@@ -1,15 +1,19 @@
 package online.walletstate.http.auth
 
-import online.walletstate.domain.auth.LoginInfo
-import online.walletstate.domain.User
-import online.walletstate.domain.errors.{AppHttpError, UserNotFound}
 import online.walletstate.config.{AuthConfig, IdPConfig}
-import online.walletstate.services.auth.TokenService
+import online.walletstate.domain.auth.LoginInfo
+import online.walletstate.domain.auth.codecs.given
+import online.walletstate.domain.auth.errors.InvalidCredentials
+import online.walletstate.domain.users.User
+import online.walletstate.domain.users.codecs.given
+import online.walletstate.domain.users.errors.UserNotExists
 import online.walletstate.http.RequestOps.as
 import online.walletstate.http.auth.AuthCookiesOps.{clearAuthCookies, withAuthCookies}
 import online.walletstate.services.UsersService
+import online.walletstate.services.auth.TokenService
 import zio.*
 import zio.http.*
+import zio.json.*
 
 trait AuthRoutesHandler {
 
@@ -45,23 +49,27 @@ class ConfiguredUsersAuthRoutesHandler(
     config: IdPConfig.ConfiguredUsers
 ) extends AuthRoutesHandler {
 
-  private def validateCreds(creds: LoginInfo) = ZIO
-    .fromOption {
-      config.users.find(u => u.username == creds.username && u.password == creds.password).map(_.id)
-    }
-    .mapError(e => AppHttpError(Status.Unauthorized, "Invalid credentials"))
-
   override def login(req: Request): Task[Response] = for {
     creds  <- req.as[LoginInfo]
-    _      <- ZIO.logInfo(s"Creds $creds")
-    userId <- validateCreds(creds)
-    user  <- usersService.get(userId).catchSome { case UserNotFound => usersService.save(User(userId, creds.username)) }
-    _     <- ZIO.logInfo(s"User login $user")
-    token <- tokenService.encode(AuthContext.of(userId, user.namespace))
-  } yield Response.text("logged in").withAuthCookies(token)
+    userId <- validateUserCredentials(creds)
+    user   <- getOrCreateUser(userId, creds.username)
+    token  <- tokenService.encode(AuthContext.of(userId, user.namespace))
+  } yield Response.json(user.toJson).withAuthCookies(token)
 
   override def logout(req: Request): Task[Response] =
     ZIO.succeed(Response.text("logged out").clearAuthCookies)
+
+  private def validateUserCredentials(c: LoginInfo): Task[String] =
+    ZIO
+      .fromOption(config.users.find(u => u.username == c.username && u.password == c.password).map(_.id))
+      .mapError(_ => InvalidCredentials)
+
+  private def getOrCreateUser(userId: String, username: String): Task[User] =
+    usersService
+      .get(userId)
+      .catchSome { case UserNotExists =>
+        usersService.save(User(userId, username))
+      }
 }
 
 object ConfiguredUsersAuthRoutesHandler {

@@ -19,7 +19,7 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("namespace", response.body);
+    client.global.set("namespace", response.body.id);
 %}
 
 ### Get namespace
@@ -30,5 +30,6 @@ POST localhost:8081/namespace/join
 Content-Type: application/json
 
 {
-  "namespace": "{{namespace}}"
+  "namespace": "{{namespace}}",
+  "inviteCode": "test"
 }

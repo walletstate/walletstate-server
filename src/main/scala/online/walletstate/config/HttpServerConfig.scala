@@ -1,6 +1,6 @@
 package online.walletstate.config
 
-import zio.{Config, ZIO, ZLayer}
+import zio.*
 import zio.config.*
 import zio.config.magnolia.*
 import zio.http.*

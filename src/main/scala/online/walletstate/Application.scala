@@ -1,13 +1,11 @@
 package online.walletstate
 
-import online.walletstate.config.{AppConfig, HttpServerConfig}
-import online.walletstate.domain.Namespace
-import online.walletstate.domain.errors.AppHttpError
-import online.walletstate.http.auth.{AuthMiddleware, AuthRoutesHandler, ConfiguredUsersAuthRoutesHandler}
+import online.walletstate.config.HttpServerConfig
 import online.walletstate.http.*
-import online.walletstate.repos.{InMemoryNamespaceRepo, InMemoryUsersRepo}
+import online.walletstate.http.auth.{AuthMiddleware, AuthRoutesHandler, ConfiguredUsersAuthRoutesHandler}
+import online.walletstate.repos.{InMemoryNamespacesRepo, InMemoryUsersRepo}
 import online.walletstate.services.auth.{StatelessTokenServiceImpl, TokenService}
-import online.walletstate.services.{NamespaceService, NamespaceServiceImpl, UsersServiceImpl}
+import online.walletstate.services.{NamespacesService, NamespacesServiceImpl, UsersServiceImpl}
 import zio.*
 import zio.config.typesafe.*
 import zio.http.*
@@ -39,12 +37,12 @@ object Application extends ZIOAppDefault {
     NamespaceRoutes.layer,
 
     // services
-    NamespaceServiceImpl.layer,
+    NamespacesServiceImpl.layer,
     StatelessTokenServiceImpl.layer,
     UsersServiceImpl.layer,
 
     // repos
-    InMemoryNamespaceRepo.layer,
+    InMemoryNamespacesRepo.layer,
     InMemoryUsersRepo.layer,
 
     // dependencies tree
