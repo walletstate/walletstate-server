@@ -8,7 +8,7 @@ import zio.http.*
 case class HttpServerConfig(port: Int)
 
 object HttpServerConfig {
-  private val config: Config[HttpServerConfig] = deriveConfig[HttpServerConfig].nested("server")
+  private val config: Config[HttpServerConfig] = deriveConfig[HttpServerConfig].nested("server").mapKey(toKebabCase)
 
   val serverConfigLayer: ZLayer[Any, Config.Error, Server.Config] =
     ZLayer.fromZIO(
