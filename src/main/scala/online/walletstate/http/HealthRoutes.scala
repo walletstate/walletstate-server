@@ -1,8 +1,9 @@
 package online.walletstate.http
 
+import zio.ZLayer
 import zio.http.*
 
-class HealthRoutes {
+final case class HealthRoutes() {
   private val health: HttpApp[Any, Nothing] = Http.collect[Request] { case Method.GET -> !! / "health" =>
     Response.text("alive")
   }
@@ -12,4 +13,8 @@ class HealthRoutes {
   }
 
   val routes = health ++ version
+}
+
+object HealthRoutes {
+  val layer = ZLayer.fromFunction(HealthRoutes.apply _)
 }

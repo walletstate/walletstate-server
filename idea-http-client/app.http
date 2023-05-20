@@ -1,0 +1,34 @@
+### Login
+POST localhost:8081/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### Logout
+GET localhost:8081/logout
+
+### Create namespace
+POST localhost:8081/namespace
+Content-Type: application/json
+
+{
+  "name": "test-name-2"
+}
+
+> {%
+    client.global.set("namespace", response.body);
+%}
+
+### Get namespace
+GET http://localhost:8081/namespace
+
+### Join namespace
+POST localhost:8081/namespace/join
+Content-Type: application/json
+
+{
+  "namespace": "{{namespace}}"
+}
