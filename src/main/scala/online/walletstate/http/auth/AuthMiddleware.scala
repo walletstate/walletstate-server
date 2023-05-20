@@ -1,10 +1,10 @@
 package online.walletstate.http.auth
 
-import online.walletstate.services.auth.TokenService
 import online.walletstate.http.auth.AuthCookiesOps.getAuthCookies
+import online.walletstate.services.auth.TokenService
 import zio.*
-import zio.json.*
 import zio.http.*
+import zio.json.*
 
 case class AuthMiddleware(tokenService: TokenService) {
 
@@ -12,7 +12,7 @@ case class AuthMiddleware(tokenService: TokenService) {
     RequestHandlerMiddlewares.customAuthProvidingZIO[Any, Any, String, Ctx] { headers =>
       headers.getAuthCookies match {
         case None        => ZIO.succeed(None)
-        case Some(value) => tokenService.decode(value).fold(_ => None, ctx => Some(ctx)) // todo add logging for errors
+        case Some(value) => tokenService.decode(value).debug("Ctx: ").fold(_ => None, ctx => Some(ctx)) // todo add logging for errors
       }
     }
 }

@@ -1,42 +1,41 @@
 package online.walletstate.http
 
-import online.walletstate.domain.{CreateNamespace, JoinNamespace, Namespace}
+import online.walletstate.domain.namespaces.codecs.given
+import online.walletstate.domain.namespaces.{CreateNamespace, JoinNamespace, Namespace}
 import online.walletstate.http.RequestOps.as
 import online.walletstate.http.auth.*
 import online.walletstate.http.auth.AuthCookiesOps.withAuthCookies
 import online.walletstate.services.*
 import online.walletstate.services.auth.TokenService
+import zio.*
 import zio.http.*
 import zio.http.endpoint.*
 import zio.json.*
-import zio.*
 
 import java.util.UUID
 
 final case class NamespaceRoutes(
     auth: AuthMiddleware,
-    namespaceService: NamespaceService,
+    namespaceService: NamespacesService,
     tokenService: TokenService,
     usersService: UsersService
 ) {
 
   private val createNamespaceHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
-      ctx      <- ZIO.service[UserContext]
-      now      <- Clock.instant
-      _        <- ZIO.logInfo(s"Context $ctx")
-      ns       <- req.as[CreateNamespace]
-      uuid     <- namespaceService.create(Namespace(UUID.randomUUID(), ns.name, ctx.user, now))
-      user     <- usersService.get(ctx.user)
-      _        <- usersService.save(user.copy(namespace = Some(uuid)))
-      newToken <- tokenService.encode(UserNamespaceContext(ctx.user, uuid))
-    } yield Response.text(uuid.toString).withAuthCookies(newToken)
+      ctx       <- ZIO.service[UserContext]
+      now       <- Clock.instant
+      nsInfo    <- req.as[CreateNamespace]
+      namespace <- namespaceService.create(Namespace(UUID.randomUUID(), nsInfo.name, ctx.user, now))
+      user      <- usersService.get(ctx.user)
+      _         <- usersService.save(user.copy(namespace = Some(namespace.id)))
+      newToken  <- tokenService.encode(UserNamespaceContext(ctx.user, namespace.id))
+    } yield Response.json(namespace.toJson).withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]
 
   private val getNamespaceHandler = Handler.fromFunctionZIO[Request] { _ =>
     for {
       ctx <- ZIO.service[UserNamespaceContext]
-      _   <- ZIO.logInfo(s"Context $ctx")
       ns <- namespaceService.get(ctx.namespace).map {
         case Some(ns) => Response.json(ns.toJson)
         case None     => Response.status(Status.NotFound)

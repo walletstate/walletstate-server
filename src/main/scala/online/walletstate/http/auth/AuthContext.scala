@@ -1,10 +1,9 @@
 package online.walletstate.http.auth
 
 import online.walletstate.http.auth.AuthCookiesOps.getAuthCookies
-import online.walletstate.services.auth.TokenService
+import zio.*
 import zio.http.*
 import zio.json.*
-import zio.*
 import zio.json.internal.Write
 
 import java.util.UUID
@@ -36,5 +35,5 @@ object AuthContext {
 
   def of(userId: String, namespace: Option[UUID]): AuthContext =
     namespace.fold(UserContext(userId))(ns => UserNamespaceContext(userId, ns))
-  
+
 }

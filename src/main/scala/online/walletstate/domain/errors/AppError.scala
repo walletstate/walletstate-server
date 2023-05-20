@@ -1,5 +1,5 @@
 package online.walletstate.domain.errors
 
-trait AppError extends Throwable
+import scala.util.control.NoStackTrace
 
-case object UserNotFound extends AppError
+trait AppError extends Throwable with NoStackTrace

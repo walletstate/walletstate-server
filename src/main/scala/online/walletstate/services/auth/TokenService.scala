@@ -2,10 +2,9 @@ package online.walletstate.services.auth
 
 import online.walletstate.config.AuthConfig
 import online.walletstate.config.AuthConfig.config
+import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
 import zio.*
 import zio.json.*
-
-import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
 
 trait TokenService {
 
@@ -27,9 +26,8 @@ class StatelessTokenServiceImpl private (authConfig: AuthConfig) extends TokenSe
 
   private val algorithm = JwtAlgorithm.HS512
   private val secret    = authConfig.secret
-  
+
   override def encode[A: JsonEncoder](content: A): Task[String] = for {
-    _     <- ZIO.logInfo(s"Auth config: $authConfig")
     clock <- Clock.javaClock
     claim <- ZIO.attempt(JwtClaim(content.toJson).issuedNow(clock).expiresIn(authConfig.tokenTTL.toSeconds)(clock))
   } yield Jwt(clock).encode(claim, secret, algorithm)

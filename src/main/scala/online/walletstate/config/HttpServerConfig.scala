@@ -1,6 +1,6 @@
 package online.walletstate.config
 
-import zio.{Config, ZIO, ZLayer}
+import zio.*
 import zio.config.*
 import zio.config.magnolia.*
 import zio.http.*
@@ -8,7 +8,7 @@ import zio.http.*
 case class HttpServerConfig(port: Int)
 
 object HttpServerConfig {
-  private val config: Config[HttpServerConfig] = deriveConfig[HttpServerConfig].nested("server")
+  private val config: Config[HttpServerConfig] = deriveConfig[HttpServerConfig].nested("server").mapKey(toKebabCase)
 
   val serverConfigLayer: ZLayer[Any, Config.Error, Server.Config] =
     ZLayer.fromZIO(
