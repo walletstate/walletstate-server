@@ -7,6 +7,7 @@ object Dependencies {
     val zioJson   = "0.5.0"
     val zioHttp   = "3.0.0-RC1"
     val zioConfig = "4.0.0-RC16"
+    val jwt       = "9.1.2"
   }
 
   private val zio     = "dev.zio" %% "zio"      % Versions.zio
@@ -19,5 +20,7 @@ object Dependencies {
     "dev.zio" %% "zio-config-typesafe" % Versions.zioConfig
   )
 
-  val all = Seq(zio, zioJson, zioHttp) ++ zioConfig
+  val jwt = "com.github.jwt-scala" %% "jwt-core" % Versions.jwt
+
+  val all = Seq(zio, zioJson, zioHttp, jwt) ++ zioConfig
 }

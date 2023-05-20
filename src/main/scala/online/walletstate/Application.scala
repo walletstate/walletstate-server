@@ -2,34 +2,53 @@ package online.walletstate
 
 import online.walletstate.config.{AppConfig, HttpServerConfig}
 import online.walletstate.domain.Namespace
-import online.walletstate.repos.ImMemoryNamespaceRepo
-import online.walletstate.http.{HealthRoutes, Routes}
-import online.walletstate.services.{NamespaceService, NamespaceServiceImpl}
-import zio.http.*
+import online.walletstate.domain.errors.AppHttpError
+import online.walletstate.http.auth.{AuthMiddleware, AuthRoutesHandler, ConfiguredUsersAuthRoutesHandler}
+import online.walletstate.http.*
+import online.walletstate.repos.{InMemoryNamespaceRepo, InMemoryUsersRepo}
+import online.walletstate.services.auth.{StatelessTokenServiceImpl, TokenService}
+import online.walletstate.services.{NamespaceService, NamespaceServiceImpl, UsersServiceImpl}
 import zio.*
 import zio.config.typesafe.*
-
-import java.net.InetSocketAddress
-import java.util.UUID
+import zio.http.*
+import zio.json.*
 
 object Application extends ZIOAppDefault {
 
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
     Runtime.setConfigProvider(TypesafeConfigProvider.fromResourcePath())
 
-  val app =
-    new Routes().routes
-      .mapError(e => Response(status = Status.InternalServerError, body = Body.fromString(e.getMessage)))
+  private val server = for {
+    p <- ZIO.serviceWithZIO[WalletStateServer](s => Server.install(s.app))
+    _ <- ZIO.logInfo(s"Server started on port $p")
+    _ <- ZIO.never
+  } yield ()
 
-  def run = Server
-    .serve(app)
-    .flatMap(_ => Console.printLine("Server started"))
-    .provide(
-      HttpServerConfig.serverConfigLayer,
-      Server.live,
-      // namespace
-      NamespaceServiceImpl.layer,
-      ImMemoryNamespaceRepo.layer
-    )
+  def run = server.provide(
+    HttpServerConfig.serverConfigLayer,
+    Server.live,
+    WalletStateServer.layer,
+
+    // auth
+    AuthRoutesHandler.layer,
+    AuthMiddleware.layer,
+
+    // routes
+    HealthRoutes.layer,
+    AuthRoutes.layer,
+    NamespaceRoutes.layer,
+
+    // services
+    NamespaceServiceImpl.layer,
+    StatelessTokenServiceImpl.layer,
+    UsersServiceImpl.layer,
+
+    // repos
+    InMemoryNamespaceRepo.layer,
+    InMemoryUsersRepo.layer,
+
+    // dependencies tree
+    ZLayer.Debug.mermaid
+  )
 
 }
