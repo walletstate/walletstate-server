@@ -25,11 +25,18 @@ Content-Type: application/json
 ### Get namespace
 GET http://localhost:8081/namespace
 
+### Create invite
+POST localhost:8081/namespace/invite
+Content-Type: application/json
+
+> {%
+    client.global.set("inviteCode", response.body.inviteCode);
+%}
+
 ### Join namespace
 POST localhost:8081/namespace/join
 Content-Type: application/json
 
 {
-  "namespace": "{{namespace}}",
-  "inviteCode": "test"
+  "inviteCode": "{{inviteCode}}"
 }

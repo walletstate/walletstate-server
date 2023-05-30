@@ -17,18 +17,14 @@ import java.util.UUID
 final case class NamespaceRoutes(
     auth: AuthMiddleware,
     namespaceService: NamespacesService,
-    tokenService: TokenService,
-    usersService: UsersService
+    tokenService: TokenService
 ) {
 
   private val createNamespaceHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
       ctx       <- ZIO.service[UserContext]
-      now       <- Clock.instant
       nsInfo    <- req.as[CreateNamespace]
-      namespace <- namespaceService.create(Namespace(UUID.randomUUID(), nsInfo.name, ctx.user, now))
-      user      <- usersService.get(ctx.user)
-      _         <- usersService.save(user.copy(namespace = Some(namespace.id)))
+      namespace <- namespaceService.create(ctx.user, nsInfo)
       newToken  <- tokenService.encode(UserNamespaceContext(ctx.user, namespace.id))
     } yield Response.json(namespace.toJson).withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]
@@ -36,20 +32,23 @@ final case class NamespaceRoutes(
   private val getNamespaceHandler = Handler.fromFunctionZIO[Request] { _ =>
     for {
       ctx <- ZIO.service[UserNamespaceContext]
-      ns <- namespaceService.get(ctx.namespace).map {
-        case Some(ns) => Response.json(ns.toJson)
-        case None     => Response.status(Status.NotFound)
-      }
-    } yield ns
+      ns  <- namespaceService.get(ctx.namespace)
+    } yield Response.json(ns.toJson)
+  } @@ auth.ctx[UserNamespaceContext]
+
+  private val inviteNamespaceHandler = Handler.fromFunctionZIO[Request] { _ =>
+    for {
+      ctx    <- ZIO.service[UserNamespaceContext]
+      invite <- namespaceService.createInvite(ctx.user, ctx.namespace)
+    } yield Response.json(invite.toJson)
   } @@ auth.ctx[UserNamespaceContext]
 
   private val joinNamespaceHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
-      ctx      <- ZIO.service[UserContext]
-      joinInfo <- req.as[JoinNamespace]
-      user     <- usersService.get(ctx.user)
-      _        <- usersService.save(user.copy(namespace = Some(joinInfo.namespace)))
-      newToken <- tokenService.encode(UserNamespaceContext(ctx.user, joinInfo.namespace))
+      ctx       <- ZIO.service[UserContext]
+      joinInfo  <- req.as[JoinNamespace]
+      namespace <- namespaceService.joinNamespace(ctx.user, joinInfo.inviteCode)
+      newToken  <- tokenService.encode(UserNamespaceContext(ctx.user, namespace.id))
     } yield Response.ok.withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]
 
@@ -59,10 +58,13 @@ final case class NamespaceRoutes(
   private val getNamespaceRoute =
     Http.collectHandler[Request] { case Method.GET -> !! / "namespace" => getNamespaceHandler }
 
+  private val inviteNamespaceRoute =
+    Http.collectHandler[Request] { case Method.POST -> !! / "namespace" / "invite" => inviteNamespaceHandler }
+
   private val joinNamespaceRoute =
     Http.collectHandler[Request] { case Method.POST -> !! / "namespace" / "join" => joinNamespaceHandler }
 
-  val routes = createNamespaceRoute ++ getNamespaceRoute ++ joinNamespaceRoute
+  val routes = createNamespaceRoute ++ getNamespaceRoute ++ inviteNamespaceRoute ++ joinNamespaceRoute
 }
 
 object NamespaceRoutes {
