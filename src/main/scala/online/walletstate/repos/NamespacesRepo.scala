@@ -1,29 +1,32 @@
 package online.walletstate.repos
 
 import online.walletstate.domain.namespaces.Namespace
+import online.walletstate.domain.namespaces.errors.NamespaceNotExist
 import zio.{Task, ULayer, ZIO, ZLayer}
 
 import java.util.UUID
 import scala.collection.concurrent.TrieMap
 
-trait NamespaceRepo {
-  def create(ns: Namespace): Task[Namespace]
-  def get(id: UUID): Task[Option[Namespace]]
+trait NamespacesRepo {
+  def save(ns: Namespace): Task[Namespace]
+  def get(id: UUID): Task[Namespace]
 }
 
-case class InMemoryNamespacesRepo() extends NamespaceRepo {
-  private val storage = TrieMap.empty[UUID, Namespace]
+case class NamespacesRepoLive(quill: QuillCtx) extends NamespacesRepo {
+  import io.getquill.*
+  import quill.*
 
-  override def create(ns: Namespace): Task[Namespace] =
-    ZIO.succeed {
-      storage.put(ns.id, ns)
-      ns
+  override def save(ns: Namespace): Task[Namespace] =
+    run(quote(query[Namespace].insertValue(lift(ns)))).map(_ => ns)
+
+  override def get(id: UUID): Task[Namespace] =
+    run(quote(query[Namespace].filter(_.id == lift(id)))).map(_.headOption).flatMap {
+      case Some(value) => ZIO.succeed(value)
+      case None        => ZIO.fail(NamespaceNotExist)
     }
-
-  override def get(id: UUID): Task[Option[Namespace]] =
-    ZIO.succeed(storage.get(id))
 }
 
-object InMemoryNamespacesRepo {
-  val layer: ULayer[NamespaceRepo] = ZLayer.succeed(InMemoryNamespacesRepo())
+object NamespacesRepoLive {
+  val layer: ZLayer[QuillCtx, Nothing, NamespacesRepo] =
+    ZLayer.fromFunction(NamespacesRepoLive.apply _)
 }

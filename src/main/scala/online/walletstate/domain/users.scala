@@ -14,6 +14,6 @@ object users {
   }
 
   object errors {
-    case object UserNotExists extends AppError with ToResponse(Status.NotFound, "User not found")
+    case object UserNotExist extends AppError with ToResponse(Status.NotFound, "User not found")
   }
 }

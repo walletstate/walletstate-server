@@ -1,11 +1,12 @@
 package online.walletstate
 
+import io.getquill.jdbczio.Quill
 import online.walletstate.config.HttpServerConfig
 import online.walletstate.http.*
 import online.walletstate.http.auth.{AuthMiddleware, AuthRoutesHandler, ConfiguredUsersAuthRoutesHandler}
-import online.walletstate.repos.{InMemoryNamespacesRepo, InMemoryUsersRepo}
+import online.walletstate.repos.{NamespaceInvitesRepoLive, NamespacesRepoLive, QuillNamingStrategy, UsersRepoLive}
 import online.walletstate.services.auth.{StatelessTokenServiceImpl, TokenService}
-import online.walletstate.services.{NamespacesService, NamespacesServiceImpl, UsersServiceImpl}
+import online.walletstate.services.{NamespacesService, NamespacesServiceLive, UsersServiceLive}
 import zio.*
 import zio.config.typesafe.*
 import zio.http.*
@@ -37,13 +38,18 @@ object Application extends ZIOAppDefault {
     NamespaceRoutes.layer,
 
     // services
-    NamespacesServiceImpl.layer,
+    NamespacesServiceLive.layer,
     StatelessTokenServiceImpl.layer,
-    UsersServiceImpl.layer,
+    UsersServiceLive.layer,
 
     // repos
-    InMemoryNamespacesRepo.layer,
-    InMemoryUsersRepo.layer,
+    NamespacesRepoLive.layer,
+    NamespaceInvitesRepoLive.layer,
+    UsersRepoLive.layer,
+
+    // DB
+    Quill.Postgres.fromNamingStrategy(QuillNamingStrategy),
+    Quill.DataSource.fromPrefix("db"),
 
     // dependencies tree
     ZLayer.Debug.mermaid

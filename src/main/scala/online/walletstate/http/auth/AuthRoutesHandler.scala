@@ -6,7 +6,7 @@ import online.walletstate.domain.auth.codecs.given
 import online.walletstate.domain.auth.errors.InvalidCredentials
 import online.walletstate.domain.users.User
 import online.walletstate.domain.users.codecs.given
-import online.walletstate.domain.users.errors.UserNotExists
+import online.walletstate.domain.users.errors.UserNotExist
 import online.walletstate.http.RequestOps.as
 import online.walletstate.http.auth.AuthCookiesOps.{clearAuthCookies, withAuthCookies}
 import online.walletstate.services.UsersService
@@ -67,8 +67,8 @@ class ConfiguredUsersAuthRoutesHandler(
   private def getOrCreateUser(userId: String, username: String): Task[User] =
     usersService
       .get(userId)
-      .catchSome { case UserNotExists =>
-        usersService.save(User(userId, username))
+      .catchSome { case UserNotExist =>
+        usersService.create(User(userId, username))
       }
 }
 

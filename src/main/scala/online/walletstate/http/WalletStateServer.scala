@@ -12,7 +12,7 @@ final case class WalletStateServer(health: HealthRoutes, auth: AuthRoutes, names
   def app =
     routes.catchAllZIO {
       case e: ToResponse => ZIO.succeed(e.toResponse)
-      case e             => ZIO.fail(e)
+      case e             => ZIO.fail(e).debug(s"Error ${e.toString}")
     }.withDefaultErrorResponse @@ RequestHandlerMiddlewares.requestLogging()
 }
 
