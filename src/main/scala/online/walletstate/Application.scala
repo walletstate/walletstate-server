@@ -11,11 +11,14 @@ import zio.*
 import zio.config.typesafe.*
 import zio.http.*
 import zio.json.*
+import zio.logging.backend.SLF4J
+import zio.logging.removeDefaultLoggers
 
 object Application extends ZIOAppDefault {
 
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
-    Runtime.setConfigProvider(TypesafeConfigProvider.fromResourcePath())
+    Runtime.setConfigProvider(TypesafeConfigProvider.fromResourcePath()) ++
+      Runtime.removeDefaultLoggers >>>  SLF4J.slf4j
 
   def run =
     ZIO
@@ -44,7 +47,7 @@ object Application extends ZIOAppDefault {
         Quill.Postgres.fromNamingStrategy(QuillNamingStrategy),
         Quill.DataSource.fromPrefix("db"),
         Migrations.layer,
-
+        
         // dependencies tree
         ZLayer.Debug.mermaid
       )
