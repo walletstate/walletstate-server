@@ -12,6 +12,7 @@ object Dependencies {
     val zioSql     = "0.1.2"
     val zioQuil    = "4.6.0.1"
     val postgresql = "42.5.4"
+    val flyway     = "9.16.0"
   }
 
   private val zio     = "dev.zio" %% "zio"      % Versions.zio
@@ -21,8 +22,9 @@ object Dependencies {
 //  private val zioSql  = "dev.zio" %% "zio-sql-postgres" % Versions.zioSql //doesn't support Scala 3
   private val zioQuil    = "io.getquill"   %% "quill-jdbc-zio" % Versions.zioQuil
   private val postgresql = "org.postgresql" % "postgresql"     % Versions.postgresql
+  private val flyway     = "org.flywaydb"   % "flyway-core"    % Versions.flyway
 
-  private val db = Seq(zioQuil, postgresql)
+  private val db = Seq(zioQuil, postgresql, flyway)
 
   private val zioConfig = Seq(
     "dev.zio" %% "zio-config"          % Versions.zioConfig,

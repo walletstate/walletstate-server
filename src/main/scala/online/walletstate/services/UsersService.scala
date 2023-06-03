@@ -2,7 +2,7 @@ package online.walletstate.services
 
 import online.walletstate.models.users.User
 import online.walletstate.models.users.errors.UserNotExist
-import online.walletstate.models.db.QuillCtx
+import online.walletstate.db.QuillCtx
 import online.walletstate.utils.ZIOExtentions.getOrError
 import zio.*
 

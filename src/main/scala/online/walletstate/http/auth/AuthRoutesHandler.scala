@@ -7,7 +7,7 @@ import online.walletstate.models.auth.errors.InvalidCredentials
 import online.walletstate.models.users.User
 import online.walletstate.models.users.codecs.given
 import online.walletstate.models.users.errors.UserNotExist
-import online.walletstate.http.RequestOps.as
+import online.walletstate.utils.RequestOps.as
 import online.walletstate.http.auth.AuthCookiesOps.{clearAuthCookies, withAuthCookies}
 import online.walletstate.services.UsersService
 import online.walletstate.services.auth.TokenService

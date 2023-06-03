@@ -23,7 +23,7 @@ Content-Type: application/json
 %}
 
 ### Get namespace
-GET http://localhost:8081/api/namespaces
+GET http://localhost:8081/api/namespaces/current
 
 ### Create invite
 POST localhost:8081/api/namespaces/invite

@@ -2,7 +2,7 @@ package online.walletstate.http
 
 import online.walletstate.models.namespaces.codecs.given
 import online.walletstate.models.namespaces.{CreateNamespace, JoinNamespace, Namespace}
-import online.walletstate.http.RequestOps.as
+import online.walletstate.utils.RequestOps.as
 import online.walletstate.http.auth.*
 import online.walletstate.http.auth.AuthCookiesOps.withAuthCookies
 import online.walletstate.services.*
@@ -29,7 +29,7 @@ final case class NamespaceRoutes(
     } yield Response.json(namespace.toJson).withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]
 
-  private val getNamespaceHandler = Handler.fromFunctionZIO[Request] { _ =>
+  private val getCurrentNamespaceHandler = Handler.fromFunctionZIO[Request] { _ =>
     for {
       ctx <- ZIO.service[UserNamespaceContext]
       ns  <- namespaceService.get(ctx.namespace)
@@ -51,10 +51,10 @@ final case class NamespaceRoutes(
       newToken  <- tokenService.encode(UserNamespaceContext(ctx.user, namespace.id))
     } yield Response.ok.withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]
-  
+
   val routes = Http.collectHandler[Request] {
     case Method.POST -> !! / "api" / "namespaces"            => createNamespaceHandler
-    case Method.GET -> !! / "api" / "namespaces"             => getNamespaceHandler
+    case Method.GET -> !! / "api" / "namespaces" / "current" => getCurrentNamespaceHandler
     case Method.POST -> !! / "api" / "namespaces" / "invite" => inviteNamespaceHandler
     case Method.POST -> !! / "api" / "namespaces" / "join"   => joinNamespaceHandler
   }

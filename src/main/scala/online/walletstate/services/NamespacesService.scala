@@ -2,7 +2,7 @@ package online.walletstate.services
 
 import online.walletstate.models.namespaces.errors.*
 import online.walletstate.models.namespaces.{CreateNamespace, Namespace, NamespaceInvite}
-import online.walletstate.models.db.QuillCtx
+import online.walletstate.db.QuillCtx
 import online.walletstate.utils.ZIOExtentions.getOrError
 import zio.{Clock, Task, ZIO, ZLayer}
 

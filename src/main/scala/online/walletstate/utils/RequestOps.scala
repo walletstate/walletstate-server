@@ -1,4 +1,4 @@
-package online.walletstate.http
+package online.walletstate.utils
 
 import online.walletstate.models.errors.ParseError
 import zio.*
