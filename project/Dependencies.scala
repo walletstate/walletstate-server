@@ -13,6 +13,8 @@ object Dependencies {
     val zioQuil    = "4.6.0.1"
     val postgresql = "42.5.4"
     val flyway     = "9.16.0"
+
+    val zioTestContainers = "0.10.0"
   }
 
   private val zio     = "dev.zio" %% "zio"      % Versions.zio
@@ -35,4 +37,13 @@ object Dependencies {
   val jwt = "com.github.jwt-scala" %% "jwt-core" % Versions.jwt
 
   val all = Seq(zio, zioJson, zioHttp, jwt) ++ zioConfig ++ db
+
+  val tests = Seq(
+    "dev.zio"               %% "zio-test"                          % Versions.zio               % Test,
+    "dev.zio"               %% "zio-test-sbt"                      % Versions.zio               % Test,
+    "dev.zio"               %% "zio-test-magnolia"                 % Versions.zio               % Test,
+    "io.github.scottweaver" %% "zio-2-0-testcontainers-postgresql" % Versions.zioTestContainers % Test,
+    "io.github.scottweaver" %% "zio-2-0-db-migration-aspect"       % Versions.zioTestContainers % Test
+  )
+
 }
