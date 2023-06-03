@@ -1,9 +1,9 @@
-package online.walletstate
+package online.walletstate.models
 
 import io.getquill.{CompositeNamingStrategy2, NamingStrategy, PluralizedTableNames, SnakeCase}
 import io.getquill.jdbczio.Quill
 
-package object repos {
+object db {
   type QuillCtx = Quill.Postgres[CompositeNamingStrategy2[SnakeCase, PluralizedTableNames]]
 
   val QuillNamingStrategy: CompositeNamingStrategy2[SnakeCase, PluralizedTableNames] =

@@ -1,7 +1,7 @@
 package online.walletstate.http
 
-import online.walletstate.domain.namespaces.codecs.given
-import online.walletstate.domain.namespaces.{CreateNamespace, JoinNamespace, Namespace}
+import online.walletstate.models.namespaces.codecs.given
+import online.walletstate.models.namespaces.{CreateNamespace, JoinNamespace, Namespace}
 import online.walletstate.http.RequestOps.as
 import online.walletstate.http.auth.*
 import online.walletstate.http.auth.AuthCookiesOps.withAuthCookies
@@ -51,20 +51,13 @@ final case class NamespaceRoutes(
       newToken  <- tokenService.encode(UserNamespaceContext(ctx.user, namespace.id))
     } yield Response.ok.withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]
-
-  private val createNamespaceRoute =
-    Http.collectHandler[Request] { case Method.POST -> !! / "namespace" => createNamespaceHandler }
-
-  private val getNamespaceRoute =
-    Http.collectHandler[Request] { case Method.GET -> !! / "namespace" => getNamespaceHandler }
-
-  private val inviteNamespaceRoute =
-    Http.collectHandler[Request] { case Method.POST -> !! / "namespace" / "invite" => inviteNamespaceHandler }
-
-  private val joinNamespaceRoute =
-    Http.collectHandler[Request] { case Method.POST -> !! / "namespace" / "join" => joinNamespaceHandler }
-
-  val routes = createNamespaceRoute ++ getNamespaceRoute ++ inviteNamespaceRoute ++ joinNamespaceRoute
+  
+  val routes = Http.collectHandler[Request] {
+    case Method.POST -> !! / "api" / "namespaces"            => createNamespaceHandler
+    case Method.GET -> !! / "api" / "namespaces"             => getNamespaceHandler
+    case Method.POST -> !! / "api" / "namespaces" / "invite" => inviteNamespaceHandler
+    case Method.POST -> !! / "api" / "namespaces" / "join"   => joinNamespaceHandler
+  }
 }
 
 object NamespaceRoutes {

@@ -4,9 +4,9 @@ import io.getquill.jdbczio.Quill
 import online.walletstate.config.HttpServerConfig
 import online.walletstate.http.*
 import online.walletstate.http.auth.{AuthMiddleware, AuthRoutesHandler, ConfiguredUsersAuthRoutesHandler}
-import online.walletstate.repos.{NamespaceInvitesRepoLive, NamespacesRepoLive, QuillNamingStrategy, UsersRepoLive}
-import online.walletstate.services.auth.{StatelessTokenServiceImpl, TokenService}
-import online.walletstate.services.{NamespacesService, NamespacesServiceLive, UsersServiceLive}
+import online.walletstate.services.auth.{StatelessTokenService, TokenService}
+import online.walletstate.models.db.QuillNamingStrategy
+import online.walletstate.services.{NamespaceInvitesServiceLive, NamespacesService, NamespacesServiceLive, UsersServiceLive}
 import zio.*
 import zio.config.typesafe.*
 import zio.http.*
@@ -39,13 +39,9 @@ object Application extends ZIOAppDefault {
 
     // services
     NamespacesServiceLive.layer,
-    StatelessTokenServiceImpl.layer,
+    NamespaceInvitesServiceLive.layer,
     UsersServiceLive.layer,
-
-    // repos
-    NamespacesRepoLive.layer,
-    NamespaceInvitesRepoLive.layer,
-    UsersRepoLive.layer,
+    StatelessTokenService.layer,
 
     // DB
     Quill.Postgres.fromNamingStrategy(QuillNamingStrategy),

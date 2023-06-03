@@ -1,6 +1,6 @@
-package online.walletstate.domain
+package online.walletstate.models
 
-import online.walletstate.domain.errors.{AppError, ToResponse}
+import online.walletstate.models.errors.{AppError, ToResponse}
 import zio.http.Status
 import zio.json.*
 

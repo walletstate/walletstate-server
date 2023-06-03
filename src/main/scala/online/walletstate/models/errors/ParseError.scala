@@ -1,4 +1,4 @@
-package online.walletstate.domain.errors
+package online.walletstate.models.errors
 
 import zio.json.{DeriveJsonEncoder, JsonEncoder}
 import zio.http.Status

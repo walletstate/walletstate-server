@@ -1,12 +1,12 @@
 package online.walletstate.http.auth
 
 import online.walletstate.config.{AuthConfig, IdPConfig}
-import online.walletstate.domain.auth.LoginInfo
-import online.walletstate.domain.auth.codecs.given
-import online.walletstate.domain.auth.errors.InvalidCredentials
-import online.walletstate.domain.users.User
-import online.walletstate.domain.users.codecs.given
-import online.walletstate.domain.users.errors.UserNotExist
+import online.walletstate.models.auth.LoginInfo
+import online.walletstate.models.auth.codecs.given
+import online.walletstate.models.auth.errors.InvalidCredentials
+import online.walletstate.models.users.User
+import online.walletstate.models.users.codecs.given
+import online.walletstate.models.users.errors.UserNotExist
 import online.walletstate.http.RequestOps.as
 import online.walletstate.http.auth.AuthCookiesOps.{clearAuthCookies, withAuthCookies}
 import online.walletstate.services.UsersService
