@@ -23,7 +23,7 @@ Content-Type: application/json
 %}
 
 ### Get namespace
-GET http://localhost:8081/api/namespaces/current
+GET localhost:8081/api/namespaces/current
 
 ### Create invite
 POST localhost:8081/api/namespaces/invite
@@ -40,3 +40,63 @@ Content-Type: application/json
 {
   "inviteCode": "{{inviteCode}}"
 }
+
+### Create account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "name": "monobank white card"
+}
+
+> {%
+    client.global.set("accountId", response.body.id);
+%}
+
+### Get accounts
+GET localhost:8081/api/accounts
+
+### Get account
+GET localhost:8081/api/accounts/{{accountId}}
+
+### Create category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "name": "Food"
+}
+
+> {%
+    client.global.set("categoryId", response.body.id);
+%}
+
+### Get categories
+GET localhost:8081/api/categories
+
+### Get category
+GET localhost:8081/api/categories/{{categoryId}}
+
+### Create record
+POST localhost:8081/api/records
+Content-Type: application/json
+
+{
+  "account": "{{accountId}}",
+  "amount": 99.99,
+  "type": "Spending",
+  "category": "{{categoryId}}",
+  "description": "Bananas",
+  "time": "2023-06-02T14:10:20Z"
+}
+
+> {%
+    client.global.set("recordId", response.body.id);
+%}
+
+### Get records
+GET localhost:8081/api/records
+
+### Get category
+GET localhost:8081/api/records/{{recordId}}
+

@@ -1,7 +1,7 @@
 package online.walletstate.models
 
-import zio.{Random, Task, UIO, ZIO}
 import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.{Random, Task, UIO, ZIO}
 
 import java.util.UUID
 
