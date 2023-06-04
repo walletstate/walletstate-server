@@ -49,8 +49,8 @@ case class NamespacesServiceLive(
     invite    <- invitesService.get(inviteCode)
     now       <- Clock.instant
     _         <- if (invite.validTo.isBefore(now)) ZIO.fail(NamespaceInviteExpired) else ZIO.unit
-    namespace <- get(invite.namespaceId)
-    _         <- usersService.setNamespace(userId, invite.namespaceId)
+    namespace <- get(invite.namespace)
+    _         <- usersService.setNamespace(userId, invite.namespace)
     _         <- invitesService.delete(invite.id)
   } yield namespace
 

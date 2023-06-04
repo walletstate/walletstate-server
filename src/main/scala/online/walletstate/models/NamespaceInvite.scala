@@ -8,7 +8,7 @@ import java.util.UUID
 
 final case class NamespaceInvite(
     id: NamespaceInvite.Id,
-    namespaceId: Namespace.Id,
+    namespace: Namespace.Id,
     inviteCode: String,
     createdBy: User.Id,
     validTo: Instant
@@ -22,8 +22,8 @@ object NamespaceInvite {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
-  def make(namespaceId: Namespace.Id, inviteCode: String, createdBy: User.Id, validTo: Instant): UIO[NamespaceInvite] =
-    Id.random.map(NamespaceInvite(_, namespaceId, inviteCode, createdBy, validTo))
+  def make(namespace: Namespace.Id, inviteCode: String, createdBy: User.Id, validTo: Instant): UIO[NamespaceInvite] =
+    Id.random.map(NamespaceInvite(_, namespace, inviteCode, createdBy, validTo))
 
   given codec: JsonCodec[NamespaceInvite] = DeriveJsonCodec.gen[NamespaceInvite]
 }
