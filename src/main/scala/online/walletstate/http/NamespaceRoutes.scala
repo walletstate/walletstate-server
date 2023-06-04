@@ -1,18 +1,15 @@
 package online.walletstate.http
 
-import online.walletstate.domain.namespaces.codecs.given
-import online.walletstate.domain.namespaces.{CreateNamespace, JoinNamespace, Namespace}
-import online.walletstate.http.RequestOps.as
 import online.walletstate.http.auth.*
 import online.walletstate.http.auth.AuthCookiesOps.withAuthCookies
+import online.walletstate.models.Namespace
+import online.walletstate.models.api.{CreateNamespace, JoinNamespace}
 import online.walletstate.services.*
-import online.walletstate.services.auth.TokenService
+import online.walletstate.utils.RequestOps.as
 import zio.*
 import zio.http.*
 import zio.http.endpoint.*
 import zio.json.*
-
-import java.util.UUID
 
 final case class NamespaceRoutes(
     auth: AuthMiddleware,
@@ -24,12 +21,12 @@ final case class NamespaceRoutes(
     for {
       ctx       <- ZIO.service[UserContext]
       nsInfo    <- req.as[CreateNamespace]
-      namespace <- namespaceService.create(ctx.user, nsInfo)
+      namespace <- namespaceService.create(ctx.user, nsInfo.name)
       newToken  <- tokenService.encode(UserNamespaceContext(ctx.user, namespace.id))
     } yield Response.json(namespace.toJson).withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]
 
-  private val getNamespaceHandler = Handler.fromFunctionZIO[Request] { _ =>
+  private val getCurrentNamespaceHandler = Handler.fromFunctionZIO[Request] { _ =>
     for {
       ctx <- ZIO.service[UserNamespaceContext]
       ns  <- namespaceService.get(ctx.namespace)
@@ -52,19 +49,12 @@ final case class NamespaceRoutes(
     } yield Response.ok.withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]
 
-  private val createNamespaceRoute =
-    Http.collectHandler[Request] { case Method.POST -> !! / "namespace" => createNamespaceHandler }
-
-  private val getNamespaceRoute =
-    Http.collectHandler[Request] { case Method.GET -> !! / "namespace" => getNamespaceHandler }
-
-  private val inviteNamespaceRoute =
-    Http.collectHandler[Request] { case Method.POST -> !! / "namespace" / "invite" => inviteNamespaceHandler }
-
-  private val joinNamespaceRoute =
-    Http.collectHandler[Request] { case Method.POST -> !! / "namespace" / "join" => joinNamespaceHandler }
-
-  val routes = createNamespaceRoute ++ getNamespaceRoute ++ inviteNamespaceRoute ++ joinNamespaceRoute
+  val routes = Http.collectHandler[Request] {
+    case Method.POST -> !! / "api" / "namespaces"            => createNamespaceHandler
+    case Method.GET -> !! / "api" / "namespaces" / "current" => getCurrentNamespaceHandler
+    case Method.POST -> !! / "api" / "namespaces" / "invite" => inviteNamespaceHandler
+    case Method.POST -> !! / "api" / "namespaces" / "join"   => joinNamespaceHandler
+  }
 }
 
 object NamespaceRoutes {

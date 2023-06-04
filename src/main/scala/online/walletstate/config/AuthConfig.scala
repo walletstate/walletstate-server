@@ -18,5 +18,5 @@ object IdPConfig {
 object AuthConfig {
   val config: Config[AuthConfig] = deriveConfig[AuthConfig].nested("auth").mapKey(toKebabCase)
 
-//  val layer: ZLayer[ConfigProvider, Config.Error, AuthConfig] = ZLayer.fromZIO(ZIO.config(config))
+  val layer: ZLayer[ConfigProvider, Config.Error, AuthConfig] = ZLayer.fromZIO(ZIO.config(config))
 }

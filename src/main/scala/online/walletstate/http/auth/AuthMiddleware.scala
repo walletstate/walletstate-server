@@ -1,7 +1,7 @@
 package online.walletstate.http.auth
 
 import online.walletstate.http.auth.AuthCookiesOps.getAuthCookies
-import online.walletstate.services.auth.TokenService
+import online.walletstate.services.TokenService
 import zio.*
 import zio.http.*
 import zio.json.*

@@ -1,4 +1,4 @@
-package online.walletstate.domain.errors
+package online.walletstate.models.errors
 
 import zio.http.*
 import zio.json.*

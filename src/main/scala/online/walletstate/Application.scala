@@ -4,55 +4,51 @@ import io.getquill.jdbczio.Quill
 import online.walletstate.config.HttpServerConfig
 import online.walletstate.http.*
 import online.walletstate.http.auth.{AuthMiddleware, AuthRoutesHandler, ConfiguredUsersAuthRoutesHandler}
-import online.walletstate.repos.{NamespaceInvitesRepoLive, NamespacesRepoLive, QuillNamingStrategy, UsersRepoLive}
-import online.walletstate.services.auth.{StatelessTokenServiceImpl, TokenService}
-import online.walletstate.services.{NamespacesService, NamespacesServiceLive, UsersServiceLive}
+import online.walletstate.db.{Migrations, QuillNamingStrategy}
+import online.walletstate.services.*
 import zio.*
 import zio.config.typesafe.*
 import zio.http.*
 import zio.json.*
+import zio.logging.backend.SLF4J
+import zio.logging.removeDefaultLoggers
 
 object Application extends ZIOAppDefault {
 
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
-    Runtime.setConfigProvider(TypesafeConfigProvider.fromResourcePath())
+    Runtime.setConfigProvider(TypesafeConfigProvider.fromResourcePath()) ++
+      Runtime.removeDefaultLoggers >>>  SLF4J.slf4j
 
-  private val server = for {
-    p <- ZIO.serviceWithZIO[WalletStateServer](s => Server.install(s.app))
-    _ <- ZIO.logInfo(s"Server started on port $p")
-    _ <- ZIO.never
-  } yield ()
+  def run =
+    ZIO
+      .serviceWithZIO[WalletStateServer](_.start)
+      .provide(
+        HttpServerConfig.serverConfigLayer,
+        Server.live,
+        WalletStateServer.layer,
 
-  def run = server.provide(
-    HttpServerConfig.serverConfigLayer,
-    Server.live,
-    WalletStateServer.layer,
+        // auth
+        AuthRoutesHandler.layer,
+        AuthMiddleware.layer,
 
-    // auth
-    AuthRoutesHandler.layer,
-    AuthMiddleware.layer,
+        // routes
+        HealthRoutes.layer,
+        AuthRoutes.layer,
+        NamespaceRoutes.layer,
 
-    // routes
-    HealthRoutes.layer,
-    AuthRoutes.layer,
-    NamespaceRoutes.layer,
+        // services
+        NamespacesServiceLive.layer,
+        NamespaceInvitesServiceLive.layer,
+        UsersServiceLive.layer,
+        StatelessTokenService.layer,
 
-    // services
-    NamespacesServiceLive.layer,
-    StatelessTokenServiceImpl.layer,
-    UsersServiceLive.layer,
-
-    // repos
-    NamespacesRepoLive.layer,
-    NamespaceInvitesRepoLive.layer,
-    UsersRepoLive.layer,
-
-    // DB
-    Quill.Postgres.fromNamingStrategy(QuillNamingStrategy),
-    Quill.DataSource.fromPrefix("db"),
-
-    // dependencies tree
-    ZLayer.Debug.mermaid
-  )
+        // DB
+        Quill.Postgres.fromNamingStrategy(QuillNamingStrategy),
+        Quill.DataSource.fromPrefix("db"),
+        Migrations.layer,
+        
+        // dependencies tree
+        ZLayer.Debug.mermaid
+      )
 
 }

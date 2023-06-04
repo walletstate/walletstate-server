@@ -4,10 +4,9 @@ services:
   db:
     image: postgres
     restart: always
-    volumes:
-      - "./sql:/docker-entrypoint-initdb.d"
     environment:
       - "POSTGRES_USER=docker"
       - "POSTGRES_PASSWORD=docker"
+      - "POSTGRES_DB=walletstate"
     ports:
       - "5432:5432"

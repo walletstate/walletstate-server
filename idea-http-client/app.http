@@ -1,5 +1,5 @@
 ### Login
-POST localhost:8081/login
+POST localhost:8081/auth/login
 Content-Type: application/json
 
 {
@@ -8,10 +8,10 @@ Content-Type: application/json
 }
 
 ### Logout
-GET localhost:8081/logout
+GET localhost:8081/auth/logout
 
 ### Create namespace
-POST localhost:8081/namespace
+POST localhost:8081/api/namespaces
 Content-Type: application/json
 
 {
@@ -23,10 +23,10 @@ Content-Type: application/json
 %}
 
 ### Get namespace
-GET http://localhost:8081/namespace
+GET http://localhost:8081/api/namespaces/current
 
 ### Create invite
-POST localhost:8081/namespace/invite
+POST localhost:8081/api/namespaces/invite
 Content-Type: application/json
 
 > {%
@@ -34,7 +34,7 @@ Content-Type: application/json
 %}
 
 ### Join namespace
-POST localhost:8081/namespace/join
+POST localhost:8081/api/namespaces/join
 Content-Type: application/json
 
 {

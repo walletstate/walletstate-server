@@ -1,6 +1,6 @@
-package online.walletstate.http
+package online.walletstate.utils
 
-import online.walletstate.domain.errors.ParseError
+import online.walletstate.models.errors.ParseError
 import zio.*
 import zio.http.*
 import zio.json.*

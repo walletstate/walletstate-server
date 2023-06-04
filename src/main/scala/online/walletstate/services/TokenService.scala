@@ -1,4 +1,4 @@
-package online.walletstate.services.auth
+package online.walletstate.services
 
 import online.walletstate.config.AuthConfig
 import online.walletstate.config.AuthConfig.config
@@ -22,7 +22,7 @@ object TokenService {
     ZIO.serviceWithZIO[TokenService](_.decode(token))
 }
 
-class StatelessTokenServiceImpl private (authConfig: AuthConfig) extends TokenService {
+case class StatelessTokenService(authConfig: AuthConfig) extends TokenService {
 
   private val algorithm = JwtAlgorithm.HS512
   private val secret    = authConfig.secret
@@ -39,15 +39,11 @@ class StatelessTokenServiceImpl private (authConfig: AuthConfig) extends TokenSe
       claims <- ZIO.fromTry(Jwt(clock).decode(token, secret, Seq(algorithm))).mapError(_.getMessage)
       data   <- ZIO.fromEither(claims.content.fromJson[A])
     } yield data
-
   }
-
 }
 
-object StatelessTokenServiceImpl {
-  def apply(config: AuthConfig): StatelessTokenServiceImpl = new StatelessTokenServiceImpl(config)
+object StatelessTokenService {
 
-  val layer: ZLayer[Any, Config.Error, TokenService] =
+  val layer =
     ZLayer.fromZIO(ZIO.config[AuthConfig](AuthConfig.config).map(apply))
-
 }
