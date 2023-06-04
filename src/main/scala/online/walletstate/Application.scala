@@ -4,7 +4,6 @@ import io.getquill.jdbczio.Quill
 import online.walletstate.config.HttpServerConfig
 import online.walletstate.http.*
 import online.walletstate.http.auth.{AuthMiddleware, AuthRoutesHandler, ConfiguredUsersAuthRoutesHandler}
-import online.walletstate.services.auth.{StatelessTokenService, TokenService}
 import online.walletstate.db.{Migrations, QuillNamingStrategy}
 import online.walletstate.services.*
 import zio.*

@@ -1,18 +1,15 @@
 package online.walletstate.http
 
-import online.walletstate.models.namespaces.codecs.given
-import online.walletstate.models.namespaces.{CreateNamespace, JoinNamespace, Namespace}
-import online.walletstate.utils.RequestOps.as
 import online.walletstate.http.auth.*
 import online.walletstate.http.auth.AuthCookiesOps.withAuthCookies
+import online.walletstate.models.Namespace
+import online.walletstate.models.api.{CreateNamespace, JoinNamespace}
 import online.walletstate.services.*
-import online.walletstate.services.auth.TokenService
+import online.walletstate.utils.RequestOps.as
 import zio.*
 import zio.http.*
 import zio.http.endpoint.*
 import zio.json.*
-
-import java.util.UUID
 
 final case class NamespaceRoutes(
     auth: AuthMiddleware,
@@ -24,7 +21,7 @@ final case class NamespaceRoutes(
     for {
       ctx       <- ZIO.service[UserContext]
       nsInfo    <- req.as[CreateNamespace]
-      namespace <- namespaceService.create(ctx.user, nsInfo)
+      namespace <- namespaceService.create(ctx.user, nsInfo.name)
       newToken  <- tokenService.encode(UserNamespaceContext(ctx.user, namespace.id))
     } yield Response.json(namespace.toJson).withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]

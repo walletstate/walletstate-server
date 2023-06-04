@@ -1,4 +1,4 @@
-package online.walletstate.services.auth
+package online.walletstate.services
 
 import online.walletstate.config.AuthConfig
 import online.walletstate.config.AuthConfig.config

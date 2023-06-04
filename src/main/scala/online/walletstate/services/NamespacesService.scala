@@ -1,19 +1,18 @@
 package online.walletstate.services
 
-import online.walletstate.models.namespaces.errors.*
-import online.walletstate.models.namespaces.{CreateNamespace, Namespace, NamespaceInvite}
 import online.walletstate.db.QuillCtx
+import online.walletstate.models.errors.*
+import online.walletstate.models.{Namespace, NamespaceInvite, User}
 import online.walletstate.utils.ZIOExtentions.getOrError
 import zio.{Clock, Task, ZIO, ZLayer}
 
-import java.util.UUID
 import scala.util.Random
 
 trait NamespacesService {
-  def create(userId: String, ns: CreateNamespace): Task[Namespace]
-  def get(id: UUID): Task[Namespace]
-  def createInvite(userId: String, namespace: UUID): Task[NamespaceInvite]
-  def joinNamespace(userId: String, inviteCode: String): Task[Namespace]
+  def create(userId: User.Id, name: String): Task[Namespace]
+  def get(id: Namespace.Id): Task[Namespace]
+  def createInvite(userId: User.Id, namespace: Namespace.Id): Task[NamespaceInvite]
+  def joinNamespace(userId: User.Id, inviteCode: String): Task[Namespace]
 }
 
 case class NamespacesServiceLive(
@@ -22,28 +21,29 @@ case class NamespacesServiceLive(
     invitesService: NamespaceInvitesService
 ) extends NamespacesService {
 
-  import quill.*
   import io.getquill.*
+  import quill.*
 
-  override def create(userId: String, ns: CreateNamespace): Task[Namespace] = for {
-    user <- usersService.get(userId)
-    _    <- if (user.namespace.nonEmpty) ZIO.fail(UserAlreadyHasNamespace) else ZIO.unit
-    namespace = Namespace(ns.name, user.id)
-    _ <- run(insert(namespace))
-    _ <- usersService.setNamespace(user.id, namespace.id)
+  override def create(userId: User.Id, name: String): Task[Namespace] = for {
+    user      <- usersService.get(userId)
+    _         <- if (user.namespace.nonEmpty) ZIO.fail(UserAlreadyHasNamespace) else ZIO.unit
+    namespace <- Namespace.make(name, user.id)
+    _         <- run(insert(namespace))
+    _         <- usersService.setNamespace(user.id, namespace.id)
   } yield namespace
 
-  override def get(id: UUID): Task[Namespace] =
+  override def get(id: Namespace.Id): Task[Namespace] =
     run(namespaceById(id)).map(_.headOption).getOrError(NamespaceNotExist)
 
-  // TODO make expiration configurable
-  override def createInvite(userId: String, namespace: UUID): Task[NamespaceInvite] = for {
-    now <- Clock.instant
-    code = Random.alphanumeric.take(12).mkString.toUpperCase
-    invite <- invitesService.save(NamespaceInvite(namespace, code, userId, now.plusSeconds(3600)))
+  // TODO make expiration configurable and move to invites service
+  override def createInvite(userId: User.Id, namespace: Namespace.Id): Task[NamespaceInvite] = for {
+    now    <- Clock.instant
+    code   <- ZIO.attempt(Random.alphanumeric.take(12).mkString.toUpperCase)
+    invite <- NamespaceInvite.make(namespace, code, userId, now.plusSeconds(3600))
+    _      <- invitesService.save(invite)
   } yield invite
 
-  override def joinNamespace(userId: String, inviteCode: String): Task[Namespace] = for {
+  override def joinNamespace(userId: User.Id, inviteCode: String): Task[Namespace] = for {
     user      <- usersService.get(userId)
     _         <- if (user.namespace.nonEmpty) ZIO.fail(UserAlreadyHasNamespace) else ZIO.unit
     invite    <- invitesService.get(inviteCode)
@@ -55,8 +55,8 @@ case class NamespacesServiceLive(
   } yield namespace
 
   // queries
-  private inline def insert(ns: Namespace)   = quote(query[Namespace].insertValue(lift(ns)))
-  private inline def namespaceById(id: UUID) = quote(query[Namespace].filter(_.id == lift(id)))
+  private inline def insert(ns: Namespace)           = quote(query[Namespace].insertValue(lift(ns)))
+  private inline def namespaceById(id: Namespace.Id) = quote(query[Namespace].filter(_.id == lift(id)))
 
 }
 

@@ -5,7 +5,7 @@ import io.github.scottweaver.zio.aspect.DbMigrationAspect
 import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
 import online.walletstate.db.QuillNamingStrategy
 import online.walletstate.fixtures.NamespaceInvitesFixtures
-import online.walletstate.models.namespaces.errors.NamespaceInviteNotExist
+import online.walletstate.models.errors.NamespaceInviteNotExist
 import online.walletstate.services.NamespaceInvitesService
 import zio.*
 import zio.test.*

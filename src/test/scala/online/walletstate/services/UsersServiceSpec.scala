@@ -5,8 +5,8 @@ import io.github.scottweaver.zio.aspect.DbMigrationAspect
 import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
 import online.walletstate.db.QuillNamingStrategy
 import online.walletstate.fixtures.{NamespacesFixtures, UsersFixtures}
-import online.walletstate.models.users.User
-import online.walletstate.models.users.errors.UserNotExist
+import online.walletstate.models.User
+import online.walletstate.models.errors.UserNotExist
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
@@ -25,7 +25,7 @@ object UsersServiceSpec extends ZIOSpecDefault with UsersFixtures with Namespace
         test("should return UserNotExist error if user doesn't exist") {
           for {
             service <- ZIO.service[UsersService]
-            res     <- service.get("not-existing-user-id").exit
+            res     <- service.get(User.Id("not-existing-user-id")).exit
           } yield assert(res)(fails(equalTo(UserNotExist)))
         }
       ),

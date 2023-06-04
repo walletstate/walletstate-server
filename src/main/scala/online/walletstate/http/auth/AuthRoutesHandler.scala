@@ -1,16 +1,12 @@
 package online.walletstate.http.auth
 
 import online.walletstate.config.{AuthConfig, IdPConfig}
-import online.walletstate.models.auth.LoginInfo
-import online.walletstate.models.auth.codecs.given
-import online.walletstate.models.auth.errors.InvalidCredentials
-import online.walletstate.models.users.User
-import online.walletstate.models.users.codecs.given
-import online.walletstate.models.users.errors.UserNotExist
-import online.walletstate.utils.RequestOps.as
 import online.walletstate.http.auth.AuthCookiesOps.{clearAuthCookies, withAuthCookies}
-import online.walletstate.services.UsersService
-import online.walletstate.services.auth.TokenService
+import online.walletstate.models.User
+import online.walletstate.models.api.LoginInfo
+import online.walletstate.models.errors.{InvalidCredentials, UserNotExist}
+import online.walletstate.services.{TokenService, UsersService}
+import online.walletstate.utils.RequestOps.as
 import zio.*
 import zio.http.*
 import zio.json.*
@@ -59,12 +55,12 @@ class ConfiguredUsersAuthRoutesHandler(
   override def logout(req: Request): Task[Response] =
     ZIO.succeed(Response.text("logged out").clearAuthCookies)
 
-  private def validateUserCredentials(c: LoginInfo): Task[String] =
+  private def validateUserCredentials(c: LoginInfo): Task[User.Id] =
     ZIO
-      .fromOption(config.users.find(u => u.username == c.username && u.password == c.password).map(_.id))
+      .fromOption(config.users.find(u => u.username == c.username && u.password == c.password).map(u => User.Id(u.id)))
       .mapError(_ => InvalidCredentials)
 
-  private def getOrCreateUser(userId: String, username: String): Task[User] =
+  private def getOrCreateUser(userId: User.Id, username: String): Task[User] =
     usersService
       .get(userId)
       .catchSome { case UserNotExist =>

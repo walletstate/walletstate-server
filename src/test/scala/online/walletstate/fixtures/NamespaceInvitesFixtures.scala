@@ -1,6 +1,6 @@
 package online.walletstate.fixtures
 
-import online.walletstate.models.namespaces.NamespaceInvite
+import online.walletstate.models.NamespaceInvite
 
 import java.time.Instant
 import java.util.UUID
@@ -10,7 +10,7 @@ trait NamespaceInvitesFixtures {
   import UsersFixtures.ExistingUserId
 
   val ExistingInvite = NamespaceInvite(
-    UUID.fromString("2b3ce216-a0d2-4bf2-9a59-fbaeb03635e5"),
+    NamespaceInvite.Id(UUID.fromString("2b3ce216-a0d2-4bf2-9a59-fbaeb03635e5")),
     ExistingNamespaceId,
     "TESTCODE",
     ExistingUserId,
@@ -18,7 +18,7 @@ trait NamespaceInvitesFixtures {
   )
 
   val NewInvite = NamespaceInvite(
-    UUID.randomUUID(),
+    NamespaceInvite.Id(UUID.randomUUID()),
     ExistingNamespaceId,
     "TESTCODE2",
     ExistingUserId,
@@ -26,7 +26,7 @@ trait NamespaceInvitesFixtures {
   )
 
   val AnotherNewInvite = NamespaceInvite(
-    UUID.randomUUID(),
+    NamespaceInvite.Id(UUID.randomUUID()),
     ExistingNamespaceId,
     "TESTCODE3",
     ExistingUserId,
