@@ -1,6 +1,6 @@
 package online.walletstate.http
 
-import online.walletstate.http.auth.{AuthMiddleware, UserNamespaceContext}
+import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Account
 import online.walletstate.models.api.CreateAccount
 import online.walletstate.services.AccountsService
@@ -13,26 +13,26 @@ case class AccountsRoutes(auth: AuthMiddleware, accountsService: AccountsService
 
   private val createAccountHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
-      ctx     <- ZIO.service[UserNamespaceContext]
+      ctx     <- ZIO.service[WalletContext]
       accInfo <- req.as[CreateAccount]
-      account <- accountsService.create(ctx.namespace, accInfo.name, ctx.user)
+      account <- accountsService.create(ctx.wallet, accInfo.name, ctx.user)
     } yield Response.json(account.toJson)
-  } @@ auth.ctx[UserNamespaceContext]
+  } @@ auth.ctx[WalletContext]
 
   private val getAccountsHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
-      ctx      <- ZIO.service[UserNamespaceContext]
-      accounts <- accountsService.list(ctx.namespace)
+      ctx      <- ZIO.service[WalletContext]
+      accounts <- accountsService.list(ctx.wallet)
     } yield Response.json(accounts.toJson)
-  } @@ auth.ctx[UserNamespaceContext]
+  } @@ auth.ctx[WalletContext]
 
   private def getAccountHandler(idStr: String) = Handler.fromFunctionZIO[Request] { req =>
     for {
-      ctx     <- ZIO.service[UserNamespaceContext]
+      ctx     <- ZIO.service[WalletContext]
       id      <- Account.Id.from(idStr)
-      account <- accountsService.get(ctx.namespace, id)
+      account <- accountsService.get(ctx.wallet, id)
     } yield Response.json(account.toJson)
-  } @@ auth.ctx[UserNamespaceContext]
+  } @@ auth.ctx[WalletContext]
 
   def routes = Http.collectHandler[Request] {
     case Method.POST -> !! / "api" / "accounts"     => createAccountHandler

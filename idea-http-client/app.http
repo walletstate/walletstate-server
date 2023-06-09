@@ -10,8 +10,8 @@ Content-Type: application/json
 ### Logout
 GET localhost:8081/auth/logout
 
-### Create namespace
-POST localhost:8081/api/namespaces
+### Create wallet
+POST localhost:8081/api/wallets
 Content-Type: application/json
 
 {
@@ -19,22 +19,22 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("namespace", response.body.id);
+    client.global.set("wallet", response.body.id);
 %}
 
-### Get namespace
-GET localhost:8081/api/namespaces/current
+### Get wallet
+GET localhost:8081/api/wallets/current
 
 ### Create invite
-POST localhost:8081/api/namespaces/invite
+POST localhost:8081/api/wallets/invite
 Content-Type: application/json
 
 > {%
     client.global.set("inviteCode", response.body.inviteCode);
 %}
 
-### Join namespace
-POST localhost:8081/api/namespaces/join
+### Join wallet
+POST localhost:8081/api/wallets/join
 Content-Type: application/json
 
 {

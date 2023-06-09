@@ -2,7 +2,7 @@ package online.walletstate.services
 
 import online.walletstate.db.QuillCtx
 import online.walletstate.models.errors.RecordNotExist
-import online.walletstate.models.{Account, Category, Namespace, Record, RecordType, User}
+import online.walletstate.models.{Account, Category, Wallet, Record, RecordType, User}
 import online.walletstate.utils.ZIOExtentions.getOrError
 import zio.{Task, ZLayer}
 
@@ -18,9 +18,9 @@ trait RecordsService {
       time: Instant,
       createdBy: User.Id
   ): Task[Record]
-  def get(namespace: Namespace.Id, id: Record.Id): Task[Record]
-  def list(namespace: Namespace.Id): Task[Seq[Record]]
-  def list(namespace: Namespace.Id, account: Account.Id): Task[Seq[Record]]
+  def get(wallet: Wallet.Id, id: Record.Id): Task[Record]
+  def list(wallet: Wallet.Id): Task[Seq[Record]]
+  def list(wallet: Wallet.Id, account: Account.Id): Task[Seq[Record]]
 }
 
 case class RecordsServiceLive(quill: QuillCtx) extends RecordsService {
@@ -40,14 +40,14 @@ case class RecordsServiceLive(quill: QuillCtx) extends RecordsService {
     _      <- run(insert(record))
   } yield record
 
-  override def get(namespace: Namespace.Id, id: Record.Id): Task[Record] =
-    run(recordsById(namespace, id)).map(_.headOption).getOrError(RecordNotExist)
+  override def get(wallet: Wallet.Id, id: Record.Id): Task[Record] =
+    run(recordsById(wallet, id)).map(_.headOption).getOrError(RecordNotExist)
 
-  override def list(namespace: Namespace.Id): Task[Seq[Record]] =
-    run(recordsByNamespace(namespace))
+  override def list(wallet: Wallet.Id): Task[Seq[Record]] =
+    run(recordsByWallet(wallet))
 
-  override def list(namespace: Namespace.Id, account: Account.Id): Task[Seq[Record]] =
-    run(recordsByAccount(namespace, account))
+  override def list(wallet: Wallet.Id, account: Account.Id): Task[Seq[Record]] =
+    run(recordsByAccount(wallet, account))
 
   // mappers
   given encodeRecordType: MappedEncoding[RecordType, String] = MappedEncoding[RecordType, String](_.toString)
@@ -56,19 +56,19 @@ case class RecordsServiceLive(quill: QuillCtx) extends RecordsService {
   // queries
   private inline def insert(record: Record) = quote(query[Record].insertValue(lift(record)))
 
-  private inline def recordsByNamespace(ns: Namespace.Id) = quote {
+  private inline def recordsByWallet(ns: Wallet.Id) = quote {
     query[Record]
       .join(query[Account])
       .on(_.account == _.id)
-      .filter { case (_, account) => account.namespace == lift(ns) }
+      .filter { case (_, account) => account.wallet == lift(ns) }
       .map { case (record, _) => record }
   }
 
-  private inline def recordsByAccount(ns: Namespace.Id, account: Account.Id) =
-    recordsByNamespace(ns).filter(_.account == lift(account))
+  private inline def recordsByAccount(ns: Wallet.Id, account: Account.Id) =
+    recordsByWallet(ns).filter(_.account == lift(account))
 
-  private inline def recordsById(ns: Namespace.Id, id: Record.Id) =
-    recordsByNamespace(ns).filter(_.id == lift(id))
+  private inline def recordsById(ns: Wallet.Id, id: Record.Id) =
+    recordsByWallet(ns).filter(_.id == lift(id))
 }
 
 object RecordsServiceLive {

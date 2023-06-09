@@ -10,7 +10,7 @@ import zio.json.*
 final case class WalletStateServer(
     health: HealthRoutes,
     auth: AuthRoutes,
-    namespace: NamespaceRoutes,
+    wallets: WalletsRoutes,
     accounts: AccountsRoutes,
     categories: CategoriesRoutes,
     records: RecordsRoutes,
@@ -20,7 +20,7 @@ final case class WalletStateServer(
   private val routes =
     health.routes ++
       auth.routes ++
-      namespace.routes ++
+      wallets.routes ++
       accounts.routes ++
       categories.routes ++
       records.routes

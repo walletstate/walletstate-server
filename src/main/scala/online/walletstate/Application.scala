@@ -34,14 +34,14 @@ object Application extends ZIOAppDefault {
         // routes
         HealthRoutes.layer,
         AuthRoutes.layer,
-        NamespaceRoutes.layer,
+        WalletsRoutes.layer,
         AccountsRoutes.layer,
         CategoriesRoutes.layer,
         RecordsRoutes.layer,
 
         // services
-        NamespacesServiceLive.layer,
-        NamespaceInvitesServiceLive.layer,
+        WalletsServiceLive.layer,
+        WalletInvitesServiceLive.layer,
         UsersServiceLive.layer,
         StatelessTokenService.layer,
         AccountsServiceLive.layer,

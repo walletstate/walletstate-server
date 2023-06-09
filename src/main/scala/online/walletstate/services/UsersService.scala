@@ -2,14 +2,14 @@ package online.walletstate.services
 
 import online.walletstate.db.QuillCtx
 import online.walletstate.models.errors.UserNotExist
-import online.walletstate.models.{Namespace, User}
+import online.walletstate.models.{Wallet, User}
 import online.walletstate.utils.ZIOExtentions.getOrError
 import zio.*
 
 trait UsersService {
   def create(user: User): Task[User]
   def get(id: User.Id): Task[User]
-  def setNamespace(user: User.Id, namespace: Namespace.Id): Task[Unit]
+  def setWallet(user: User.Id, wallet: Wallet.Id): Task[Unit]
 }
 
 final case class UsersServiceLive(quill: QuillCtx) extends UsersService {
@@ -22,14 +22,14 @@ final case class UsersServiceLive(quill: QuillCtx) extends UsersService {
   override def get(id: User.Id): Task[User] =
     run(userById(id)).map(_.headOption).getOrError(UserNotExist)
 
-  override def setNamespace(user: User.Id, namespace: Namespace.Id): Task[Unit] =
-    run(updateNamespace(user, namespace)).map(_ => ())
+  override def setWallet(user: User.Id, wallet: Wallet.Id): Task[Unit] =
+    run(updateWallet(user, wallet)).map(_ => ())
 
   // queries
   private inline def userById(id: User.Id)  = quote(query[User].filter(_.id == lift(id)))
   private inline def insertUser(user: User) = quote(query[User].insertValue(lift(user)))
-  private inline def updateNamespace(user: User.Id, namespace: Namespace.Id) =
-    quote(userById(user).update(_.namespace -> Some(lift(namespace))))
+  private inline def updateWallet(user: User.Id, wallet: Wallet.Id) =
+    quote(userById(user).update(_.wallet -> Some(lift(wallet))))
 }
 
 object UsersServiceLive {

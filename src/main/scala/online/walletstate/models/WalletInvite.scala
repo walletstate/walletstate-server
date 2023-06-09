@@ -6,15 +6,15 @@ import zio.{Random, Task, UIO, ZIO}
 import java.time.Instant
 import java.util.UUID
 
-final case class NamespaceInvite(
-    id: NamespaceInvite.Id,
-    namespace: Namespace.Id,
+final case class WalletInvite(
+    id: WalletInvite.Id,
+    wallet: Wallet.Id,
     inviteCode: String,
     createdBy: User.Id,
     validTo: Instant
 )
 
-object NamespaceInvite {
+object WalletInvite {
   final case class Id(id: UUID) extends AnyVal
   object Id {
     def random: UIO[Id] = Random.nextUUID.map(Id(_))
@@ -22,8 +22,8 @@ object NamespaceInvite {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
-  def make(namespace: Namespace.Id, inviteCode: String, createdBy: User.Id, validTo: Instant): UIO[NamespaceInvite] =
-    Id.random.map(NamespaceInvite(_, namespace, inviteCode, createdBy, validTo))
+  def make(wallet: Wallet.Id, inviteCode: String, createdBy: User.Id, validTo: Instant): UIO[WalletInvite] =
+    Id.random.map(WalletInvite(_, wallet, inviteCode, createdBy, validTo))
 
-  given codec: JsonCodec[NamespaceInvite] = DeriveJsonCodec.gen[NamespaceInvite]
+  given codec: JsonCodec[WalletInvite] = DeriveJsonCodec.gen[WalletInvite]
 }

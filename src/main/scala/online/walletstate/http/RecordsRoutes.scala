@@ -1,6 +1,6 @@
 package online.walletstate.http
 
-import online.walletstate.http.auth.{AuthMiddleware, UserNamespaceContext}
+import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.api.CreateRecord
 import online.walletstate.models.{Account, Record}
 import online.walletstate.services.RecordsService
@@ -13,9 +13,9 @@ case class RecordsRoutes(auth: AuthMiddleware, recordsService: RecordsService) {
 
   private val createRecordHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
-      ctx  <- ZIO.service[UserNamespaceContext]
+      ctx  <- ZIO.service[WalletContext]
       info <- req.as[CreateRecord]
-      record <- recordsService.create( // TODO pass namespace and check that account is in correct namespace
+      record <- recordsService.create( // TODO pass wallet and check that account is in correct wallet
         info.account,
         info.amount,
         info.`type`,
@@ -25,22 +25,22 @@ case class RecordsRoutes(auth: AuthMiddleware, recordsService: RecordsService) {
         ctx.user
       )
     } yield Response.json(record.toJson)
-  } @@ auth.ctx[UserNamespaceContext]
+  } @@ auth.ctx[WalletContext]
 
   private val getRecordsHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
-      ctx     <- ZIO.service[UserNamespaceContext]
-      records <- recordsService.list(ctx.namespace)
+      ctx     <- ZIO.service[WalletContext]
+      records <- recordsService.list(ctx.wallet)
     } yield Response.json(records.toJson)
-  } @@ auth.ctx[UserNamespaceContext]
+  } @@ auth.ctx[WalletContext]
 
   private def getRecordHandler(idStr: String) = Handler.fromFunctionZIO[Request] { req =>
     for {
-      ctx    <- ZIO.service[UserNamespaceContext]
+      ctx    <- ZIO.service[WalletContext]
       id     <- Record.Id.from(idStr)
-      record <- recordsService.get(ctx.namespace, id)
+      record <- recordsService.get(ctx.wallet, id)
     } yield Response.json(record.toJson)
-  } @@ auth.ctx[UserNamespaceContext]
+  } @@ auth.ctx[WalletContext]
 
   def routes = Http.collectHandler[Request] {
     case Method.POST -> !! / "api" / "records"     => createRecordHandler

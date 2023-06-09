@@ -4,53 +4,53 @@ CREATE TABLE users
 (
     id         VARCHAR(255)             NOT NULL PRIMARY KEY,
     username   VARCHAR(255)             NOT NULL,
-    namespace  UUID,
+    wallet     UUID,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE namespaces
+CREATE TABLE wallets
 (
     id         UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
     name       VARCHAR(255)             NOT NULL,
     created_by VARCHAR(255)             NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT namespaces_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
+    CONSTRAINT wallets_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 ALTER TABLE users
-    ADD CONSTRAINT users_namespace_fk FOREIGN KEY (namespace) REFERENCES namespaces (id);
+    ADD CONSTRAINT users_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id);
 
-create table namespace_invites
+create table wallet_invites
 (
     id          UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    namespace   UUID                     NOT NULL,
+    wallet      UUID                     NOT NULL,
     invite_code VARCHAR(24)              NOT NULL,
     created_by  VARCHAR(255)             NOT NULL,
     valid_to    TIMESTAMP WITH TIME ZONE NOT NULL,
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT invites_namespace_fk FOREIGN KEY (namespace) REFERENCES namespaces (id),
+    CONSTRAINT invites_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
     CONSTRAINT invites_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 CREATE TABLE accounts
 (
     id         UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    namespace  UUID                     NOT NULL,
+    wallet     UUID                     NOT NULL,
     name       VARCHAR(255)             NOT NULL,
     created_by VARCHAR(255)             NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT accounts_namespace_fk FOREIGN KEY (namespace) REFERENCES namespaces (id),
+    CONSTRAINT accounts_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
     CONSTRAINT accounts_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 CREATE TABLE categories
 (
     id         UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    namespace  UUID                     NOT NULL,
+    wallet     UUID                     NOT NULL,
     name       VARCHAR(255)             NOT NULL,
     created_by VARCHAR(255)             NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT categories_namespace_fk FOREIGN KEY (namespace) REFERENCES namespaces (id),
+    CONSTRAINT categories_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
     CONSTRAINT categories_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 

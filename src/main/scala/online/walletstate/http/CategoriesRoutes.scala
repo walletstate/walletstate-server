@@ -1,6 +1,6 @@
 package online.walletstate.http
 
-import online.walletstate.http.auth.{AuthMiddleware, UserNamespaceContext}
+import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Category
 import online.walletstate.models.api.CreateCategory
 import online.walletstate.services.CategoriesService
@@ -13,26 +13,26 @@ case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesS
 
   private val createCategoryHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
-      ctx      <- ZIO.service[UserNamespaceContext]
+      ctx      <- ZIO.service[WalletContext]
       info     <- req.as[CreateCategory]
-      category <- categoriesService.create(ctx.namespace, info.name, ctx.user)
+      category <- categoriesService.create(ctx.wallet, info.name, ctx.user)
     } yield Response.json(category.toJson)
-  } @@ auth.ctx[UserNamespaceContext]
+  } @@ auth.ctx[WalletContext]
 
   private val getCategoriesHandler = Handler.fromFunctionZIO[Request] { _ =>
     for {
-      ctx        <- ZIO.service[UserNamespaceContext]
-      categories <- categoriesService.list(ctx.namespace)
+      ctx        <- ZIO.service[WalletContext]
+      categories <- categoriesService.list(ctx.wallet)
     } yield Response.json(categories.toJson)
-  } @@ auth.ctx[UserNamespaceContext]
+  } @@ auth.ctx[WalletContext]
 
   private def getCategoryHandler(idStr: String) = Handler.fromFunctionZIO[Request] { _ =>
     for {
-      ctx      <- ZIO.service[UserNamespaceContext]
+      ctx      <- ZIO.service[WalletContext]
       id       <- Category.Id.from(idStr)
-      category <- categoriesService.get(ctx.namespace, id)
+      category <- categoriesService.get(ctx.wallet, id)
     } yield Response.json(category.toJson)
-  } @@ auth.ctx[UserNamespaceContext]
+  } @@ auth.ctx[WalletContext]
 
   def routes = Http.collectHandler[Request] {
     case Method.POST -> !! / "api" / "categories"     => createCategoryHandler

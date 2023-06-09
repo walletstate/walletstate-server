@@ -49,7 +49,7 @@ class ConfiguredUsersAuthRoutesHandler(
     creds  <- req.as[LoginInfo]
     userId <- validateUserCredentials(creds)
     user   <- getOrCreateUser(userId, creds.username)
-    token  <- tokenService.encode(AuthContext.of(userId, user.namespace))
+    token  <- tokenService.encode(AuthContext.of(userId, user.wallet))
   } yield Response.json(user.toJson).withAuthCookies(token)
 
   override def logout(req: Request): Task[Response] =

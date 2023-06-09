@@ -1,7 +1,7 @@
 package online.walletstate.http.auth
 
 import online.walletstate.http.auth.AuthCookiesOps.getAuthCookies
-import online.walletstate.models.{Namespace, User}
+import online.walletstate.models.{Wallet, User}
 import zio.*
 import zio.http.*
 import zio.json.*
@@ -17,22 +17,22 @@ object UserContext {
   given codec: JsonCodec[UserContext] = DeriveJsonCodec.gen[UserContext]
 }
 
-final case class UserNamespaceContext(user: User.Id, namespace: Namespace.Id) extends AuthContext
+final case class WalletContext(user: User.Id, wallet: Wallet.Id) extends AuthContext
 
-object UserNamespaceContext {
-  given codec: JsonCodec[UserNamespaceContext] = DeriveJsonCodec.gen[UserNamespaceContext]
+object WalletContext {
+  given codec: JsonCodec[WalletContext] = DeriveJsonCodec.gen[WalletContext]
 }
 
 object AuthContext {
 
   given encoder: JsonEncoder[AuthContext] = (a: AuthContext, indent: Option[RuntimeFlags], out: Write) => {
     a match {
-      case ctx: UserContext          => UserContext.codec.encoder.unsafeEncode(ctx, indent, out)
-      case ctx: UserNamespaceContext => UserNamespaceContext.codec.encoder.unsafeEncode(ctx, indent, out)
+      case ctx: UserContext   => UserContext.codec.encoder.unsafeEncode(ctx, indent, out)
+      case ctx: WalletContext => WalletContext.codec.encoder.unsafeEncode(ctx, indent, out)
     }
   }
 
-  def of(userId: User.Id, namespace: Option[Namespace.Id]): AuthContext =
-    namespace.fold(UserContext(userId))(ns => UserNamespaceContext(userId, ns))
+  def of(user: User.Id, wallet: Option[Wallet.Id]): AuthContext =
+    wallet.fold(UserContext(user))(ns => WalletContext(user, ns))
 
 }
