@@ -10,21 +10,21 @@ package object errors {
   /////////// user errors
   case object UserNotExist extends AppError with ToResponse(Status.NotFound, "User not found")
 
-  /////////// namespace errors
-  case object NamespaceNotExist extends AppError
+  /////////// wallet errors
+  case object WalletNotExist extends AppError
 
-  case object UserAlreadyHasNamespace // Allow only one namespace for user for now
+  case object UserAlreadyHasWallet // Allow only one wallet for user for now
       extends AppError
-      with ToResponse(Status.Forbidden, "User already has the namespace")
+      with ToResponse(Status.Forbidden, "User already has the wallet")
 
-  /////////// namespace invite errors
-  case object NamespaceInviteNotExist
+  /////////// wallet invite errors
+  case object WalletInviteNotExist
       extends AppError
-      with ToResponse(Status.Forbidden, "Invite code not found. Cannot join the namespace.")
+      with ToResponse(Status.Forbidden, "Invite code not found. Cannot join the wallet.")
 
-  case object NamespaceInviteExpired
+  case object WalletInviteExpired
       extends AppError
-      with ToResponse(Status.Forbidden, "Invite code expired. Please ask the namespace owner to generate a new one")
+      with ToResponse(Status.Forbidden, "Invite code expired. Please ask the wallet owner to generate a new one")
 
   /////////// accounts errors
   case object AccountNotExist extends AppError with ToResponse(Status.NotFound, "Account not found")

@@ -5,7 +5,7 @@ import zio.{Random, Task, UIO, ZIO}
 
 import java.util.UUID
 
-final case class Account(id: Account.Id, namespace: Namespace.Id, name: String, createdBy: User.Id)
+final case class Account(id: Account.Id, wallet: Wallet.Id, name: String, createdBy: User.Id)
 
 object Account {
   final case class Id(id: UUID) extends AnyVal
@@ -17,8 +17,8 @@ object Account {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
-  def make(namespace: Namespace.Id, name: String, createdBy: User.Id): UIO[Account] =
-    Id.random.map(Account(_, namespace, name, createdBy))
+  def make(wallet: Wallet.Id, name: String, createdBy: User.Id): UIO[Account] =
+    Id.random.map(Account(_, wallet, name, createdBy))
 
   given codec: JsonCodec[Account] = DeriveJsonCodec.gen[Account]
 }

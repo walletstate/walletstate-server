@@ -4,14 +4,14 @@ import io.getquill.jdbczio.Quill
 import io.github.scottweaver.zio.aspect.DbMigrationAspect
 import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
 import online.walletstate.db.QuillNamingStrategy
-import online.walletstate.fixtures.{NamespacesFixtures, UsersFixtures}
+import online.walletstate.fixtures.{WalletsFixtures, UsersFixtures}
 import online.walletstate.models.User
 import online.walletstate.models.errors.UserNotExist
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
 
-object UsersServiceSpec extends ZIOSpecDefault with UsersFixtures with NamespacesFixtures {
+object UsersServiceSpec extends ZIOSpecDefault with UsersFixtures with WalletsFixtures {
 
   def spec = {
     suite("UsersServiceSpec ")(
@@ -33,20 +33,20 @@ object UsersServiceSpec extends ZIOSpecDefault with UsersFixtures with Namespace
         test("should create a user") {
           for {
             service <- ZIO.service[UsersService]
-            _       <- service.create(NewUserWithNamespace)
-            user    <- service.get(NewUserWithNamespace.id)
-          } yield assertTrue(user == NewUserWithNamespace)
+            _       <- service.create(NewUserWithWallet)
+            user    <- service.get(NewUserWithWallet.id)
+          } yield assertTrue(user == NewUserWithWallet)
         }
       ),
-      suite("set namespace")(
-        test("should set namespace for user") {
+      suite("set wallet")(
+        test("should set wallet for user") {
           for {
             service    <- ZIO.service[UsersService]
-            _          <- service.create(NewUserWithoutNamespace)
-            userBefore <- service.get(NewUserWithoutNamespace.id)
-            _          <- service.setNamespace(NewUserWithoutNamespace.id, ExistingNamespaceId)
-            userAfter  <- service.get(NewUserWithoutNamespace.id)
-          } yield assertTrue(userBefore.namespace.isEmpty && userAfter.namespace.nonEmpty)
+            _          <- service.create(NewUserWithoutWallet)
+            userBefore <- service.get(NewUserWithoutWallet.id)
+            _          <- service.setWallet(NewUserWithoutWallet.id, ExistingWalletId)
+            userAfter  <- service.get(NewUserWithoutWallet.id)
+          } yield assertTrue(userBefore.wallet.isEmpty && userAfter.wallet.nonEmpty)
         }
       )
     ) @@ DbMigrationAspect.migrateOnce()()
