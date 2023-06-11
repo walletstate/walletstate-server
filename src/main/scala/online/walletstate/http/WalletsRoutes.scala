@@ -46,7 +46,7 @@ final case class WalletsRoutes(
       joinInfo <- req.as[JoinWallet]
       wallet   <- walletsService.joinWallet(ctx.user, joinInfo.inviteCode)
       newToken <- tokenService.encode(WalletContext(ctx.user, wallet.id))
-    } yield Response.ok.withAuthCookies(newToken)
+    } yield Response.json(wallet.toJson).withAuthCookies(newToken)
   } @@ auth.ctx[UserContext]
 
   val routes = Http.collectHandler[Request] {
