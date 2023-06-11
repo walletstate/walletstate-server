@@ -7,6 +7,12 @@ package object errors {
   /////////// auth errors
   case object InvalidCredentials extends AppError with ToResponse(Status.Unauthorized, "Invalid credentials")
 
+  case object AuthTokenNotFound extends AppError with ToResponse(Status.Unauthorized, "Request without auth token")
+  case class InvalidAuthToken(msg: String) extends AppError with ToResponse(Status.Unauthorized, msg)
+  case class InvalidAuthContext(context: String)
+      extends AppError
+      with ToResponse(Status.Unauthorized, s"Cannot extract $context from auth token.")
+
   /////////// user errors
   case object UserNotExist extends AppError with ToResponse(Status.NotFound, "User not found")
 

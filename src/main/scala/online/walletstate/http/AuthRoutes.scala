@@ -15,8 +15,8 @@ final case class AuthRoutes(authRoutesHandler: AuthRoutesHandler) {
   }
 
   def routes = Http.collectZIO[Request] {
-    case req @ Method.POST -> !! / "auth" / "login" => authRoutesHandler.login(req)
-    case req @ Method.GET -> !! / "auth" / "logout" => authRoutesHandler.logout(req)
+    case req @ Method.POST -> !! / "auth" / "login"  => authRoutesHandler.login(req)
+    case req @ Method.POST -> !! / "auth" / "logout" => authRoutesHandler.logout(req)
   }
 
 }
