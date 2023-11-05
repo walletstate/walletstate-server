@@ -28,6 +28,14 @@ case class AccountsGroupsRoutes(auth: AuthMiddleware, accountsGroupsService: Acc
     } yield Response.ok
   } @@ auth.ctx[WalletContext]
 
+  private def deleteGroupHandler(idStr: String) = Handler.fromFunctionZIO[Request] { req =>
+    for {
+      ctx <- ZIO.service[WalletContext]
+      id  <- AccountsGroup.Id.from(idStr)
+      _   <- accountsGroupsService.delete(ctx.wallet, id)
+    } yield Response.ok
+  } @@ auth.ctx[WalletContext]
+
   private val getGroupsHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
       ctx    <- ZIO.service[WalletContext]
@@ -43,11 +51,20 @@ case class AccountsGroupsRoutes(auth: AuthMiddleware, accountsGroupsService: Acc
     } yield Response.json(group.toJson)
   } @@ auth.ctx[WalletContext]
 
+  private val getGroupsWithAccountsHandler = Handler.fromFunctionZIO[Request] { req =>
+    for {
+      ctx    <- ZIO.service[WalletContext]
+      groups <- accountsGroupsService.listWithAccounts(ctx.wallet)
+    } yield Response.json(groups.toJson)
+  } @@ auth.ctx[WalletContext]
+
   def routes = Http.collectHandler[Request] {
-    case Method.POST -> !! / "api" / "groups"     => createGroupHandler
-    case Method.GET -> !! / "api" / "groups"      => getGroupsHandler
-    case Method.GET -> !! / "api" / "groups" / id => getGroupHandler(id)
-    case Method.PUT -> !! / "api" / "groups" / id => updateGroupHandler(id)
+    case Method.POST -> !! / "api" / "groups"                  => createGroupHandler
+    case Method.GET -> !! / "api" / "groups"                   => getGroupsHandler
+    case Method.GET -> !! / "api" / "groups" / "with-accounts" => getGroupsHandler
+    case Method.GET -> !! / "api" / "groups" / id              => getGroupHandler(id)
+    case Method.PUT -> !! / "api" / "groups" / id              => updateGroupHandler(id)
+    case Method.DELETE -> !! / "api" / "groups" / id           => deleteGroupHandler(id)
   }
 }
 

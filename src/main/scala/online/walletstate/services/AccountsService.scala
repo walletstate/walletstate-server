@@ -11,6 +11,7 @@ trait AccountsService {
   def create(group: AccountsGroup.Id, name: String, orderingIndex: Int, icon: String, user: User.Id): Task[Account]
   def get(wallet: Wallet.Id, id: Account.Id): Task[Account]
   def list(wallet: Wallet.Id): Task[Seq[Account]]
+  def list(wallet: Wallet.Id, group: AccountsGroup.Id): Task[Seq[Account]]
 }
 
 final case class AccountsServiceLive(quill: QuillCtx) extends AccountsService {
@@ -34,6 +35,9 @@ final case class AccountsServiceLive(quill: QuillCtx) extends AccountsService {
   override def list(wallet: Wallet.Id): Task[Seq[Account]] =
     run(accountsByWallet(wallet))
 
+  override def list(wallet: Wallet.Id, group: AccountsGroup.Id): Task[Seq[Account]] =
+    run(accountsByGroup(wallet, group))
+
   // queries
   private inline def insert(account: Account) = quote(query[Account].insertValue(lift(account)))
 
@@ -45,7 +49,11 @@ final case class AccountsServiceLive(quill: QuillCtx) extends AccountsService {
       .map { case (account, _) => account }
   }
 
-  private inline def accountsById(wallet: Wallet.Id, id: Account.Id) = accountsByWallet(wallet).filter(_.id == lift(id))
+  private inline def accountsByGroup(wallet: Wallet.Id, group: AccountsGroup.Id) =
+    accountsByWallet(wallet).filter(_.group == lift(group))
+
+  private inline def accountsById(wallet: Wallet.Id, id: Account.Id) =
+    accountsByWallet(wallet).filter(_.id == lift(id))
 }
 
 object AccountsServiceLive {
