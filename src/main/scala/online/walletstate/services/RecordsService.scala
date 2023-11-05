@@ -2,8 +2,8 @@ package online.walletstate.services
 
 import online.walletstate.db.QuillCtx
 import online.walletstate.models.errors.RecordNotExist
-import online.walletstate.models.{Account, Category, Wallet, Record, RecordType, User}
-import online.walletstate.utils.ZIOExtentions.getOrError
+import online.walletstate.models.{Account, AccountsGroup, Category, Record, RecordType, User, Wallet}
+import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
 import java.time.Instant
@@ -60,8 +60,10 @@ case class RecordsServiceLive(quill: QuillCtx) extends RecordsService {
     query[Record]
       .join(query[Account])
       .on(_.account == _.id)
-      .filter { case (_, account) => account.wallet == lift(ns) }
-      .map { case (record, _) => record }
+      .join(query[AccountsGroup])
+      .on(_._2.group == _.id)
+      .filter { case (_, group) => group.wallet == lift(ns) }
+      .map { case ((record, _), _) => record }
   }
 
   private inline def recordsByAccount(ns: Wallet.Id, account: Account.Id) =

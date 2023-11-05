@@ -3,7 +3,7 @@ package online.walletstate.services
 import online.walletstate.db.QuillCtx
 import online.walletstate.models.errors.CategoryNotExist
 import online.walletstate.models.{Category, Wallet, User}
-import online.walletstate.utils.ZIOExtentions.getOrError
+import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
 trait CategoriesService {

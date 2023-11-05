@@ -14,8 +14,8 @@ case class AccountsRoutes(auth: AuthMiddleware, accountsService: AccountsService
   private val createAccountHandler = Handler.fromFunctionZIO[Request] { req =>
     for {
       ctx     <- ZIO.service[WalletContext]
-      accInfo <- req.as[CreateAccount]
-      account <- accountsService.create(ctx.wallet, accInfo.name, ctx.user)
+      accInfo <- req.as[CreateAccount] //TODO validate group is in current user wallet
+      account <- accountsService.create(accInfo.group, accInfo.name, accInfo.orderingIndex, accInfo.icon, ctx.user)
     } yield Response.json(account.toJson)
   } @@ auth.ctx[WalletContext]
 

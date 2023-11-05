@@ -3,7 +3,7 @@ package online.walletstate.services
 import online.walletstate.db.QuillCtx
 import online.walletstate.models.errors.UserNotExist
 import online.walletstate.models.{Wallet, User}
-import online.walletstate.utils.ZIOExtentions.getOrError
+import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.*
 
 trait UsersService {

@@ -31,7 +31,10 @@ package object errors {
   case object WalletInviteExpired
       extends AppError
       with ToResponse(Status.Forbidden, "Invite code expired. Please ask the wallet owner to generate a new one")
-
+  
+  /////////// accounts errors
+  case object AccountsGroupNotExist extends AppError with ToResponse(Status.NotFound, "Accounts group not found")
+  
   /////////// accounts errors
   case object AccountNotExist extends AppError with ToResponse(Status.NotFound, "Account not found")
 

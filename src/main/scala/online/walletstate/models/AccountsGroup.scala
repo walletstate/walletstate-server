@@ -6,16 +6,15 @@ import zio.{Random, Task, UIO, ZIO}
 
 import java.util.UUID
 
-final case class Account(
-    id: Account.Id,
-    group: AccountsGroup.Id,
+final case class AccountsGroup(
+    id: AccountsGroup.Id,
+    wallet: Wallet.Id,
     name: String,
     orderingIndex: Int,
-    icon: String,
     createdBy: User.Id
 )
 
-object Account {
+object AccountsGroup {
   final case class Id(id: UUID) extends AnyVal
 
   object Id {
@@ -25,8 +24,8 @@ object Account {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
-  def make(group: AccountsGroup.Id, name: String, orderingIndex: Int, icon: String, createdBy: User.Id): UIO[Account] =
-    Id.random.map(Account(_, group, name, orderingIndex, icon, createdBy))
+  def make(wallet: Wallet.Id, name: String, orderingIndex: Int, createdBy: User.Id): UIO[AccountsGroup] =
+    Id.random.map(AccountsGroup(_, wallet, name, orderingIndex, createdBy))
 
-  given codec: JsonCodec[Account] = DeriveJsonCodec.gen[Account]
+  given codec: JsonCodec[AccountsGroup] = DeriveJsonCodec.gen[AccountsGroup]
 }

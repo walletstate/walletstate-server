@@ -13,6 +13,6 @@ object User {
 
   def make(id: User.Id, username: String, wallet: Option[Wallet.Id] = None): UIO[User] =
     ZIO.succeed(User(id, username, wallet))
-  
+
   given codec: JsonCodec[User] = DeriveJsonCodec.gen[User]
 }
