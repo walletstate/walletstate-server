@@ -61,7 +61,7 @@ case class AccountsGroupsRoutes(auth: AuthMiddleware, accountsGroupsService: Acc
   def routes = Http.collectHandler[Request] {
     case Method.POST -> !! / "api" / "groups"                  => createGroupHandler
     case Method.GET -> !! / "api" / "groups"                   => getGroupsHandler
-    case Method.GET -> !! / "api" / "groups" / "with-accounts" => getGroupsHandler
+    case Method.GET -> !! / "api" / "groups" / "with-accounts" => getGroupsWithAccountsHandler
     case Method.GET -> !! / "api" / "groups" / id              => getGroupHandler(id)
     case Method.PUT -> !! / "api" / "groups" / id              => updateGroupHandler(id)
     case Method.DELETE -> !! / "api" / "groups" / id           => deleteGroupHandler(id)
