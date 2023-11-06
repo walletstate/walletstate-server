@@ -11,6 +11,7 @@ final case class WalletStateServer(
     health: HealthRoutes,
     auth: AuthRoutes,
     wallets: WalletsRoutes,
+    accountsGroupsRoutes: AccountsGroupsRoutes,
     accounts: AccountsRoutes,
     categories: CategoriesRoutes,
     records: RecordsRoutes,
@@ -21,6 +22,7 @@ final case class WalletStateServer(
     health.routes ++
       auth.routes ++
       wallets.routes ++
+      accountsGroupsRoutes.routes ++
       accounts.routes ++
       categories.routes ++
       records.routes

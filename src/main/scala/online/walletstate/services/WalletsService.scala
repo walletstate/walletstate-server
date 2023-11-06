@@ -3,7 +3,7 @@ package online.walletstate.services
 import online.walletstate.db.QuillCtx
 import online.walletstate.models.errors.*
 import online.walletstate.models.{Wallet, WalletInvite, User}
-import online.walletstate.utils.ZIOExtentions.getOrError
+import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Clock, Task, ZIO, ZLayer}
 
 import scala.util.Random

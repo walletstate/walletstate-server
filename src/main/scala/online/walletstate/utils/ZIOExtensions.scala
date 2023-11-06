@@ -3,7 +3,7 @@ package online.walletstate.utils
 import online.walletstate.models.errors.AppError
 import zio.*
 
-object ZIOExtentions {
+object ZIOExtensions {
 
   extension [T](task: Task[Option[T]])
     def getOrError[E <: AppError](error: E): Task[T] =
