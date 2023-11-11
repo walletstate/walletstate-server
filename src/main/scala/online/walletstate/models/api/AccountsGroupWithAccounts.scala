@@ -8,7 +8,7 @@ final case class SimpleAccount(
     name: String,
     orderingIndex: Int,
     icon: String,
-    tags: Seq[String] = Seq("tag1", "tag2")
+    tags: Seq[String]
 )
 
 object SimpleAccount {
@@ -17,7 +17,8 @@ object SimpleAccount {
     account.id,
     account.name,
     account.orderingIndex,
-    account.icon
+    account.icon,
+    account.tags
   )
 
   given codec: JsonCodec[SimpleAccount] = DeriveJsonCodec.gen[SimpleAccount]
