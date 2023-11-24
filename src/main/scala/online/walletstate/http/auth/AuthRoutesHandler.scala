@@ -11,6 +11,9 @@ import zio.*
 import zio.http.*
 import zio.json.*
 
+import java.security.MessageDigest
+import java.util.HexFormat
+
 trait AuthRoutesHandler {
 
   def login(req: Request): Task[Response]
@@ -55,10 +58,12 @@ class ConfiguredUsersAuthRoutesHandler(
   override def logout(req: Request): Task[Response] =
     ZIO.succeed(Response.text("logged out").clearAuthCookies)
 
-  private def validateUserCredentials(c: LoginInfo): Task[User.Id] =
-    ZIO
-      .fromOption(config.users.find(u => u.username == c.username && u.password == c.password).map(u => User.Id(u.id)))
-      .mapError(_ => InvalidCredentials)
+  private def validateUserCredentials(c: LoginInfo): Task[User.Id] = for {
+    user      <- ZIO.fromOption(config.users.find(_.username == c.username)).mapError(_ => InvalidCredentials)
+    pwdDigest <- ZIO.attempt(MessageDigest.getInstance("SHA-256").digest(c.password.getBytes("UTF-8")))
+    pwdHash   <- ZIO.attempt(HexFormat.of().formatHex(pwdDigest))
+    _         <- if (user.passwordHash == pwdHash) ZIO.unit else ZIO.fail(InvalidCredentials)
+  } yield User.Id(user.id)
 
   private def getOrCreateUser(userId: User.Id, username: String): Task[User] =
     usersService

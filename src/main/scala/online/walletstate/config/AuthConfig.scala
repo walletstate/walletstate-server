@@ -12,7 +12,7 @@ object IdPConfig {
   case class ConfiguredUsers(users: List[TestUserIdentity]) extends IdPConfig
   case class SSO(callbackUrl: String, flow: String)         extends IdPConfig // TODO implement later
 
-  case class TestUserIdentity(id: String, username: String, password: String)
+  case class TestUserIdentity(id: String, username: String, passwordHash: String)
 }
 
 object AuthConfig {
