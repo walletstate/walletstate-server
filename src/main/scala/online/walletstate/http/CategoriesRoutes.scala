@@ -11,34 +11,30 @@ import zio.json.*
 
 case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesService) {
 
-  private val createCategoryHandler = Handler.fromFunctionZIO[Request] { req =>
+  private val createCategoryHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
-      ctx      <- ZIO.service[WalletContext]
       info     <- req.as[CreateCategory]
       category <- categoriesService.create(ctx.wallet, info.name, ctx.user)
     } yield Response.json(category.toJson)
-  } @@ auth.ctx[WalletContext]
+  }
 
-  private val getCategoriesHandler = Handler.fromFunctionZIO[Request] { _ =>
+  private val getCategoriesHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
-      ctx        <- ZIO.service[WalletContext]
       categories <- categoriesService.list(ctx.wallet)
     } yield Response.json(categories.toJson)
-  } @@ auth.ctx[WalletContext]
+  }
 
-  private def getCategoryHandler(idStr: String) = Handler.fromFunctionZIO[Request] { _ =>
+  private val getCategoryHandler = Handler.fromFunctionZIO[(Category.Id, WalletContext, Request)] { (id, ctx, req) =>
     for {
-      ctx      <- ZIO.service[WalletContext]
-      id       <- Category.Id.from(idStr)
       category <- categoriesService.get(ctx.wallet, id)
     } yield Response.json(category.toJson)
-  } @@ auth.ctx[WalletContext]
-
-  def routes = Http.collectHandler[Request] {
-    case Method.POST -> !! / "api" / "categories"     => createCategoryHandler
-    case Method.GET -> !! / "api" / "categories"      => getCategoriesHandler
-    case Method.GET -> !! / "api" / "categories" / id => getCategoryHandler(id)
   }
+
+  def routes = Routes(
+    Method.POST / "api" / "categories"                   -> auth.walletCtx -> createCategoryHandler,
+    Method.GET / "api" / "categories"                    -> auth.walletCtx -> getCategoriesHandler,
+    Method.GET / "api" / "categories" / Category.Id.path -> auth.walletCtx -> getCategoryHandler
+  )
 }
 
 object CategoriesRoutes {

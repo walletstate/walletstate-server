@@ -1,4 +1,4 @@
-ThisProject / scalaVersion := "3.2.1"
+ThisProject / scalaVersion := "3.3.1"
 
 ThisProject / name         := "walletstate"
 ThisProject / organization := "online.walletstate"

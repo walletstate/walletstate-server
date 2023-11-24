@@ -6,18 +6,10 @@ import zio.http.*
 
 final case class AuthRoutes(authRoutesHandler: AuthRoutesHandler) {
 
-  private val login = Http.collectZIO[Request] { case req @ Method.POST -> !! / "login" =>
-    authRoutesHandler.login(req)
-  }
-
-  private val logout = Http.collectZIO[Request] { case req @ Method.GET -> !! / "logout" =>
-    authRoutesHandler.logout(req)
-  }
-
-  def routes = Http.collectZIO[Request] {
-    case req @ Method.POST -> !! / "auth" / "login"  => authRoutesHandler.login(req)
-    case req @ Method.POST -> !! / "auth" / "logout" => authRoutesHandler.logout(req)
-  }
+  def routes = Routes(
+    Method.POST / "auth" / "login"  -> handler { (req: Request) => authRoutesHandler.login(req) },
+    Method.POST / "auth" / "logout" -> handler { (req: Request) => authRoutesHandler.logout(req) }
+  )
 
 }
 

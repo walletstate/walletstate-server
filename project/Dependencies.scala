@@ -3,18 +3,18 @@ import sbt.*
 object Dependencies {
 
   object Versions {
-    val zio       = "2.0.13"
-    val zioJson   = "0.5.0"
-    val zioHttp   = "3.0.0-RC1"
+    val zio       = "2.0.19"
+    val zioJson   = "0.6.2"
+    val zioHttp   = "3.0.0-RC3"
     val zioConfig = "4.0.0-RC16"
-    val jwt       = "9.1.2"
+    val jwt       = "9.2.0"
 
-    val zioLogging = "2.1.13"
-    val slf4j      = "2.0.5"
-    val logback    = "1.4.7"
+    val zioLogging = "2.1.16"
+    val slf4j      = "2.0.9"
+    val logback    = "1.4.11"
 
     val zioSql     = "0.1.2"
-    val zioQuil    = "4.6.0.1"
+    val zioQuil    = "4.8.0"
     val postgresql = "42.5.4"
     val flyway     = "9.16.0"
 

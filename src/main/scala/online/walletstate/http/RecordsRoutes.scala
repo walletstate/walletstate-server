@@ -11,9 +11,8 @@ import zio.json.*
 
 case class RecordsRoutes(auth: AuthMiddleware, recordsService: RecordsService) {
 
-  private val createRecordHandler = Handler.fromFunctionZIO[Request] { req =>
+  private val createRecordHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
-      ctx  <- ZIO.service[WalletContext]
       info <- req.as[CreateRecord]
       record <- recordsService.create( // TODO pass wallet and check that account is in correct wallet
         info.account,
@@ -25,28 +24,25 @@ case class RecordsRoutes(auth: AuthMiddleware, recordsService: RecordsService) {
         ctx.user
       )
     } yield Response.json(record.toJson)
-  } @@ auth.ctx[WalletContext]
+  }
 
-  private val getRecordsHandler = Handler.fromFunctionZIO[Request] { req =>
+  private val getRecordsHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
-      ctx     <- ZIO.service[WalletContext]
       records <- recordsService.list(ctx.wallet)
     } yield Response.json(records.toJson)
-  } @@ auth.ctx[WalletContext]
+  }
 
-  private def getRecordHandler(idStr: String) = Handler.fromFunctionZIO[Request] { req =>
+  private val getRecordHandler = Handler.fromFunctionZIO[(Record.Id, WalletContext, Request)] { (id, ctx, req) =>
     for {
-      ctx    <- ZIO.service[WalletContext]
-      id     <- Record.Id.from(idStr)
       record <- recordsService.get(ctx.wallet, id)
     } yield Response.json(record.toJson)
-  } @@ auth.ctx[WalletContext]
-
-  def routes = Http.collectHandler[Request] {
-    case Method.POST -> !! / "api" / "records"     => createRecordHandler
-    case Method.GET -> !! / "api" / "records"      => getRecordsHandler
-    case Method.GET -> !! / "api" / "records" / id => getRecordHandler(id)
   }
+
+  def routes = Routes(
+    Method.POST / "api" / "records"                 -> auth.walletCtx -> createRecordHandler,
+    Method.GET / "api" / "records"                  -> auth.walletCtx -> getRecordsHandler,
+    Method.GET / "api" / "records" / Record.Id.path -> auth.walletCtx -> getRecordHandler
+  )
 }
 
 object RecordsRoutes {
