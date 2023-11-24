@@ -8,7 +8,14 @@ import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
 trait AccountsService {
-  def create(group: AccountsGroup.Id, name: String, orderingIndex: Int, icon: String, user: User.Id): Task[Account]
+  def create(
+      group: AccountsGroup.Id,
+      name: String,
+      orderingIndex: Int,
+      icon: String,
+      tags: Seq[String],
+      user: User.Id
+  ): Task[Account]
   def get(wallet: Wallet.Id, id: Account.Id): Task[Account]
   def list(wallet: Wallet.Id): Task[Seq[Account]]
   def list(wallet: Wallet.Id, group: AccountsGroup.Id): Task[Seq[Account]]
@@ -23,9 +30,10 @@ final case class AccountsServiceLive(quill: QuillCtx) extends AccountsService {
       name: String,
       orderingIndex: Int,
       icon: String,
+      tags: Seq[String],
       user: User.Id
   ): Task[Account] = for {
-    account <- Account.make(group, name, orderingIndex, icon, user)
+    account <- Account.make(group, name, orderingIndex, icon, tags, user)
     _       <- run(insert(account))
   } yield account
 

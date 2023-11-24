@@ -12,6 +12,7 @@ final case class Account(
     name: String,
     orderingIndex: Int,
     icon: String,
+    tags: Seq[String],
     createdBy: User.Id
 )
 
@@ -25,8 +26,8 @@ object Account {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
-  def make(group: AccountsGroup.Id, name: String, orderingIndex: Int, icon: String, createdBy: User.Id): UIO[Account] =
-    Id.random.map(Account(_, group, name, orderingIndex, icon, createdBy))
+  def make(group: AccountsGroup.Id, name: String, orderingIndex: Int, icon: String, tags: Seq[String], createdBy: User.Id): UIO[Account] =
+    Id.random.map(Account(_, group, name, orderingIndex, icon, tags, createdBy))
 
   given codec: JsonCodec[Account] = DeriveJsonCodec.gen[Account]
 }

@@ -51,6 +51,7 @@ CREATE TABLE accounts
     name           VARCHAR(255)             NOT NULL,
     ordering_index INTEGER                  NOT NULL             DEFAULT 0,
     icon           TEXT,
+    tags           VARCHAR(50)[]            NOT NULL             DEFAULT '{}',
     created_by     VARCHAR(255)             NOT NULL,
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
     CONSTRAINT accounts_accounts_groups_fk FOREIGN KEY ("group") REFERENCES accounts_groups (id),
