@@ -11,9 +11,8 @@ import zio.json.*
 
 case class AccountsRoutes(auth: AuthMiddleware, accountsService: AccountsService) {
 
-  private val createAccountHandler = Handler.fromFunctionZIO[Request] { req =>
+  private val createAccountHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
-      ctx     <- ZIO.service[WalletContext]
       accInfo <- req.as[CreateAccount] // TODO validate group is in current user wallet
       account <- accountsService.create(
         accInfo.group,
@@ -24,28 +23,25 @@ case class AccountsRoutes(auth: AuthMiddleware, accountsService: AccountsService
         ctx.user
       )
     } yield Response.json(account.toJson)
-  } @@ auth.ctx[WalletContext]
+  }
 
-  private val getAccountsHandler = Handler.fromFunctionZIO[Request] { req =>
+  private val getAccountsHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
-      ctx      <- ZIO.service[WalletContext]
       accounts <- accountsService.list(ctx.wallet)
     } yield Response.json(accounts.toJson)
-  } @@ auth.ctx[WalletContext]
+  }
 
-  private def getAccountHandler(idStr: String) = Handler.fromFunctionZIO[Request] { req =>
+  private val getAccountHandler = Handler.fromFunctionZIO[(Account.Id, WalletContext, Request)] { (id, ctx, req) =>
     for {
-      ctx     <- ZIO.service[WalletContext]
-      id      <- Account.Id.from(idStr)
       account <- accountsService.get(ctx.wallet, id)
     } yield Response.json(account.toJson)
-  } @@ auth.ctx[WalletContext]
-
-  def routes = Http.collectHandler[Request] {
-    case Method.POST -> !! / "api" / "accounts"     => createAccountHandler
-    case Method.GET -> !! / "api" / "accounts"      => getAccountsHandler
-    case Method.GET -> !! / "api" / "accounts" / id => getAccountHandler(id)
   }
+
+  def routes = Routes(
+    Method.POST / "api" / "accounts"                  -> auth.walletCtx -> createAccountHandler,
+    Method.GET / "api" / "accounts"                   -> auth.walletCtx -> getAccountsHandler,
+    Method.GET / "api" / "accounts" / Account.Id.path -> auth.walletCtx -> getAccountHandler
+  )
 }
 
 object AccountsRoutes {

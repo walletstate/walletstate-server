@@ -1,5 +1,6 @@
 package online.walletstate.models
 
+import zio.http.codec.PathCodec
 import zio.{UIO, ZIO}
 import zio.json.{DeriveJsonCodec, JsonCodec}
 
@@ -8,6 +9,8 @@ final case class User(id: User.Id, username: String, wallet: Option[Wallet.Id] =
 object User {
   case class Id(id: String) extends AnyVal
   object Id {
+    val path: PathCodec[Id] = zio.http.string("user-id").transform(Id(_))(_.id)
+
     given codec: JsonCodec[Id] = JsonCodec[String].transform(Id(_), _.id)
   }
 

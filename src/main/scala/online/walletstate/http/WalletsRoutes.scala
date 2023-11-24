@@ -8,7 +8,6 @@ import online.walletstate.services.*
 import online.walletstate.utils.RequestOps.as
 import zio.*
 import zio.http.*
-import zio.http.endpoint.*
 import zio.json.*
 
 final case class WalletsRoutes(
@@ -17,44 +16,40 @@ final case class WalletsRoutes(
     tokenService: TokenService
 ) {
 
-  private val createWalletHandler = Handler.fromFunctionZIO[Request] { req =>
+  private val createWalletHandler = Handler.fromFunctionZIO[(UserContext, Request)] { (ctx, req) =>
     for {
-      ctx      <- ZIO.service[UserContext]
       nsInfo   <- req.as[CreateWallet]
       wallet   <- walletsService.create(ctx.user, nsInfo.name)
       newToken <- tokenService.encode(WalletContext(ctx.user, wallet.id))
     } yield Response.json(wallet.toJson).withAuthCookies(newToken)
-  } @@ auth.ctx[UserContext]
+  }
 
-  private val getCurrentWalletHandler = Handler.fromFunctionZIO[Request] { _ =>
+  private val getCurrentWalletHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, _) =>
     for {
-      ctx <- ZIO.service[WalletContext]
-      ns  <- walletsService.get(ctx.wallet)
+      ns <- walletsService.get(ctx.wallet)
     } yield Response.json(ns.toJson)
-  } @@ auth.ctx[WalletContext]
+  }
 
-  private val inviteWalletHandler = Handler.fromFunctionZIO[Request] { _ =>
+  private val inviteWalletHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, _) =>
     for {
-      ctx    <- ZIO.service[WalletContext]
       invite <- walletsService.createInvite(ctx.user, ctx.wallet)
     } yield Response.json(invite.toJson)
-  } @@ auth.ctx[WalletContext]
+  }
 
-  private val joinWalletHandler = Handler.fromFunctionZIO[Request] { req =>
+  private val joinWalletHandler = Handler.fromFunctionZIO[(UserContext, Request)] { (ctx, req) =>
     for {
-      ctx      <- ZIO.service[UserContext]
       joinInfo <- req.as[JoinWallet]
       wallet   <- walletsService.joinWallet(ctx.user, joinInfo.inviteCode)
       newToken <- tokenService.encode(WalletContext(ctx.user, wallet.id))
     } yield Response.json(wallet.toJson).withAuthCookies(newToken)
-  } @@ auth.ctx[UserContext]
-
-  val routes = Http.collectHandler[Request] {
-    case Method.POST -> !! / "api" / "wallets"            => createWalletHandler
-    case Method.GET -> !! / "api" / "wallets" / "current" => getCurrentWalletHandler
-    case Method.POST -> !! / "api" / "wallets" / "invite" => inviteWalletHandler
-    case Method.POST -> !! / "api" / "wallets" / "join"   => joinWalletHandler
   }
+
+  val routes = Routes(
+    Method.POST / "api" / "wallets"            -> auth.userCtx   -> createWalletHandler,
+    Method.GET / "api" / "wallets" / "current" -> auth.walletCtx -> getCurrentWalletHandler,
+    Method.POST / "api" / "wallets" / "invite" -> auth.walletCtx -> inviteWalletHandler,
+    Method.POST / "api" / "wallets" / "join"   -> auth.userCtx   -> joinWalletHandler
+  )
 }
 
 object WalletsRoutes {

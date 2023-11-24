@@ -27,14 +27,14 @@ final case class WalletStateServer(
       categories.routes ++
       records.routes
 
-  def app = routes.catchAllZIO {
-    case e: ToResponse => ZIO.succeed(e.toResponse)
-    case e             => ZIO.fail(e).debug(s"Error ${e.toString}")
-  }.withDefaultErrorResponse @@ RequestHandlerMiddlewares.requestLogging()
+  def app = routes.handleError { //TODO Investigate what was changed
+    case e: ToResponse => e.toResponse
+    case e             => Response.error(Status.InternalServerError)//.debug(s"Error ${e.toString}")
+  } @@ Middleware.requestLogging()
 
   def start = for {
     _ <- migrations.migrate
-    p <- Server.install(app)
+    p <- Server.install(app.toHttpApp)
     _ <- ZIO.logInfo(s"Server started on port $p")
     _ <- ZIO.never
   } yield ()

@@ -26,7 +26,7 @@ object AuthCookiesOps {
     Cookie.Response(
       name = AuthCookiesName,
       content = content,
-      path = Some(!!),
+      path = Some(Root),
       isHttpOnly = true,
       maxAge = Some(expireIn)
     )
