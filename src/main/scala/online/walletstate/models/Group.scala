@@ -34,14 +34,15 @@ object Group {
   }
 
   object Type {
-    private def fromString(typeStr: String): Either[String, Type] =
+    def fromString(typeStr: String): Either[String, Type] =
       Try(Type.valueOf(typeStr.capitalize)).toEither.left.map(_ => "Not a group type")
 
-    def toString(`type`: Type): String = `type`.toString.toLowerCase
+    def asString(`type`: Type): String = `type`.toString.toLowerCase
 
-    val path: PathCodec[Type] = zio.http.string("group-type").transformOrFailLeft(fromString)(toString)
+    //TODO investigate 500 response for invalid group type in path
+    val path: PathCodec[Type] = zio.http.string("group-type").transformOrFailLeft(fromString)(asString)
 
-    given codec: JsonCodec[Type] = JsonCodec[String].transformOrFail(fromString, toString)
+    given codec: JsonCodec[Type] = JsonCodec[String].transformOrFail(fromString, asString)
   }
 
   def make(wallet: Wallet.Id, `type`: Type, name: String, orderingIndex: Int, createdBy: User.Id): UIO[Group] =

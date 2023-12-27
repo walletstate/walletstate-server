@@ -20,13 +20,13 @@ class WalletStateQuillContext(override val ds: DataSource)
     (index: Index, value: Group.Type, row: PrepareRow) => {
       val pgObj = new PGobject()
       pgObj.setType("group_type")
-      pgObj.setValue(value.toString.toLowerCase)
+      pgObj.setValue(Group.Type.asString(value))
       row.setObject(index, pgObj, Types.OTHER)
     }
   )
 
   given groupTypeDecoder: Decoder[Group.Type] =
-    decoder((index, row, _) => Group.Type.valueOf(row.getObject(index).toString.capitalize))
+    decoder((index, row, _) => Group.Type.fromString(row.getObject(index).toString).toOption.get) //TODO rewrite .toOption.get
 
 }
 

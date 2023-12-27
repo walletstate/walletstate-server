@@ -2,6 +2,7 @@ package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models
+import online.walletstate.models.api.Grouped
 import online.walletstate.models.errors.AccountNotExist
 import online.walletstate.models.{Account, Group, User, Wallet}
 import online.walletstate.utils.ZIOExtensions.getOrError
@@ -19,9 +20,10 @@ trait AccountsService {
   def get(wallet: Wallet.Id, id: Account.Id): Task[Account]
   def list(wallet: Wallet.Id): Task[Seq[Account]]
   def list(wallet: Wallet.Id, group: Group.Id): Task[Seq[Account]]
+  def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Account]]]
 }
 
-final case class AccountsServiceLive(quill: WalletStateQuillContext) extends AccountsService {
+final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService) extends AccountsService {
   import io.getquill.*
   import quill.{*, given}
 
@@ -33,7 +35,7 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext) extends Acc
       tags: Seq[String],
       user: User.Id
   ): Task[Account] = for {
-    account <- Account.make(group, name, orderingIndex, icon, tags, user)
+    account <- Account.make(group, name, orderingIndex, icon, tags, user) //TODO check group has correct type
     _       <- run(insert(account))
   } yield account
 
@@ -45,6 +47,9 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext) extends Acc
 
   override def list(wallet: Wallet.Id, group: Group.Id): Task[Seq[Account]] =
     run(accountsByGroup(wallet, group))
+
+  def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Account]]] =
+    groupsService.group(wallet, Group.Type.Accounts, list(wallet))
 
   // queries
   private inline def insert(account: Account) = quote(query[Account].insertValue(lift(account)))

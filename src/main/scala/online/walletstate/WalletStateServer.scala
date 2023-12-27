@@ -8,14 +8,14 @@ import zio.http.*
 import zio.json.*
 
 final case class WalletStateServer(
-                                    health: HealthRoutes,
-                                    auth: AuthRoutes,
-                                    wallets: WalletsRoutes,
-                                    accountsGroupsRoutes: GroupsRoutes,
-                                    accounts: AccountsRoutes,
-                                    categories: CategoriesRoutes,
-                                    records: RecordsRoutes,
-                                    migrations: Migrations
+    health: HealthRoutes,
+    auth: AuthRoutes,
+    wallets: WalletsRoutes,
+    accountsGroupsRoutes: GroupsRoutes,
+    accounts: AccountsRoutes,
+    categories: CategoriesRoutes,
+    records: RecordsRoutes,
+    migrations: Migrations
 ) {
 
   private val routes =

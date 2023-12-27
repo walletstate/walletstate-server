@@ -41,12 +41,12 @@ Content-Type: application/json
   "inviteCode": "{{inviteCode}}"
 }
 
-### Create group
-POST localhost:8081/api/groups
+### Create accounts group
+POST localhost:8081/api/groups/accounts
 Content-Type: application/json
 
 {
-  "name": "main accounts",
+  "name": "main accounts 2",
   "orderingIndex": 1
 }
 
@@ -54,11 +54,11 @@ Content-Type: application/json
     client.global.set("groupId", response.body.id);
 %}
 
-### List groups
-GET localhost:8081/api/groups
+### List accounts groups
+GET localhost:8081/api/groups/accountss
 
-### Get group
-GET localhost:8081/api/groups/{{groupId}}
+### Get accounts group
+GET localhost:8081/api/groups/accounts/{{groupId}}
 
 ### Create account
 POST localhost:8081/api/accounts
@@ -78,6 +78,9 @@ Content-Type: application/json
 
 ### Get accounts
 GET localhost:8081/api/accounts
+
+### Get grouped accounts
+GET localhost:8081/api/accounts/grouped
 
 ### Get account
 GET localhost:8081/api/accounts/{{accountId}}
