@@ -3,7 +3,7 @@ package online.walletstate.services
 import io.getquill.jdbczio.Quill
 import io.github.scottweaver.zio.aspect.DbMigrationAspect
 import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
-import online.walletstate.db.QuillNamingStrategy
+import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.fixtures.{WalletsFixtures, UsersFixtures}
 import online.walletstate.models.Wallet
 import online.walletstate.models.errors.{WalletInviteNotExist, WalletNotExist, UserAlreadyHasWallet}
@@ -21,8 +21,8 @@ object WalletsSeviceSpec extends ZIOSpecDefault with WalletsFixtures with UsersF
       suite("get")(
         test("should return existing wallet") {
           for {
-            service   <- ZIO.service[WalletsService]
-            wallet <- service.get(ExistingWalletId)
+            service <- ZIO.service[WalletsService]
+            wallet  <- service.get(ExistingWalletId)
           } yield assertTrue(wallet == ExistingWallet)
         },
         test("should return WalletNotExist error") {
@@ -36,8 +36,8 @@ object WalletsSeviceSpec extends ZIOSpecDefault with WalletsFixtures with UsersF
       suite("create")(
         test("should create a new wallet") {
           for {
-            service   <- ZIO.service[WalletsService]
-            wallet <- service.create(ExistingUserWithoutWalletId1, "test-wallet-1")
+            service <- ZIO.service[WalletsService]
+            wallet  <- service.create(ExistingUserWithoutWalletId1, "test-wallet-1")
           } yield assertTrue(wallet.name == "test-wallet-1")
         },
         test("should return UserAlreadyHasWallet error") {
@@ -85,7 +85,7 @@ object WalletsSeviceSpec extends ZIOSpecDefault with WalletsFixtures with UsersF
     WalletsServiceLive.layer,
     WalletInvitesServiceLive.layer,
     UsersServiceLive.layer,
-    Quill.Postgres.fromNamingStrategy(QuillNamingStrategy),
+    WalletStateQuillContext.layer,
     ZPostgreSQLContainer.live,
     ZPostgreSQLContainer.Settings.default
   )

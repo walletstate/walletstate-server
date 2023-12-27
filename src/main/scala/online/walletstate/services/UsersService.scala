@@ -1,6 +1,6 @@
 package online.walletstate.services
 
-import online.walletstate.db.QuillCtx
+import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.errors.UserNotExist
 import online.walletstate.models.{Wallet, User}
 import online.walletstate.utils.ZIOExtensions.getOrError
@@ -12,7 +12,7 @@ trait UsersService {
   def setWallet(user: User.Id, wallet: Wallet.Id): Task[Unit]
 }
 
-final case class UsersServiceLive(quill: QuillCtx) extends UsersService {
+final case class UsersServiceLive(quill: WalletStateQuillContext) extends UsersService {
   import io.getquill.*
   import quill.*
 

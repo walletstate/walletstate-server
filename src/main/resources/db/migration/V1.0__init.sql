@@ -32,10 +32,13 @@ CREATE TABLE wallet_invites
     CONSTRAINT invites_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
-CREATE TABLE accounts_groups
+CREATE TYPE group_type AS ENUM ('accounts', 'categories');
+
+CREATE TABLE "groups"
 (
     id             UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
     wallet         UUID                     NOT NULL,
+    type           group_type               NOT NULL,
     name           VARCHAR(255)             NOT NULL,
     ordering_index INTEGER                  NOT NULL             DEFAULT 0,
     created_by     VARCHAR(255)             NOT NULL,
@@ -54,7 +57,7 @@ CREATE TABLE accounts
     tags           VARCHAR(50)[]            NOT NULL             DEFAULT '{}',
     created_by     VARCHAR(255)             NOT NULL,
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT accounts_accounts_groups_fk FOREIGN KEY ("group") REFERENCES accounts_groups (id),
+    CONSTRAINT accounts_groups_fk FOREIGN KEY ("group") REFERENCES groups (id),
     CONSTRAINT accounts_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 

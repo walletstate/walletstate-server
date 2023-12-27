@@ -1,8 +1,8 @@
 package online.walletstate.services
 
-import online.walletstate.db.QuillCtx
+import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.errors.RecordNotExist
-import online.walletstate.models.{Account, AccountsGroup, Category, Record, RecordType, User, Wallet}
+import online.walletstate.models.{Account, Category, Group, Record, RecordType, User, Wallet}
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
@@ -23,9 +23,9 @@ trait RecordsService {
   def list(wallet: Wallet.Id, account: Account.Id): Task[Seq[Record]]
 }
 
-case class RecordsServiceLive(quill: QuillCtx) extends RecordsService {
+case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsService {
   import io.getquill.*
-  import quill.*
+  import quill.{*, given}
 
   override def create(
       account: Account.Id,
@@ -60,7 +60,7 @@ case class RecordsServiceLive(quill: QuillCtx) extends RecordsService {
     query[Record]
       .join(query[Account])
       .on(_.account == _.id)
-      .join(query[AccountsGroup])
+      .join(query[Group])
       .on(_._2.group == _.id)
       .filter { case (_, group) => group.wallet == lift(ns) }
       .map { case ((record, _), _) => record }

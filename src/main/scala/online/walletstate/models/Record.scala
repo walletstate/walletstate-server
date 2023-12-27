@@ -44,6 +44,7 @@ object Record {
   given codec: JsonCodec[Record] = DeriveJsonCodec.gen[Record]
 }
 
+//TODO Move to record object
 enum RecordType {
   case Income, Spending, Transfer
 }

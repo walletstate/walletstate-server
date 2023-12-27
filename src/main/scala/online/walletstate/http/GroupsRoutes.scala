@@ -1,24 +1,24 @@
 package online.walletstate.http
 
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
-import online.walletstate.models.AccountsGroup
-import online.walletstate.models.api.{CreateAccountsGroup, UpdateAccountsGroup}
-import online.walletstate.services.AccountsGroupsService
+import online.walletstate.models.Group
+import online.walletstate.models.api.{CreateGroup, UpdateAccountsGroup}
+import online.walletstate.services.GroupsService
 import online.walletstate.utils.RequestOps.as
 import zio.*
 import zio.http.*
 import zio.json.*
 
-case class AccountsGroupsRoutes(auth: AuthMiddleware, accountsGroupsService: AccountsGroupsService) {
+case class GroupsRoutes(auth: AuthMiddleware, accountsGroupsService: GroupsService) {
 
   private val createGroupHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
-      groupInfo <- req.as[CreateAccountsGroup]
+      groupInfo <- req.as[CreateGroup]
       group     <- accountsGroupsService.create(ctx.wallet, groupInfo.name, groupInfo.orderingIndex, ctx.user)
     } yield Response.json(group.toJson)
   }
 
-  private val updateGroupHandler = Handler.fromFunctionZIO[(AccountsGroup.Id, WalletContext, Request)] {
+  private val updateGroupHandler = Handler.fromFunctionZIO[(Group.Id, WalletContext, Request)] {
     (id, ctx, req) =>
       for {
         updateInfo <- req.as[UpdateAccountsGroup]
@@ -26,7 +26,7 @@ case class AccountsGroupsRoutes(auth: AuthMiddleware, accountsGroupsService: Acc
       } yield Response.ok
   }
 
-  private val deleteGroupHandler = Handler.fromFunctionZIO[(AccountsGroup.Id, WalletContext, Request)] {
+  private val deleteGroupHandler = Handler.fromFunctionZIO[(Group.Id, WalletContext, Request)] {
     (id, ctx, req) =>
       for {
         _ <- accountsGroupsService.delete(ctx.wallet, id)
@@ -39,7 +39,7 @@ case class AccountsGroupsRoutes(auth: AuthMiddleware, accountsGroupsService: Acc
     } yield Response.json(groups.toJson)
   }
 
-  private val getGroupHandler = Handler.fromFunctionZIO[(AccountsGroup.Id, WalletContext, Request)] { (id, ctx, req) =>
+  private val getGroupHandler = Handler.fromFunctionZIO[(Group.Id, WalletContext, Request)] { (id, ctx, req) =>
     for {
       group <- accountsGroupsService.get(ctx.wallet, id)
     } yield Response.json(group.toJson)
@@ -55,12 +55,12 @@ case class AccountsGroupsRoutes(auth: AuthMiddleware, accountsGroupsService: Acc
     Method.POST / "api" / "groups"                           -> auth.walletCtx -> createGroupHandler,
     Method.GET / "api" / "groups"                            -> auth.walletCtx -> getGroupsHandler,
     Method.GET / "api" / "groups" / "with-accounts"          -> auth.walletCtx -> getGroupsWithAccountsHandler,
-    Method.GET / "api" / "groups" / AccountsGroup.Id.path    -> auth.walletCtx -> getGroupHandler,
-    Method.PUT / "api" / "groups" / AccountsGroup.Id.path    -> auth.walletCtx -> updateGroupHandler,
-    Method.DELETE / "api" / "groups" / AccountsGroup.Id.path -> auth.walletCtx -> deleteGroupHandler
+    Method.GET / "api" / "groups" / Group.Id.path    -> auth.walletCtx -> getGroupHandler,
+    Method.PUT / "api" / "groups" / Group.Id.path    -> auth.walletCtx -> updateGroupHandler,
+    Method.DELETE / "api" / "groups" / Group.Id.path -> auth.walletCtx -> deleteGroupHandler
   )
 }
 
-object AccountsGroupsRoutes {
-  val layer = ZLayer.fromFunction(AccountsGroupsRoutes.apply _)
+object GroupsRoutes {
+  val layer = ZLayer.fromFunction(GroupsRoutes.apply _)
 }

@@ -1,6 +1,6 @@
 package online.walletstate.services
 
-import online.walletstate.db.QuillCtx
+import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.errors.CategoryNotExist
 import online.walletstate.models.{Category, Wallet, User}
 import online.walletstate.utils.ZIOExtensions.getOrError
@@ -12,7 +12,7 @@ trait CategoriesService {
   def list(wallet: Wallet.Id): Task[Seq[Category]]
 }
 
-final case class CategoriesServiceLive(quill: QuillCtx) extends CategoriesService {
+final case class CategoriesServiceLive(quill: WalletStateQuillContext) extends CategoriesService {
   import io.getquill.*
   import quill.*
 

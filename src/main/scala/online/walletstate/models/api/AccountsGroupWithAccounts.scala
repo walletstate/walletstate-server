@@ -1,6 +1,6 @@
 package online.walletstate.models.api
 
-import online.walletstate.models.{Account, AccountsGroup}
+import online.walletstate.models.{Account, Group}
 import zio.json.{DeriveJsonCodec, JsonCodec}
 
 final case class SimpleAccount(
@@ -25,15 +25,15 @@ object SimpleAccount {
 }
 
 final case class AccountsGroupWithAccounts(
-    id: AccountsGroup.Id,
-    name: String,
-    orderingIndex: Int,
-    accounts: Seq[SimpleAccount]
+                                            id: Group.Id,
+                                            name: String,
+                                            orderingIndex: Int,
+                                            accounts: Seq[SimpleAccount]
 )
 
 object AccountsGroupWithAccounts {
 
-  def build(group: AccountsGroup, accounts: Seq[SimpleAccount]) =
+  def build(group: Group, accounts: Seq[SimpleAccount]) =
     AccountsGroupWithAccounts(
       group.id,
       group.name,
