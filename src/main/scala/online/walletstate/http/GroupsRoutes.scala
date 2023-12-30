@@ -46,7 +46,7 @@ case class GroupsRoutes(auth: AuthMiddleware, accountsGroupsService: GroupsServi
       } yield Response.json(group.toJson)
   }
 
-  def routes = Routes(
+  val routes = Routes(
     Method.POST / "api" / "groups" / Group.Type.path                   -> auth.walletCtx -> createGroupHandler,
     Method.GET / "api" / "groups" / Group.Type.path                    -> auth.walletCtx -> getGroupsHandler,
     Method.GET / "api" / "groups" / Group.Type.path / Group.Id.path    -> auth.walletCtx -> getGroupHandler,

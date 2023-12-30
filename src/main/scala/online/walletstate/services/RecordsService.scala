@@ -2,7 +2,7 @@ package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.errors.RecordNotExist
-import online.walletstate.models.{Account, Category, Group, Record, RecordType, User, Wallet}
+import online.walletstate.models.{Account, Category, Group, Record, User, Wallet}
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
@@ -12,7 +12,7 @@ trait RecordsService {
   def create(
       account: Account.Id,
       amount: BigDecimal,
-      `type`: RecordType,
+      `type`: Record.Type,
       category: Category.Id,
       description: Option[String],
       time: Instant,
@@ -30,7 +30,7 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
   override def create(
       account: Account.Id,
       amount: BigDecimal,
-      `type`: RecordType,
+      `type`: Record.Type,
       category: Category.Id,
       description: Option[String],
       time: Instant,
@@ -49,9 +49,6 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
   override def list(wallet: Wallet.Id, account: Account.Id): Task[Seq[Record]] =
     run(recordsByAccount(wallet, account))
 
-  // mappers
-  given encodeRecordType: MappedEncoding[RecordType, String] = MappedEncoding[RecordType, String](_.toString)
-  given decodeRecordType: MappedEncoding[String, RecordType] = MappedEncoding[String, RecordType](RecordType.valueOf(_))
 
   // queries
   private inline def insert(record: Record) = quote(query[Record].insertValue(lift(record)))

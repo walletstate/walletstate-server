@@ -1,8 +1,8 @@
 package online.walletstate.db
 
 import io.getquill.jdbczio.Quill
-import io.getquill.{CompositeNamingStrategy3, NamingStrategy, PluralizedTableNames, PostgresEscape, SnakeCase}
-import online.walletstate.models.Group
+import io.getquill.{CompositeNamingStrategy3, MappedEncoding, NamingStrategy, PluralizedTableNames, PostgresEscape, SnakeCase}
+import online.walletstate.models.{Group, Record}
 import zio.ZLayer
 import org.postgresql.util.PGobject
 
@@ -27,6 +27,11 @@ class WalletStateQuillContext(override val ds: DataSource)
 
   given groupTypeDecoder: Decoder[Group.Type] =
     decoder((index, row, _) => Group.Type.fromString(row.getObject(index).toString).toOption.get) //TODO rewrite .toOption.get
+
+
+  // mappers todo: make as enum in db
+  given recordTypeEncoder: MappedEncoding[Record.Type, String] = MappedEncoding[Record.Type, String](_.toString.toLowerCase)
+  given recordTypeDecoder: MappedEncoding[String, Record.Type] = MappedEncoding[String, Record.Type](s => Record.Type.valueOf(s.capitalize))
 
 }
 

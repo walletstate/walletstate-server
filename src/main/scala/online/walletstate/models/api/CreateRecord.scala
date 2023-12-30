@@ -1,6 +1,6 @@
 package online.walletstate.models.api
 
-import online.walletstate.models.{Account, Category, RecordType}
+import online.walletstate.models.{Account, Category, Record}
 import zio.json.{DeriveJsonCodec, JsonCodec}
 
 import java.time.Instant
@@ -8,7 +8,7 @@ import java.time.Instant
 final case class CreateRecord(
     account: Account.Id,
     amount: BigDecimal,
-    `type`: RecordType,
+    `type`: Record.Type,
     category: Category.Id,
     description: Option[String],
     time: Instant

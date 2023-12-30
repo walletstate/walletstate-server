@@ -110,7 +110,7 @@ Content-Type: application/json
 {
   "account": "{{accountId}}",
   "amount": 99.99,
-  "type": "Spending",
+  "type": "spending",
   "category": "{{categoryId}}",
   "description": "Bananas",
   "time": "2023-06-02T14:10:20Z"
