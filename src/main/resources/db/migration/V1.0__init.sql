@@ -63,11 +63,13 @@ CREATE TABLE accounts
 
 CREATE TABLE categories
 (
-    id         UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    wallet     UUID                     NOT NULL,
-    name       VARCHAR(255)             NOT NULL,
-    created_by VARCHAR(255)             NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
+    id             UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    wallet         UUID                     NOT NULL,
+    "group"        UUID                     NOT NULL,
+    name           VARCHAR(255)             NOT NULL,
+    created_by     VARCHAR(255)             NOT NULL,
+    ordering_index INTEGER                  NOT NULL             DEFAULT 0,
+    created_at     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
     CONSTRAINT categories_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
     CONSTRAINT categories_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );

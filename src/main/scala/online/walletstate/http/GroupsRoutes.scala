@@ -2,7 +2,7 @@ package online.walletstate.http
 
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Group
-import online.walletstate.models.api.{CreateGroup, UpdateAccountsGroup}
+import online.walletstate.models.api.{CreateGroup, UpdateGroup}
 import online.walletstate.services.GroupsService
 import online.walletstate.utils.RequestOps.as
 import zio.*
@@ -21,7 +21,7 @@ case class GroupsRoutes(auth: AuthMiddleware, accountsGroupsService: GroupsServi
   private val updateGroupHandler = Handler.fromFunctionZIO[(Group.Type, Group.Id, WalletContext, Request)] {
     (`type`, id, ctx, req) =>
       for {
-        updateInfo <- req.as[UpdateAccountsGroup]
+        updateInfo <- req.as[UpdateGroup]
         _          <- accountsGroupsService.update(ctx.wallet, `type`, id, updateInfo.name)
       } yield Response.ok
   }

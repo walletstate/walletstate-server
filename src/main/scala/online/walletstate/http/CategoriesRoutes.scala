@@ -14,7 +14,7 @@ case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesS
   private val createCategoryHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
       info     <- req.as[CreateCategory]
-      category <- categoriesService.create(ctx.wallet, info.name, ctx.user)
+      category <- categoriesService.create(ctx.wallet, info.group, info.name, info.orderingIndex, ctx.user)
     } yield Response.json(category.toJson)
   }
 
@@ -24,15 +24,22 @@ case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesS
     } yield Response.json(categories.toJson)
   }
 
+  private val getGroupedCategoriesHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
+    for {
+      categories <- categoriesService.grouped(ctx.wallet)
+    } yield Response.json(categories.toJson)
+  }
+
   private val getCategoryHandler = Handler.fromFunctionZIO[(Category.Id, WalletContext, Request)] { (id, ctx, req) =>
     for {
       category <- categoriesService.get(ctx.wallet, id)
     } yield Response.json(category.toJson)
   }
 
-  def routes = Routes(
+  val routes = Routes(
     Method.POST / "api" / "categories"                   -> auth.walletCtx -> createCategoryHandler,
     Method.GET / "api" / "categories"                    -> auth.walletCtx -> getCategoriesHandler,
+    Method.GET / "api" / "categories" / "grouped"        -> auth.walletCtx -> getGroupedCategoriesHandler,
     Method.GET / "api" / "categories" / Category.Id.path -> auth.walletCtx -> getCategoryHandler
   )
 }

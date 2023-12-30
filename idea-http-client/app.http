@@ -51,21 +51,21 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("groupId", response.body.id);
+    client.global.set("accountGroupId", response.body.id);
 %}
 
 ### List accounts groups
-GET localhost:8081/api/groups/accountss
+GET localhost:8081/api/groups/accounts
 
 ### Get accounts group
-GET localhost:8081/api/groups/accounts/{{groupId}}
+GET localhost:8081/api/groups/accounts/{{accountGroupId}}
 
 ### Create account
 POST localhost:8081/api/accounts
 Content-Type: application/json
 
 {
-  "group": "{{groupId}}",
+  "group": "{{accountGroupId}}",
   "name": "monobank white card",
   "orderingIndex": 0,
   "icon": "",
@@ -85,12 +85,27 @@ GET localhost:8081/api/accounts/grouped
 ### Get account
 GET localhost:8081/api/accounts/{{accountId}}
 
+### Create categories group
+POST localhost:8081/api/groups/categories
+Content-Type: application/json
+
+{
+  "name": "Food",
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("categoriesGroupId", response.body.id);
+%}
+
 ### Create category
 POST localhost:8081/api/categories
 Content-Type: application/json
 
 {
-  "name": "Food"
+  "group": "{{categoriesGroupId}}",
+  "name": "Cafes",
+  "orderingIndex": 0
 }
 
 > {%
@@ -99,6 +114,9 @@ Content-Type: application/json
 
 ### Get categories
 GET localhost:8081/api/categories
+
+### Get grouped categories
+GET localhost:8081/api/categories/grouped
 
 ### Get category
 GET localhost:8081/api/categories/{{categoryId}}
