@@ -2,7 +2,7 @@ package online.walletstate
 
 import io.getquill.jdbczio.Quill
 import online.walletstate.config.HttpServerConfig
-import online.walletstate.db.{Migrations, QuillNamingStrategy}
+import online.walletstate.db.{Migrations, WalletStateQuillContext}
 import online.walletstate.http.*
 import online.walletstate.http.auth.{AuthMiddleware, AuthRoutesHandler, ConfiguredUsersAuthRoutesHandler}
 import online.walletstate.services.*
@@ -35,7 +35,7 @@ object Application extends ZIOAppDefault {
         HealthRoutes.layer,
         AuthRoutes.layer,
         WalletsRoutes.layer,
-        AccountsGroupsRoutes.layer,
+        GroupsRoutes.layer,
         AccountsRoutes.layer,
         CategoriesRoutes.layer,
         RecordsRoutes.layer,
@@ -45,14 +45,14 @@ object Application extends ZIOAppDefault {
         WalletInvitesServiceLive.layer,
         UsersServiceLive.layer,
         StatelessTokenService.layer,
-        AccountsGroupsServiceLive.layer,
+        GroupsServiceLive.layer,
         AccountsServiceLive.layer,
         CategoriesServiceLive.layer,
         RecordsServiceLive.layer,
 
         // DB
-        Quill.Postgres.fromNamingStrategy(QuillNamingStrategy),
         Quill.DataSource.fromPrefix("db"),
+        WalletStateQuillContext.layer,
         Migrations.layer,
 
         // dependencies tree

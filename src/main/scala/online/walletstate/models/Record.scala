@@ -11,7 +11,7 @@ final case class Record(
     id: Record.Id,
     account: Account.Id,
     amount: BigDecimal,
-    `type`: RecordType,
+    `type`: Record.Type,
     category: Category.Id,
     description: Option[String],
     time: Instant,
@@ -30,10 +30,18 @@ object Record {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
+  enum Type {
+    case Income, Spending, Transfer
+  }
+
+  object Type {
+    given codec: JsonCodec[Type] = JsonCodec[String].transform(t => Type.valueOf(t.capitalize), _.toString.toLowerCase)
+  }
+
   def make(
       account: Account.Id,
       amount: BigDecimal,
-      `type`: RecordType,
+      `type`: Type,
       category: Category.Id,
       description: Option[String],
       time: Instant,
@@ -42,12 +50,4 @@ object Record {
     Id.random.map(Record(_, account, amount, `type`, category, description, time, createdBy))
 
   given codec: JsonCodec[Record] = DeriveJsonCodec.gen[Record]
-}
-
-enum RecordType {
-  case Income, Spending, Transfer
-}
-
-object RecordType {
-  given codec: JsonCodec[RecordType] = JsonCodec[String].transform(RecordType.valueOf(_), _.toString)
 }

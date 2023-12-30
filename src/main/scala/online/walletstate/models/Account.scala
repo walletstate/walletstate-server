@@ -9,13 +9,13 @@ import java.util.UUID
 
 final case class Account(
     id: Account.Id,
-    group: AccountsGroup.Id,
+    group: Group.Id,
     name: String,
     orderingIndex: Int,
     icon: String,
     tags: Seq[String],
     createdBy: User.Id
-)
+) extends Groupable
 
 object Account {
   final case class Id(id: UUID) extends AnyVal
@@ -29,7 +29,14 @@ object Account {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
-  def make(group: AccountsGroup.Id, name: String, orderingIndex: Int, icon: String, tags: Seq[String], createdBy: User.Id): UIO[Account] =
+  def make(
+      group: Group.Id,
+      name: String,
+      orderingIndex: Int,
+      icon: String,
+      tags: Seq[String],
+      createdBy: User.Id
+  ): UIO[Account] =
     Id.random.map(Account(_, group, name, orderingIndex, icon, tags, createdBy))
 
   given codec: JsonCodec[Account] = DeriveJsonCodec.gen[Account]

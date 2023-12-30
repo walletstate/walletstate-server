@@ -1,15 +1,16 @@
 package online.walletstate.services
 
-import online.walletstate.db.QuillCtx
+import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models
+import online.walletstate.models.api.Grouped
 import online.walletstate.models.errors.AccountNotExist
-import online.walletstate.models.{Account, AccountsGroup, User, Wallet}
+import online.walletstate.models.{Account, Group, User, Wallet}
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
 trait AccountsService {
   def create(
-      group: AccountsGroup.Id,
+      group: Group.Id,
       name: String,
       orderingIndex: Int,
       icon: String,
@@ -18,22 +19,23 @@ trait AccountsService {
   ): Task[Account]
   def get(wallet: Wallet.Id, id: Account.Id): Task[Account]
   def list(wallet: Wallet.Id): Task[Seq[Account]]
-  def list(wallet: Wallet.Id, group: AccountsGroup.Id): Task[Seq[Account]]
+  def list(wallet: Wallet.Id, group: Group.Id): Task[Seq[Account]]
+  def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Account]]]
 }
 
-final case class AccountsServiceLive(quill: QuillCtx) extends AccountsService {
+final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService) extends AccountsService {
   import io.getquill.*
-  import quill.*
+  import quill.{*, given}
 
   override def create(
-      group: AccountsGroup.Id,
+      group: Group.Id,
       name: String,
       orderingIndex: Int,
       icon: String,
       tags: Seq[String],
       user: User.Id
   ): Task[Account] = for {
-    account <- Account.make(group, name, orderingIndex, icon, tags, user)
+    account <- Account.make(group, name, orderingIndex, icon, tags, user) //TODO check group has correct type
     _       <- run(insert(account))
   } yield account
 
@@ -43,21 +45,24 @@ final case class AccountsServiceLive(quill: QuillCtx) extends AccountsService {
   override def list(wallet: Wallet.Id): Task[Seq[Account]] =
     run(accountsByWallet(wallet))
 
-  override def list(wallet: Wallet.Id, group: AccountsGroup.Id): Task[Seq[Account]] =
+  override def list(wallet: Wallet.Id, group: Group.Id): Task[Seq[Account]] =
     run(accountsByGroup(wallet, group))
+
+  def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Account]]] =
+    groupsService.group(wallet, Group.Type.Accounts, list(wallet))
 
   // queries
   private inline def insert(account: Account) = quote(query[Account].insertValue(lift(account)))
 
   private inline def accountsByWallet(wallet: Wallet.Id) = quote {
     query[Account]
-      .join(query[AccountsGroup])
+      .join(query[Group])
       .on(_.group == _.id)
       .filter { case (_, group) => group.wallet == lift(wallet) }
       .map { case (account, _) => account }
   }
 
-  private inline def accountsByGroup(wallet: Wallet.Id, group: AccountsGroup.Id) =
+  private inline def accountsByGroup(wallet: Wallet.Id, group: Group.Id) =
     accountsByWallet(wallet).filter(_.group == lift(group))
 
   private inline def accountsById(wallet: Wallet.Id, id: Account.Id) =

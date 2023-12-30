@@ -31,6 +31,12 @@ case class AccountsRoutes(auth: AuthMiddleware, accountsService: AccountsService
     } yield Response.json(accounts.toJson)
   }
 
+  private val getGroupedAccountsHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
+    for {
+      accounts <- accountsService.grouped(ctx.wallet)
+    } yield Response.json(accounts.toJson)
+  }
+
   private val getAccountHandler = Handler.fromFunctionZIO[(Account.Id, WalletContext, Request)] { (id, ctx, req) =>
     for {
       account <- accountsService.get(ctx.wallet, id)
@@ -39,6 +45,7 @@ case class AccountsRoutes(auth: AuthMiddleware, accountsService: AccountsService
 
   def routes = Routes(
     Method.POST / "api" / "accounts"                  -> auth.walletCtx -> createAccountHandler,
+    Method.GET / "api" / "accounts" / "grouped"       -> auth.walletCtx -> getGroupedAccountsHandler,
     Method.GET / "api" / "accounts"                   -> auth.walletCtx -> getAccountsHandler,
     Method.GET / "api" / "accounts" / Account.Id.path -> auth.walletCtx -> getAccountHandler
   )

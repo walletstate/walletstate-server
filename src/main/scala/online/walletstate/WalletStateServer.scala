@@ -11,7 +11,7 @@ final case class WalletStateServer(
     health: HealthRoutes,
     auth: AuthRoutes,
     wallets: WalletsRoutes,
-    accountsGroupsRoutes: AccountsGroupsRoutes,
+    accountsGroupsRoutes: GroupsRoutes,
     accounts: AccountsRoutes,
     categories: CategoriesRoutes,
     records: RecordsRoutes,

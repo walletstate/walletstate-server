@@ -3,7 +3,7 @@ package online.walletstate.services
 import io.getquill.jdbczio.Quill
 import io.github.scottweaver.zio.aspect.DbMigrationAspect
 import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
-import online.walletstate.db.QuillNamingStrategy
+import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.fixtures.{WalletsFixtures, UsersFixtures}
 import online.walletstate.models.User
 import online.walletstate.models.errors.UserNotExist
@@ -52,7 +52,7 @@ object UsersServiceSpec extends ZIOSpecDefault with UsersFixtures with WalletsFi
     ) @@ DbMigrationAspect.migrateOnce()()
   }.provideShared(
     UsersServiceLive.layer,
-    Quill.Postgres.fromNamingStrategy(QuillNamingStrategy),
+    WalletStateQuillContext.layer,
     ZPostgreSQLContainer.live,
     ZPostgreSQLContainer.Settings.default
   )
