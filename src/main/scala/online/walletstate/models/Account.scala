@@ -1,6 +1,7 @@
 package online.walletstate.models
 
 import online.walletstate.models
+import online.walletstate.models.api.CreateAccount
 import zio.http.codec.PathCodec
 import zio.json.{DeriveJsonCodec, JsonCodec}
 import zio.{Random, Task, UIO, ZIO}
@@ -29,15 +30,8 @@ object Account {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
-  def make(
-      group: Group.Id,
-      name: String,
-      orderingIndex: Int,
-      icon: String,
-      tags: Seq[String],
-      createdBy: User.Id
-  ): UIO[Account] =
-    Id.random.map(Account(_, group, name, orderingIndex, icon, tags, createdBy))
+  def make(createdBy: User.Id, info: CreateAccount): UIO[Account] =
+    Id.random.map(Account(_, info.group, info.name, info.orderingIndex, info.icon, info.tags, createdBy))
 
   given codec: JsonCodec[Account] = DeriveJsonCodec.gen[Account]
 }

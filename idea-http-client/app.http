@@ -8,7 +8,7 @@ Content-Type: application/json
 }
 
 ### Logout
-GET localhost:8081/auth/logout
+#GET localhost:8081/auth/logout
 
 ### Create wallet
 POST localhost:8081/api/wallets
@@ -26,27 +26,27 @@ Content-Type: application/json
 GET localhost:8081/api/wallets/current
 
 ### Create invite
-POST localhost:8081/api/wallets/invite
-Content-Type: application/json
-
-> {%
-    client.global.set("inviteCode", response.body.inviteCode);
-%}
+#POST localhost:8081/api/wallets/invite
+#Content-Type: application/json
+#
+#> {%
+#    client.global.set("inviteCode", response.body.inviteCode);
+#%}
 
 ### Join wallet
 POST localhost:8081/api/wallets/join
-Content-Type: application/json
-
-{
-  "inviteCode": "{{inviteCode}}"
-}
+#Content-Type: application/json
+#
+#{
+#  "inviteCode": "{{inviteCode}}"
+#}
 
 ### Create accounts group
 POST localhost:8081/api/groups/accounts
 Content-Type: application/json
 
 {
-  "name": "main accounts 2",
+  "name": "main accounts",
   "orderingIndex": 1
 }
 
@@ -105,6 +105,7 @@ Content-Type: application/json
 {
   "group": "{{categoriesGroupId}}",
   "name": "Cafes",
+  "icon": "test",
   "orderingIndex": 0
 }
 
