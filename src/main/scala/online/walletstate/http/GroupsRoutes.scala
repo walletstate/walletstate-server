@@ -22,7 +22,7 @@ case class GroupsRoutes(auth: AuthMiddleware, accountsGroupsService: GroupsServi
     (`type`, id, ctx, req) =>
       for {
         updateInfo <- req.as[UpdateGroup]
-        _          <- accountsGroupsService.update(ctx.wallet, `type`, id, updateInfo.name)
+        _          <- accountsGroupsService.update(ctx.wallet, `type`, id, updateInfo.name, updateInfo.orderingIndex)
       } yield Response.ok
   }
 

@@ -9,7 +9,7 @@ import zio.{Task, ZIO, ZLayer}
 
 trait GroupsService {
   def create(wallet: Wallet.Id, `type`: Group.Type, name: String, orderingIndex: Int, user: User.Id): Task[Group]
-  def update(wallet: Wallet.Id, `type`: Group.Type, id: Group.Id, name: String): Task[Unit]
+  def update(wallet: Wallet.Id, `type`: Group.Type, id: Group.Id, name: String, orderingIndex: Int): Task[Unit]
   def get(wallet: Wallet.Id, `type`: Group.Type, id: Group.Id): Task[Group]
   def list(wallet: Wallet.Id, `type`: Group.Type): Task[Seq[Group]]
   def delete(wallet: Wallet.Id, `type`: Group.Type, id: Group.Id): Task[Unit]
@@ -31,8 +31,8 @@ final case class GroupsServiceLive(quill: WalletStateQuillContext) extends Group
     _     <- run(insert(group))
   } yield group
 
-  override def update(wallet: Wallet.Id, `type`: Group.Type, id: Group.Id, name: String): Task[Unit] =
-    run(updateQuery(wallet, `type`, id, name)).map(_ => ())
+  override def update(wallet: Wallet.Id, `type`: Group.Type, id: Group.Id, name: String, orderingIndex: Int): Task[Unit] =
+    run(updateQuery(wallet, `type`, id, name, orderingIndex)).map(_ => ())
 
   override def get(wallet: Wallet.Id, `type`: Group.Type, id: Group.Id): Task[Group] =
     run(groupsById(wallet, `type`, id)).map(_.headOption).getOrError(AccountsGroupNotExist)
@@ -76,8 +76,8 @@ final case class GroupsServiceLive(quill: WalletStateQuillContext) extends Group
     quote(query[Group].filter(_.wallet == lift(wallet))).filter(_.`type` == lift(`type`))
   private inline def groupsById(wallet: Wallet.Id, `type`: Group.Type, group: Group.Id) =
     groupsByWallet(wallet, `type`).filter(_.id == lift(group))
-  private inline def updateQuery(wallet: Wallet.Id, `type`: Group.Type, group: Group.Id, name: String) =
-    groupsById(wallet, `type`, group).update(_.name -> lift(name))
+  private inline def updateQuery(wallet: Wallet.Id, `type`: Group.Type, group: Group.Id, name: String, orderingIndex: Int) =
+    groupsById(wallet, `type`, group).update(_.name -> lift(name), _.orderingIndex -> lift(orderingIndex))
   private inline def deleteQuery(wallet: Wallet.Id, `type`: Group.Type, group: Group.Id) =
     groupsById(wallet, `type`, group).delete
 }
