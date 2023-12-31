@@ -1,5 +1,6 @@
 package online.walletstate.models
 
+import online.walletstate.models.api.CreateCategory
 import zio.http.codec.PathCodec
 import zio.json.{DeriveJsonCodec, JsonCodec}
 import zio.{Random, Task, UIO, ZIO}
@@ -11,6 +12,7 @@ final case class Category(
     wallet: Wallet.Id,
     group: Group.Id,
     name: String,
+    icon: String,
     orderingIndex: Int,
     createdBy: User.Id
 ) extends Groupable
@@ -26,9 +28,9 @@ object Category {
 
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
-
-  def make(wallet: Wallet.Id, group: Group.Id, name: String, orderingIndex: Int, createdBy: User.Id): UIO[Category] =
-    Id.random.map(Category(_, wallet, group, name, orderingIndex, createdBy))
+  
+  def make(wallet: Wallet.Id, createdBy: User.Id, info: CreateCategory): UIO[Category] =
+    Id.random.map(Category(_, wallet, info.group, info.name, info.icon, info.orderingIndex, createdBy))
 
   given codec: JsonCodec[Category] = DeriveJsonCodec.gen[Category]
 }

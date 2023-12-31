@@ -14,7 +14,7 @@ case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesS
   private val createCategoryHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
       info     <- req.as[CreateCategory]
-      category <- categoriesService.create(ctx.wallet, info.group, info.name, info.orderingIndex, ctx.user)
+      category <- categoriesService.create(ctx.wallet, ctx.user, info)
     } yield Response.json(category.toJson)
   }
 

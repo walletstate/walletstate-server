@@ -2,40 +2,27 @@ package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models
-import online.walletstate.models.api.Grouped
+import online.walletstate.models.api.{CreateAccount, Grouped}
 import online.walletstate.models.errors.AccountNotExist
 import online.walletstate.models.{Account, Group, User, Wallet}
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
 trait AccountsService {
-  def create(
-      group: Group.Id,
-      name: String,
-      orderingIndex: Int,
-      icon: String,
-      tags: Seq[String],
-      user: User.Id
-  ): Task[Account]
+  def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAccount): Task[Account]
   def get(wallet: Wallet.Id, id: Account.Id): Task[Account]
   def list(wallet: Wallet.Id): Task[Seq[Account]]
   def list(wallet: Wallet.Id, group: Group.Id): Task[Seq[Account]]
   def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Account]]]
 }
 
-final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService) extends AccountsService {
+final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
+    extends AccountsService {
   import io.getquill.*
   import quill.{*, given}
 
-  override def create(
-      group: Group.Id,
-      name: String,
-      orderingIndex: Int,
-      icon: String,
-      tags: Seq[String],
-      user: User.Id
-  ): Task[Account] = for {
-    account <- Account.make(group, name, orderingIndex, icon, tags, user) //TODO check group has correct type
+  override def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAccount): Task[Account] = for {
+    account <- Account.make(createdBy, info) // TODO check group has correct type and group is in current wallet
     _       <- run(insert(account))
   } yield account
 
