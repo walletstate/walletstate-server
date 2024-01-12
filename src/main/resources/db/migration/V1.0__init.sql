@@ -43,8 +43,8 @@ CREATE TABLE "groups"
     ordering_index INTEGER                  NOT NULL             DEFAULT 0,
     created_by     VARCHAR(255)             NOT NULL,
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT accounts_groups_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
-    CONSTRAINT accounts_groups_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
+    CONSTRAINT groups_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
+    CONSTRAINT groups_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 CREATE TABLE accounts
@@ -74,18 +74,58 @@ CREATE TABLE categories
     CONSTRAINT categories_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
-CREATE TABLE records
+CREATE TYPE asset_type AS ENUM ('fiat', 'crypto', 'deposit', 'bond', 'stock', 'other');
+
+CREATE TABLE assets
 (
-    id          UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    account     UUID                     NOT NULL,
-    amount      DECIMAL                  NOT NULL,
-    type        varchar(35)              NOT NULL,
-    category    UUID                     NOT NULL,
-    description TEXT,
-    time        TIMESTAMP WITH TIME ZONE NOT NULL,
-    created_by  VARCHAR(255)             NOT NULL,
-    created_at  TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT records_account_fk FOREIGN KEY (account) REFERENCES accounts (id),
-    CONSTRAINT records_category_fk FOREIGN KEY (category) REFERENCES categories (id),
-    CONSTRAINT records_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
+    id             UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    wallet         UUID                     NOT NULL,
+    type           asset_type               NOT NULL,
+    ticker         VARCHAR(25)              NOT NULL,
+    name           VARCHAR(255)             NOT NULL,
+    icon           TEXT,
+    start_date     TIMESTAMP WITH TIME ZONE                      DEFAULT NULL,
+    end_date       TIMESTAMP WITH TIME ZONE                      DEFAULT NULL,
+    denominated_in UUID                                          DEFAULT NULL,
+    denomination   DECIMAL(36, 18)                               DEFAULT NULL,
+    created_by     VARCHAR(255)             NOT NULL,
+    created_at     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
+    CONSTRAINT assets_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
+    CONSTRAINT assets_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id),
+    CONSTRAINT assets_denominated_in_fk FOREIGN KEY (denominated_in) REFERENCES assets (id),
+    CONSTRAINT assets_wallet_ticker_uq UNIQUE (wallet, ticker)
+);
+
+CREATE TABLE exchange_rates
+(
+    id     UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "from" UUID                     NOT NULL,
+    "to"   UUID                     NOT NULL,
+    rate   DECIMAL(36, 18)          NOT NULL,
+    date   TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
+    CONSTRAINT exchange_rates_from_fk FOREIGN KEY ("from") REFERENCES assets (id),
+    CONSTRAINT exchange_rates_to_fk FOREIGN KEY ("to") REFERENCES assets (id)
+);
+
+CREATE TYPE transaction_type AS ENUM ('income', 'spending', 'transfer');
+
+CREATE TABLE transactions
+(
+    id           UUID                     NOT NULL DEFAULT uuid_generate_v4(),
+    account      UUID                     NOT NULL,
+    asset        UUID                     NOT NULL,
+    type         transaction_type         NOT NULL,
+    category     UUID                     NOT NULL,
+    amount       DECIMAL(36, 18)          NOT NULL,
+    date         TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    description  VARCHAR(255),
+    external_id  VARCHAR(255),
+    spent_on     UUID,
+    generated_by UUID,
+    CONSTRAINT transactions_pk PRIMARY KEY (id, account, asset),
+    CONSTRAINT transactions_account_fk FOREIGN KEY (account) REFERENCES accounts (id),
+    CONSTRAINT transactions_asset_fk FOREIGN KEY (asset) REFERENCES assets (id),
+    CONSTRAINT transactions_category_fk FOREIGN KEY (category) REFERENCES categories (id),
+    CONSTRAINT transactions_spent_on_fk FOREIGN KEY (spent_on) REFERENCES assets (id),
+    CONSTRAINT transactions_generated_by_fk FOREIGN KEY (generated_by) REFERENCES assets (id)
 );
