@@ -17,7 +17,7 @@ trait CategoriesService {
 final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
     extends CategoriesService {
   import io.getquill.*
-  import quill.*
+  import quill.{*, given}
 
   override def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateCategory): Task[Category] = for {
     category <- Category.make(wallet, createdBy, info) // todo: check group exists
@@ -28,16 +28,22 @@ final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsSer
     run(categoriesById(wallet, id)).map(_.headOption).getOrError(CategoryNotExist)
 
   override def list(wallet: Wallet.Id): Task[Seq[Category]] =
-    run(categoriesByNs(wallet))
+    run(categoriesByWallet(wallet))
 
   override def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Category]]] =
     groupsService.group(wallet, Group.Type.Categories, list(wallet))
 
   // queries
-  private inline def categories                                     = quote(querySchema[Category]("categories"))
-  private inline def insert(category: Category)                     = quote(categories.insertValue(lift(category)))
-  private inline def categoriesByNs(ns: Wallet.Id)                  = quote(categories.filter(_.wallet == lift(ns)))
-  private inline def categoriesById(ns: Wallet.Id, id: Category.Id) = categoriesByNs(ns).filter(_.id == lift(id))
+  private inline def insert(category: Category) = quote(Tables.Categories.insertValue(lift(category)))
+  private inline def categoriesByWallet(wallet: Wallet.Id) = quote {
+    Tables.Categories
+      .join(Tables.Groups)
+      .on(_.group == _.id)
+      .filter { case (_, group) => group.wallet == lift(wallet) }
+      .map { case (group, _) => group }
+  }
+  private inline def categoriesById(wallet: Wallet.Id, id: Category.Id) =
+    categoriesByWallet(wallet).filter(_.id == lift(id))
 }
 
 object CategoriesServiceLive {

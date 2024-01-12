@@ -9,7 +9,6 @@ import java.util.UUID
 
 final case class Category(
     id: Category.Id,
-    wallet: Wallet.Id,
     group: Group.Id,
     name: String,
     icon: String,
@@ -28,9 +27,9 @@ object Category {
 
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
-  
+
   def make(wallet: Wallet.Id, createdBy: User.Id, info: CreateCategory): UIO[Category] =
-    Id.random.map(Category(_, wallet, info.group, info.name, info.icon, info.orderingIndex, createdBy))
+    Id.random.map(Category(_, info.group, info.name, info.icon, info.orderingIndex, createdBy))
 
   given codec: JsonCodec[Category] = DeriveJsonCodec.gen[Category]
 }
