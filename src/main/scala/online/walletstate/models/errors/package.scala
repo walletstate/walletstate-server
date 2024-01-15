@@ -45,4 +45,7 @@ package object errors {
   /////////// records errors
   case object RecordNotExist extends AppError with ToResponse(Status.NotFound, "Record not found")
 
+  /////////// assets errors
+  case object AssetNotExist extends AppError with ToResponse(Status.NotFound, "Asset not found")
+
 }

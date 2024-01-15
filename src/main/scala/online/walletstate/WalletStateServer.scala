@@ -14,6 +14,7 @@ final case class WalletStateServer(
     accountsGroupsRoutes: GroupsRoutes,
     accounts: AccountsRoutes,
     categories: CategoriesRoutes,
+    assets: AssetsRoutes,
     records: RecordsRoutes,
     migrations: Migrations
 ) {
@@ -25,6 +26,7 @@ final case class WalletStateServer(
       accountsGroupsRoutes.routes ++
       accounts.routes ++
       categories.routes ++
+      assets.routes ++
       records.routes
 
   def app = routes.handleError { //TODO Investigate what was changed

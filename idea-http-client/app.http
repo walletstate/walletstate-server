@@ -145,3 +145,46 @@ GET localhost:8081/api/records
 ### Get category
 GET localhost:8081/api/records/{{recordId}}
 
+### Create asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "fiat",
+  "ticker": "USD",
+  "name": "US Dollar",
+  "icon": "",
+  "startDate": null,
+  "endDate": null,
+  "denominatedIn": null,
+  "denomination": null
+}
+
+> {%
+    client.global.set("fiatAssetId", response.body.id);
+%}
+
+### Create bond asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "bond",
+  "ticker": "UA10988712",
+  "name": "ОВДП",
+  "icon": "",
+  "startDate": "2023-01-15T14:10:20Z",
+  "endDate": "2024-01-15T14:10:20Z",
+  "denominatedIn": "{{fiatAssetId}}",
+  "denomination": 1000
+}
+
+> {%
+    client.global.set("bondAssetId", response.body.id);
+%}
+
+### Get assets
+GET localhost:8081/api/assets
+
+### Get asset
+GET localhost:8081/api/assets/{{fiatAssetId}}

@@ -35,7 +35,7 @@ object Group {
 
   object Type {
     def fromString(typeStr: String): Either[String, Type] =
-      Try(Type.valueOf(typeStr.capitalize)).toEither.left.map(_ => "Not a group type")
+      Try(Type.valueOf(typeStr.capitalize)).toEither.left.map(_ => s"$typeStr is not a group type")
 
     def asString(`type`: Type): String = `type`.toString.toLowerCase
 
