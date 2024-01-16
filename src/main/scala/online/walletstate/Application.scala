@@ -39,6 +39,7 @@ object Application extends ZIOAppDefault {
         AccountsRoutes.layer,
         CategoriesRoutes.layer,
         AssetsRoutes.layer,
+        ExchangeRatesRoutes.layer,
         RecordsRoutes.layer,
 
         // services
@@ -50,6 +51,7 @@ object Application extends ZIOAppDefault {
         AccountsServiceLive.layer,
         CategoriesServiceLive.layer,
         AssetsServiceLive.layer,
+        ExchangeRatesServiceLive.layer,
         RecordsServiceLive.layer,
 
         // DB

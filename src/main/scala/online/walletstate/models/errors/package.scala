@@ -48,4 +48,7 @@ package object errors {
   /////////// assets errors
   case object AssetNotExist extends AppError with ToResponse(Status.NotFound, "Asset not found")
 
+  /////////// exchange rates errors
+  case object ExchangeRateNotExist extends AppError with ToResponse(Status.NotFound, "Exchange rate not found")
+
 }

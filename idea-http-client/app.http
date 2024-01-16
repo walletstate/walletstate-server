@@ -186,5 +186,31 @@ Content-Type: application/json
 ### Get assets
 GET localhost:8081/api/assets
 
+> {%
+    client.global.set("fromAssetId", response.body[0].id);
+    client.global.set("toAssetId", response.body[1].id);
+%}
+
 ### Get asset
 GET localhost:8081/api/assets/{{fiatAssetId}}
+
+### Create exchange rate
+POST localhost:8081/api/exchange-rates
+Content-Type: application/json
+
+{
+  "from": "{{fromAssetId}}",
+  "to": "{{toAssetId}}",
+  "rate": 1001,
+  "date": "2023-02-15T14:10:20Z"
+}
+
+> {%
+    client.global.set("exchangeRateId", response.body.id);
+%}
+
+### Get exchange rate
+GET localhost:8081/api/exchange-rates/{{exchangeRateId}}
+
+### Get exchange rates for assets
+GET localhost:8081/api/exchange-rates?from={{fromAssetId}}&to={{toAssetId}}

@@ -9,7 +9,7 @@ import io.getquill.{
   PostgresEscape,
   SnakeCase
 }
-import online.walletstate.models.{Account, Asset, Category, Group, Record}
+import online.walletstate.models.{Account, Asset, Category, ExchangeRate, Group, Record}
 import zio.ZLayer
 import org.postgresql.util.PGobject
 
@@ -59,10 +59,11 @@ class WalletStateQuillContext(override val ds: DataSource)
   object Tables {
     import io.getquill.*
 
-    inline def Groups: Quoted[EntityQuery[Group]]        = quote(query[Group])
-    inline def Accounts: Quoted[EntityQuery[Account]]    = quote(query[Account])
-    inline def Categories: Quoted[EntityQuery[Category]] = quote(querySchema[Category]("categories"))
-    inline def Assets: Quoted[EntityQuery[Asset]]        = quote(query[Asset])
+    inline def Groups: Quoted[EntityQuery[Group]]               = quote(query[Group])
+    inline def Accounts: Quoted[EntityQuery[Account]]           = quote(query[Account])
+    inline def Categories: Quoted[EntityQuery[Category]]        = quote(querySchema[Category]("categories"))
+    inline def Assets: Quoted[EntityQuery[Asset]]               = quote(query[Asset])
+    inline def ExchangeRates: Quoted[EntityQuery[ExchangeRate]] = quote(query[ExchangeRate])
 
   }
 
