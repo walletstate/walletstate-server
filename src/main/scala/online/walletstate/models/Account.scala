@@ -14,8 +14,7 @@ final case class Account(
     name: String,
     orderingIndex: Int,
     icon: String,
-    tags: Seq[String],
-    createdBy: User.Id
+    tags: Seq[String]
 ) extends Groupable
 
 object Account {
@@ -30,8 +29,8 @@ object Account {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
-  def make(createdBy: User.Id, info: CreateAccount): UIO[Account] =
-    Id.random.map(Account(_, info.group, info.name, info.orderingIndex, info.icon, info.tags, createdBy))
+  def make(info: CreateAccount): UIO[Account] =
+    Id.random.map(Account(_, info.group, info.name, info.orderingIndex, info.icon, info.tags))
 
   given codec: JsonCodec[Account] = DeriveJsonCodec.gen[Account]
 }

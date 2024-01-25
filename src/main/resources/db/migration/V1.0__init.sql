@@ -36,73 +36,63 @@ CREATE TYPE group_type AS ENUM ('accounts', 'categories');
 
 CREATE TABLE "groups"
 (
-    id             UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    wallet         UUID                     NOT NULL,
-    type           group_type               NOT NULL,
-    name           VARCHAR(255)             NOT NULL,
-    ordering_index INTEGER                  NOT NULL             DEFAULT 0,
-    created_by     VARCHAR(255)             NOT NULL,
-    created_at     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT groups_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
-    CONSTRAINT groups_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
+    id             UUID         NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    wallet         UUID         NOT NULL,
+    type           group_type   NOT NULL,
+    name           VARCHAR(255) NOT NULL,
+    ordering_index INTEGER      NOT NULL             DEFAULT 0,
+    CONSTRAINT groups_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id)
 );
 
 CREATE TABLE accounts
 (
-    id             UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "group"        UUID                     NOT NULL,
-    name           VARCHAR(255)             NOT NULL,
-    ordering_index INTEGER                  NOT NULL             DEFAULT 0,
+    id             UUID          NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "group"        UUID          NOT NULL,
+    name           VARCHAR(255)  NOT NULL,
+    ordering_index INTEGER       NOT NULL             DEFAULT 0,
     icon           TEXT,
-    tags           VARCHAR(50)[]            NOT NULL             DEFAULT '{}',
-    created_by     VARCHAR(255)             NOT NULL,
-    created_at     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT accounts_groups_fk FOREIGN KEY ("group") REFERENCES groups (id),
-    CONSTRAINT accounts_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
+    tags           VARCHAR(50)[] NOT NULL             DEFAULT '{}',
+    CONSTRAINT accounts_groups_fk FOREIGN KEY ("group") REFERENCES groups (id)
 );
 
 CREATE TABLE categories
 (
-    id             UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "group"        UUID                     NOT NULL,
-    name           VARCHAR(255)             NOT NULL,
+    id             UUID          NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "group"        UUID          NOT NULL,
+    name           VARCHAR(255)  NOT NULL,
     icon           TEXT,
-    created_by     VARCHAR(255)             NOT NULL,
-    ordering_index INTEGER                  NOT NULL             DEFAULT 0,
-    created_at     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
-    CONSTRAINT categories_group_fk FOREIGN KEY ("group") REFERENCES groups (id),
-    CONSTRAINT categories_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
+    tags           VARCHAR(50)[] NOT NULL             DEFAULT '{}',
+    ordering_index INTEGER       NOT NULL             DEFAULT 0,
+    CONSTRAINT categories_group_fk FOREIGN KEY ("group") REFERENCES groups (id)
 );
 
 CREATE TYPE asset_type AS ENUM ('fiat', 'crypto', 'deposit', 'bond', 'stock', 'other');
 
 CREATE TABLE assets
 (
-    id             UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    wallet         UUID                     NOT NULL,
-    type           asset_type               NOT NULL,
-    ticker         VARCHAR(25)              NOT NULL,
-    name           VARCHAR(255)             NOT NULL,
+    id             UUID          NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    wallet         UUID          NOT NULL,
+    type           asset_type    NOT NULL,
+    ticker         VARCHAR(25)   NOT NULL,
+    name           VARCHAR(255)  NOT NULL,
     icon           TEXT,
-    start_date     TIMESTAMP WITH TIME ZONE                      DEFAULT NULL,
-    end_date       TIMESTAMP WITH TIME ZONE                      DEFAULT NULL,
-    denominated_in UUID                                          DEFAULT NULL,
-    denomination   DECIMAL(36, 18)                               DEFAULT NULL,
-    created_by     VARCHAR(255)             NOT NULL,
-    created_at     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
+    tags           VARCHAR(50)[] NOT NULL             DEFAULT '{}',
+    start_date     TIMESTAMP WITH TIME ZONE           DEFAULT NULL,
+    end_date       TIMESTAMP WITH TIME ZONE           DEFAULT NULL,
+    denominated_in UUID                               DEFAULT NULL,
+    denomination   DECIMAL(36, 18)                    DEFAULT NULL,
     CONSTRAINT assets_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
-    CONSTRAINT assets_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id),
     CONSTRAINT assets_denominated_in_fk FOREIGN KEY (denominated_in) REFERENCES assets (id),
     CONSTRAINT assets_wallet_ticker_uq UNIQUE (wallet, ticker)
 );
 
 CREATE TABLE exchange_rates
 (
-    id     UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "from" UUID                     NOT NULL,
-    "to"   UUID                     NOT NULL,
-    rate   DECIMAL(36, 18)          NOT NULL,
-    date   TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
+    id       UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "from"   UUID                     NOT NULL,
+    "to"     UUID                     NOT NULL,
+    rate     DECIMAL(36, 18)          NOT NULL,
+    datetime TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
     CONSTRAINT exchange_rates_from_fk FOREIGN KEY ("from") REFERENCES assets (id),
     CONSTRAINT exchange_rates_to_fk FOREIGN KEY ("to") REFERENCES assets (id)
 );
@@ -114,11 +104,12 @@ CREATE TABLE transactions
     id           UUID                     NOT NULL DEFAULT uuid_generate_v4(),
     account      UUID                     NOT NULL,
     asset        UUID                     NOT NULL,
+    amount       DECIMAL(36, 18)          NOT NULL,
     type         transaction_type         NOT NULL,
     category     UUID                     NOT NULL,
-    amount       DECIMAL(36, 18)          NOT NULL,
-    date         TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    datetime     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     description  VARCHAR(255),
+    tags         VARCHAR(50)[]            NOT NULL DEFAULT '{}',
     external_id  VARCHAR(255),
     spent_on     UUID,
     generated_by UUID,

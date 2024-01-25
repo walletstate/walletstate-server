@@ -18,7 +18,7 @@ final case class AssetsServiceLive(quill: WalletStateQuillContext) extends Asset
   import quill.{*, given}
 
   override def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAsset): Task[Asset] = for {
-    asset <- Asset.make(wallet, info, createdBy)
+    asset <- Asset.make(wallet, info)
     _     <- run(insert(asset))
   } yield asset
 

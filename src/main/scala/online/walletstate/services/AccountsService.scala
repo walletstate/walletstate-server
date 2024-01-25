@@ -22,7 +22,7 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsServi
   import quill.{*, given}
 
   override def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAccount): Task[Account] = for {
-    account <- Account.make(createdBy, info) // TODO check group has correct type and group is in current wallet
+    account <- Account.make(info) // TODO check group has correct type and group is in current wallet
     _       <- run(insert(account))
   } yield account
 

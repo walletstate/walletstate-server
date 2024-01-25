@@ -27,11 +27,17 @@ final case class GroupsServiceLive(quill: WalletStateQuillContext) extends Group
       orderingIndex: Index,
       user: User.Id
   ): Task[Group] = for {
-    group <- Group.make(wallet, `type`, name, orderingIndex, user)
+    group <- Group.make(wallet, `type`, name, orderingIndex)
     _     <- run(insert(group))
   } yield group
 
-  override def update(wallet: Wallet.Id, `type`: Group.Type, id: Group.Id, name: String, orderingIndex: Int): Task[Unit] =
+  override def update(
+      wallet: Wallet.Id,
+      `type`: Group.Type,
+      id: Group.Id,
+      name: String,
+      orderingIndex: Int
+  ): Task[Unit] =
     run(updateQuery(wallet, `type`, id, name, orderingIndex)).map(_ => ())
 
   override def get(wallet: Wallet.Id, `type`: Group.Type, id: Group.Id): Task[Group] =
@@ -76,7 +82,13 @@ final case class GroupsServiceLive(quill: WalletStateQuillContext) extends Group
     quote(query[Group].filter(_.wallet == lift(wallet))).filter(_.`type` == lift(`type`))
   private inline def groupsById(wallet: Wallet.Id, `type`: Group.Type, group: Group.Id) =
     groupsByWallet(wallet, `type`).filter(_.id == lift(group))
-  private inline def updateQuery(wallet: Wallet.Id, `type`: Group.Type, group: Group.Id, name: String, orderingIndex: Int) =
+  private inline def updateQuery(
+      wallet: Wallet.Id,
+      `type`: Group.Type,
+      group: Group.Id,
+      name: String,
+      orderingIndex: Int
+  ) =
     groupsById(wallet, `type`, group).update(_.name -> lift(name), _.orderingIndex -> lift(orderingIndex))
   private inline def deleteQuery(wallet: Wallet.Id, `type`: Group.Type, group: Group.Id) =
     groupsById(wallet, `type`, group).delete

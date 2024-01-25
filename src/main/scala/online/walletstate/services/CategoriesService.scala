@@ -20,7 +20,7 @@ final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsSer
   import quill.{*, given}
 
   override def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateCategory): Task[Category] = for {
-    category <- Category.make(wallet, createdBy, info) // todo: check group exists
+    category <- Category.make(info) // todo: check group exists
     _        <- run(insert(category))
   } yield category
 

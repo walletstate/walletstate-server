@@ -79,6 +79,10 @@ Content-Type: application/json
 ### Get accounts
 GET localhost:8081/api/accounts
 
+> {%
+    client.global.set("account0Id", response.body[0].id);
+%}
+
 ### Get grouped accounts
 GET localhost:8081/api/accounts/grouped
 
@@ -106,6 +110,7 @@ Content-Type: application/json
   "group": "{{categoriesGroupId}}",
   "name": "Cafes 2",
   "icon": "test",
+  "tags": ["tag1"],
   "orderingIndex": 0
 }
 
@@ -116,34 +121,15 @@ Content-Type: application/json
 ### Get categories
 GET localhost:8081/api/categories
 
+> {%
+    client.global.set("category0Id", response.body[0].id);
+%}
+
 ### Get grouped categories
 GET localhost:8081/api/categories/grouped
 
 ### Get category
 GET localhost:8081/api/categories/{{categoryId}}
-
-### Create record
-POST localhost:8081/api/records
-Content-Type: application/json
-
-{
-  "account": "{{accountId}}",
-  "amount": 99.99,
-  "type": "spending",
-  "category": "{{categoryId}}",
-  "description": "Bananas",
-  "time": "2023-06-02T14:10:20Z"
-}
-
-> {%
-    client.global.set("recordId", response.body.id);
-%}
-
-### Get records
-GET localhost:8081/api/records
-
-### Get category
-GET localhost:8081/api/records/{{recordId}}
 
 ### Create asset
 POST localhost:8081/api/assets
@@ -154,6 +140,7 @@ Content-Type: application/json
   "ticker": "USD",
   "name": "US Dollar",
   "icon": "",
+  "tags": ["tag1"],
   "startDate": null,
   "endDate": null,
   "denominatedIn": null,
@@ -173,6 +160,7 @@ Content-Type: application/json
   "ticker": "UA10988712",
   "name": "ОВДП",
   "icon": "",
+  "tags": ["tag1"],
   "startDate": "2023-01-15T14:10:20Z",
   "endDate": "2024-01-15T14:10:20Z",
   "denominatedIn": "{{fiatAssetId}}",
@@ -202,7 +190,7 @@ Content-Type: application/json
   "from": "{{fromAssetId}}",
   "to": "{{toAssetId}}",
   "rate": 1001,
-  "date": "2023-02-15T14:10:20Z"
+  "datetime": "2023-02-15T14:10:20Z"
 }
 
 > {%
@@ -214,3 +202,78 @@ GET localhost:8081/api/exchange-rates/{{exchangeRateId}}
 
 ### Get exchange rates for assets
 GET localhost:8081/api/exchange-rates?from={{fromAssetId}}&to={{toAssetId}}
+
+### Create transaction income
+POST localhost:8081/api/transactions
+Content-Type: application/json
+
+{
+  "type": "income",
+  "to": {
+    "account": "{{account0Id}}",
+    "asset": "{{fromAssetId}}",
+    "amount": 10000
+  },
+  "category": "{{category0Id}}",
+  "description": "Some Income",
+  "datetime": "2023-06-02T12:10:20Z",
+  "tags": ["tag1"]
+}
+
+> {%
+    client.global.set("transactionId", response.body[0].id);
+%}
+
+### Create transaction spending
+POST localhost:8081/api/transactions
+Content-Type: application/json
+
+{
+  "type": "spending",
+  "from": {
+    "account": "{{account0Id}}",
+    "asset": "{{fromAssetId}}",
+    "amount": 99.99
+  },
+  "category": "{{category0Id}}",
+  "description": "Bananas",
+  "datetime": "2023-06-02T14:10:20Z",
+  "tags": ["tag1"]
+}
+
+> {%
+    client.global.set("transactionId", response.body[0].id);
+%}
+
+### Create transaction transfer (exchange)
+POST localhost:8081/api/transactions
+Content-Type: application/json
+
+{
+  "type": "transfer",
+  "from": {
+    "account": "{{account0Id}}",
+    "asset": "{{fromAssetId}}",
+    "amount": 1000
+  },
+  "to": {
+    "account": "{{account0Id}}",
+    "asset": "{{toAssetId}}",
+    "amount": 1
+  },
+  "category": "{{category0Id}}",
+  "description": "Exchange asset",
+  "datetime": "2023-06-02T15:10:20Z",
+  "tags": ["tag1"]
+}
+
+> {%
+    client.global.set("transactionId", response.body[0].id);
+%}
+
+
+### Get transaction
+GET localhost:8081/api/transactions/{{transactionId}}
+
+### Get transactions
+GET localhost:8081/api/transactions?account={{account0Id}}

@@ -16,11 +16,11 @@ final case class Asset(
     ticker: String,
     name: String,
     icon: String,
+    tags: Seq[String],
     startDate: Option[ZonedDateTime],
     endDate: Option[ZonedDateTime],
     denominatedIn: Option[Asset.Id],
-    denomination: Option[BigDecimal],
-    createdBy: User.Id
+    denomination: Option[BigDecimal]
 )
 
 object Asset {
@@ -52,7 +52,7 @@ object Asset {
     given codec: JsonCodec[Type] = JsonCodec[String].transformOrFail(fromString, asString)
   }
 
-  def make(wallet: Wallet.Id, info: CreateAsset, createdBy: User.Id): UIO[Asset] =
+  def make(wallet: Wallet.Id, info: CreateAsset): UIO[Asset] =
     Id.random.map(
       Asset(
         _,
@@ -61,11 +61,11 @@ object Asset {
         info.ticker,
         info.name,
         info.icon,
+        info.tags,
         info.startDate,
         info.endDate,
         info.denominatedIn,
-        info.denomination,
-        createdBy
+        info.denomination
       )
     )
 

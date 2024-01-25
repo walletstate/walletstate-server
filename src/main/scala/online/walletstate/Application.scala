@@ -40,7 +40,7 @@ object Application extends ZIOAppDefault {
         CategoriesRoutes.layer,
         AssetsRoutes.layer,
         ExchangeRatesRoutes.layer,
-        RecordsRoutes.layer,
+        TransactionsRoutes.layer,
 
         // services
         WalletsServiceLive.layer,
@@ -52,7 +52,7 @@ object Application extends ZIOAppDefault {
         CategoriesServiceLive.layer,
         AssetsServiceLive.layer,
         ExchangeRatesServiceLive.layer,
-        RecordsServiceLive.layer,
+        TransactionsServiceLive.layer,
 
         // DB
         Quill.DataSource.fromPrefix("db"),

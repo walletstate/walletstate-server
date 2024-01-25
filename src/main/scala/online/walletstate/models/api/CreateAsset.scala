@@ -10,6 +10,7 @@ final case class CreateAsset(
     ticker: String,
     name: String,
     icon: String,
+    tags: Seq[String],
     startDate: Option[ZonedDateTime],
     endDate: Option[ZonedDateTime],
     denominatedIn: Option[Asset.Id],

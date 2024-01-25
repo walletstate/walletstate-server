@@ -16,7 +16,7 @@ final case class WalletStateServer(
     categories: CategoriesRoutes,
     assets: AssetsRoutes,
     exchangeRates: ExchangeRatesRoutes,
-    records: RecordsRoutes,
+    transactions: TransactionsRoutes,
     migrations: Migrations
 ) {
 
@@ -29,11 +29,11 @@ final case class WalletStateServer(
       categories.routes ++
       assets.routes ++
       exchangeRates.routes ++
-      records.routes
+      transactions.routes
 
-  def app = routes.handleError { //TODO Investigate what was changed
+  def app = routes.handleError { // TODO Investigate what was changed
     case e: ToResponse => e.toResponse
-    case e             => Response.error(Status.InternalServerError)//.debug(s"Error ${e.toString}")
+    case e             => Response.error(Status.InternalServerError) // .debug(s"Error ${e.toString}")
   } @@ Middleware.requestLogging()
 
   def start = for {

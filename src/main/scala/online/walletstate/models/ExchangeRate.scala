@@ -8,7 +8,13 @@ import zio.json.{DeriveJsonCodec, JsonCodec}
 import java.time.ZonedDateTime
 import java.util.UUID
 
-final case class ExchangeRate(id: ExchangeRate.Id, from: Asset.Id, to: Asset.Id, rate: BigDecimal, date: ZonedDateTime)
+final case class ExchangeRate(
+    id: ExchangeRate.Id,
+    from: Asset.Id,
+    to: Asset.Id,
+    rate: BigDecimal,
+    datetime: ZonedDateTime
+)
 
 object ExchangeRate {
   final case class Id(id: UUID) extends AnyVal
@@ -24,7 +30,7 @@ object ExchangeRate {
   }
 
   def make(wallet: Wallet.Id, info: CreateExchangeRate): UIO[ExchangeRate] =
-    Id.random.map(ExchangeRate(_, info.from, info.to, info.rate, info.date))
+    Id.random.map(ExchangeRate(_, info.from, info.to, info.rate, info.datetime))
 
   given codec: JsonCodec[ExchangeRate] = DeriveJsonCodec.gen[ExchangeRate]
 }

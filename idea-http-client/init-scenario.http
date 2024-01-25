@@ -1,0 +1,1046 @@
+### Login
+POST localhost:8081/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### Create wallet
+POST localhost:8081/api/wallets
+Content-Type: application/json
+
+{
+  "name": "My wallet"
+}
+
+> {%
+    client.global.set("walletId", response.body.id);
+%}
+
+### Get wallet
+GET localhost:8081/api/wallets/current
+
+
+### Create "Main accounts" accounts group
+POST localhost:8081/api/groups/accounts
+Content-Type: application/json
+
+{
+  "name": "Main",
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("mainAccountsGroupId", response.body.id);
+%}
+
+### Create "Saving" accounts group
+POST localhost:8081/api/groups/accounts
+Content-Type: application/json
+
+{
+  "name": "Savings",
+  "orderingIndex": 2
+}
+
+> {%
+    client.global.set("savingAccountsGroupId", response.body.id);
+%}
+
+### Create "Crypto" accounts group
+POST localhost:8081/api/groups/accounts
+Content-Type: application/json
+
+{
+  "name": "Crypto",
+  "orderingIndex": 3
+}
+
+> {%
+    client.global.set("cryptoAccountsGroupId", response.body.id);
+%}
+
+### List accounts groups
+GET localhost:8081/api/groups/accounts
+
+
+
+### Create "Cash" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{mainAccountsGroupId}}",
+  "name": "Cash",
+  "orderingIndex": 1,
+  "icon": "some icon",
+  "tags": ["uah"]
+}
+
+> {%
+    client.global.set("cashAccountId", response.body.id);
+%}
+
+### Create "MonoBank Black" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{mainAccountsGroupId}}",
+  "name": "MonoBank Black",
+  "orderingIndex": 2,
+  "icon": "some icon",
+  "tags": ["uah", "mono"]
+}
+
+> {%
+    client.global.set("monoBlackAccountId", response.body.id);
+%}
+
+### Create "MonoBank White" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{mainAccountsGroupId}}",
+  "name": "MonoBank White",
+  "orderingIndex": 3,
+  "icon": "some icon",
+  "tags": ["uah", "mono"]
+}
+
+> {%
+    client.global.set("monoWhiteAccountId", response.body.id);
+%}
+
+### Create "PryvatBank Universal" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{mainAccountsGroupId}}",
+  "name": "PryvatBank Universal",
+  "orderingIndex": 4,
+  "icon": "some icon",
+  "tags": ["uah", "pryvat"]
+}
+
+> {%
+    client.global.set("pryvatUniversalAccountId", response.body.id);
+%}
+
+### Create "MonoBank USD" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{savingAccountsGroupId}}",
+  "name": "MonoBank USD",
+  "orderingIndex": 1,
+  "icon": "some icon",
+  "tags": ["usd", "mono"]
+}
+
+> {%
+    client.global.set("monoUsdAccountId", response.body.id);
+%}
+
+### Create "MonoBank EUR" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{savingAccountsGroupId}}",
+  "name": "MonoBank EUR",
+  "orderingIndex": 2,
+  "icon": "some icon",
+  "tags": ["eur", "mono"]
+}
+
+> {%
+    client.global.set("monoEurAccountId", response.body.id);
+%}
+
+### Create "MonoBank Deposits" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{savingAccountsGroupId}}",
+  "name": "MonoBank Deposits",
+  "orderingIndex": 3,
+  "icon": "some icon",
+  "tags": ["uah", "mono"]
+}
+
+> {%
+    client.global.set("monoDepAccountId", response.body.id);
+%}
+
+### Create "PryvatBank Deposits" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{savingAccountsGroupId}}",
+  "name": "PryvatBank Deposits",
+  "orderingIndex": 4,
+  "icon": "some icon",
+  "tags": ["uah", "pryvat"]
+}
+
+> {%
+    client.global.set("pryvatDepAccountId", response.body.id);
+%}
+
+### Create "SenseBank Bonds" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{savingAccountsGroupId}}",
+  "name": "SenseBank Bonds",
+  "orderingIndex": 5,
+  "icon": "some icon",
+  "tags": ["bonds", "sense"]
+}
+
+> {%
+    client.global.set("senseBondsAccountId", response.body.id);
+%}
+
+### Create "Binance main" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{cryptoAccountsGroupId}}",
+  "name": "Binance main",
+  "orderingIndex": 4,
+  "icon": "some icon",
+  "tags": ["btc", "eth", "sol", "binance"]
+}
+
+> {%
+    client.global.set("binanceMainAccountId", response.body.id);
+%}
+
+### Create "Binance earn" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{cryptoAccountsGroupId}}",
+  "name": "Binance Earn",
+  "orderingIndex": 5,
+  "icon": "some icon",
+  "tags": ["eth", "sol", "binance"]
+}
+
+> {%
+    client.global.set("binanceEarnAccountId", response.body.id);
+%}
+
+### Create "WhiteBit main" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{cryptoAccountsGroupId}}",
+  "name": "WhiteBit Main",
+  "orderingIndex": 6,
+  "icon": "some icon",
+  "tags": ["eth", "btc", "usdt", "whitebit"]
+}
+
+> {%
+    client.global.set("whitebitMainAccountId", response.body.id);
+%}
+
+### Create "WhiteBit Earn" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{cryptoAccountsGroupId}}",
+  "name": "WhiteBit Earn",
+  "orderingIndex": 7,
+  "icon": "some icon",
+  "tags": ["eth", "btc", "whitebit"]
+}
+
+> {%
+    client.global.set("whitebitEarnAccountId", response.body.id);
+%}
+
+### Create "Ladger BTC" account
+POST localhost:8081/api/accounts
+Content-Type: application/json
+
+{
+  "group": "{{cryptoAccountsGroupId}}",
+  "name": "Ledger BTC",
+  "orderingIndex": 8,
+  "icon": "some icon",
+  "tags": ["btc", "ledger"]
+}
+
+> {%
+    client.global.set("ledgerBtcAccountId", response.body.id);
+%}
+
+
+
+### Get accounts
+GET localhost:8081/api/accounts
+
+### Get grouped accounts
+GET localhost:8081/api/accounts/grouped
+
+
+
+
+
+
+
+### Create "Everyday spending" categories group
+POST localhost:8081/api/groups/categories
+Content-Type: application/json
+
+{
+  "name": "Everyday spending",
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("everydaySpendingCategoryGroupId", response.body.id);
+%}
+
+### Create "Purchases" categories group
+POST localhost:8081/api/groups/categories
+Content-Type: application/json
+
+{
+  "name": "Purchases",
+  "orderingIndex": 2
+}
+
+> {%
+    client.global.set("purchasesCategoryGroupId", response.body.id);
+%}
+
+### Create "House" categories group
+POST localhost:8081/api/groups/categories
+Content-Type: application/json
+
+{
+  "name": "House",
+  "orderingIndex": 3
+}
+
+> {%
+    client.global.set("houseCategoryGroupId", response.body.id);
+%}
+
+### Create "Transport" categories group
+POST localhost:8081/api/groups/categories
+Content-Type: application/json
+
+{
+  "name": "Transport",
+  "orderingIndex": 4
+}
+
+> {%
+    client.global.set("transportCategoryGroupId", response.body.id);
+%}
+
+### Create "Investments" categories group
+POST localhost:8081/api/groups/categories
+Content-Type: application/json
+
+{
+  "name": "Investments",
+  "orderingIndex": 5
+}
+
+> {%
+    client.global.set("investmentsCategoryGroupId", response.body.id);
+%}
+
+### Create "Income" categories group
+POST localhost:8081/api/groups/categories
+Content-Type: application/json
+
+{
+  "name": "Income",
+  "orderingIndex": 6
+}
+
+> {%
+    client.global.set("incomeCategoryGroupId", response.body.id);
+%}
+
+### Create "Transfers" categories group
+POST localhost:8081/api/groups/categories
+Content-Type: application/json
+
+{
+  "name": "Transfers",
+  "orderingIndex": 7
+}
+
+> {%
+    client.global.set("transfersCategoryGroupId", response.body.id);
+%}
+
+
+
+
+### Create Supermarkets category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{everydaySpendingCategoryGroupId}}",
+  "name": "Supermarkets",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("supermarketsCategoryId", response.body.id);
+%}
+
+### Create Cafes category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{everydaySpendingCategoryGroupId}}",
+  "name": "Cafes",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 2
+}
+
+> {%
+    client.global.set("cafesCategoryId", response.body.id);
+%}
+
+### Create Restaurants category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{everydaySpendingCategoryGroupId}}",
+  "name": "Restaurants",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 3
+}
+
+> {%
+    client.global.set("restaurantsCategoryId", response.body.id);
+%}
+
+### Create Delivery category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{everydaySpendingCategoryGroupId}}",
+  "name": "Delivery",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 4
+}
+
+> {%
+    client.global.set("deliveryCategoryId", response.body.id);
+%}
+
+### Create Clothes category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{purchasesCategoryGroupId}}",
+  "name": "Clothes",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("clothesCategoryId", response.body.id);
+%}
+
+### Create Gadgets category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{purchasesCategoryGroupId}}",
+  "name": "Gadgets",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 2
+}
+
+> {%
+    client.global.set("gadgetsCategoryId", response.body.id);
+%}
+
+### Create Utilities category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{houseCategoryGroupId}}",
+  "name": "Utilities",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("utilitiesCategoryId", response.body.id);
+%}
+
+### Create Repair category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{houseCategoryGroupId}}",
+  "name": "Repair",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 2
+}
+
+> {%
+    client.global.set("repairCategoryId", response.body.id);
+%}
+
+### Create Car category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{transportCategoryGroupId}}",
+  "name": "Car",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("carCategoryId", response.body.id);
+%}
+
+### Create Taxi category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{transportCategoryGroupId}}",
+  "name": "Taxi",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("taxiCategoryId", response.body.id);
+%}
+
+### Create Stocks category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{investmentsCategoryGroupId}}",
+  "name": "Stocks",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("stocksCategoryId", response.body.id);
+%}
+
+### Create Bonds category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{investmentsCategoryGroupId}}",
+  "name": "Bonds",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 2
+}
+
+> {%
+    client.global.set("bondsCategoryId", response.body.id);
+%}
+
+### Create Deposits category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{investmentsCategoryGroupId}}",
+  "name": "Deposits",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 3
+}
+
+> {%
+    client.global.set("depositsCategoryId", response.body.id);
+%}
+
+### Create Salary category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{incomeCategoryGroupId}}",
+  "name": "Salary",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("salaryCategoryId", response.body.id);
+%}
+
+### Create Capitalization category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{incomeCategoryGroupId}}",
+  "name": "Capitalization",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 2
+}
+
+> {%
+    client.global.set("capitalizationCategoryId", response.body.id);
+%}
+
+### Create Dividends category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{incomeCategoryGroupId}}",
+  "name": "Dividends",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 3
+}
+
+> {%
+    client.global.set("dividendsCategoryId", response.body.id);
+%}
+
+### Create Transfer category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{transfersCategoryGroupId}}",
+  "name": "Transfer",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 1
+}
+
+> {%
+    client.global.set("transferCategoryId", response.body.id);
+%}
+
+### Create Exchange category
+POST localhost:8081/api/categories
+Content-Type: application/json
+
+{
+  "group": "{{transfersCategoryGroupId}}",
+  "name": "Exchange",
+  "icon": "some test",
+  "tags": [],
+  "orderingIndex": 2
+}
+
+> {%
+    client.global.set("exchangeCategoryId", response.body.id);
+%}
+
+
+
+### Get categories
+GET localhost:8081/api/categories
+
+### Get grouped categories
+GET localhost:8081/api/categories/grouped
+
+
+
+
+
+
+### Create UAH asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "fiat",
+  "ticker": "UAH",
+  "name": "UA Hryvnia",
+  "icon": "some icon",
+  "tags": [],
+  "startDate": null,
+  "endDate": null,
+  "denominatedIn": null,
+  "denomination": null
+}
+
+> {%
+    client.global.set("uahAssetId", response.body.id);
+%}
+
+### Create USD asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "fiat",
+  "ticker": "USD",
+  "name": "US Dollar",
+  "icon": "some icon",
+  "tags": [],
+  "startDate": null,
+  "endDate": null,
+  "denominatedIn": null,
+  "denomination": null
+}
+
+> {%
+    client.global.set("usdAssetId", response.body.id);
+%}
+
+### Create EUR asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "fiat",
+  "ticker": "EUR",
+  "name": "Euro",
+  "icon": "some icon",
+  "tags": [],
+  "startDate": null,
+  "endDate": null,
+  "denominatedIn": null,
+  "denomination": null
+}
+
+> {%
+    client.global.set("eurAssetId", response.body.id);
+%}
+
+
+
+### Create BTC asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "crypto",
+  "ticker": "BTC",
+  "name": "Bitcoin",
+  "icon": "some icon",
+  "tags": [],
+  "startDate": null,
+  "endDate": null,
+  "denominatedIn": null,
+  "denomination": null
+}
+
+> {%
+    client.global.set("btcAssetId", response.body.id);
+%}
+
+### Create ETH asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "crypto",
+  "ticker": "ETH",
+  "name": "Ethereum",
+  "icon": "some icon",
+  "tags": [],
+  "startDate": null,
+  "endDate": null,
+  "denominatedIn": null,
+  "denomination": null
+}
+
+> {%
+    client.global.set("ethAssetId", response.body.id);
+%}
+
+### Create USDT asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "crypto",
+  "ticker": "USDT",
+  "name": "Teaser USD",
+  "icon": "some icon",
+  "tags": [],
+  "startDate": null,
+  "endDate": null,
+  "denominatedIn": null,
+  "denomination": null
+}
+
+> {%
+    client.global.set("usdtAssetId", response.body.id);
+%}
+
+### Create SOL asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "crypto",
+  "ticker": "SOL",
+  "name": "Solana",
+  "icon": "some icon",
+  "tags": [],
+  "startDate": null,
+  "endDate": null,
+  "denominatedIn": null,
+  "denomination": null
+}
+
+> {%
+    client.global.set("solAssetId", response.body.id);
+%}
+
+
+
+### Create bond asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "bond",
+  "ticker": "UA10988712",
+  "name": "ОВДП",
+  "icon": "some icon",
+  "tags": [],
+  "startDate": "2023-01-15T14:10:20Z",
+  "endDate": "2025-01-15T14:10:20Z",
+  "denominatedIn": "{{uahAssetId}}",
+  "denomination": 1000
+}
+
+> {%
+    client.global.set("bondAssetId", response.body.id);
+%}
+
+### Create deposit asset
+POST localhost:8081/api/assets
+Content-Type: application/json
+
+{
+  "type": "deposit",
+  "ticker": "DEPMono1",
+  "name": "Mono deposit",
+  "icon": "some icon",
+  "tags": [],
+  "startDate": "2024-01-10T14:10:20Z",
+  "endDate": "2024-04-10T14:10:20Z",
+  "denominatedIn": "{{usdAssetId}}",
+  "denomination": 1
+}
+
+> {%
+    client.global.set("depositAssetId", response.body.id);
+%}
+
+
+### Get assets
+GET localhost:8081/api/assets
+
+
+
+
+
+### Create exchange rate
+POST localhost:8081/api/exchange-rates
+Content-Type: application/json
+
+{
+  "from": "{{uahAssetId}}",
+  "to": "{{usdAssetId}}",
+  "rate": 37.9761,
+  "datetime": "2024-01-15T14:10:20Z"
+}
+
+> {%
+    client.global.set("exchangeRateId", response.body.id);
+%}
+
+### Get exchange rate
+GET localhost:8081/api/exchange-rates/{{exchangeRateId}}
+
+### Get exchange rates for assets
+GET localhost:8081/api/exchange-rates?from={{uahAssetId}}&to={{usdAssetId}}
+
+
+
+
+
+
+
+
+### Create transaction: Salary income on Mono White account
+POST localhost:8081/api/transactions
+Content-Type: application/json
+
+{
+  "type": "income",
+  "to": {
+    "account": "{{monoWhiteAccountId}}",
+    "asset": "{{uahAssetId}}",
+    "amount": 50000
+  },
+  "category": "{{salaryCategoryId}}",
+  "description": "Salary Income",
+  "tags": [],
+  "datetime": "2024-01-05T12:10:20Z"
+}
+
+> {%
+    client.global.set("salaryTransactionId", response.body[0].id);
+%}
+
+### Create transaction: Transfer from mono white to mono black account
+POST localhost:8081/api/transactions
+Content-Type: application/json
+
+{
+  "type": "transfer",
+  "from": {
+    "account": "{{monoWhiteAccountId}}",
+    "asset": "{{uahAssetId}}",
+    "amount": 30000
+  },
+  "to": {
+    "account": "{{monoBlackAccountId}}",
+    "asset": "{{uahAssetId}}",
+    "amount": 30000
+  },
+  "category": "{{transferCategoryId}}",
+  "description": "transfer from mono white to mono black",
+  "tags": [],
+  "datetime": "2024-01-05T12:11:20Z"
+}
+
+> {%
+    client.global.set("transferTransactionId", response.body[0].id);
+%}
+
+### Create transaction: Transfer from mono white to usd dep
+POST localhost:8081/api/transactions
+Content-Type: application/json
+
+{
+  "type": "transfer",
+  "from": {
+    "account": "{{monoWhiteAccountId}}",
+    "asset": "{{uahAssetId}}",
+    "amount": 10000
+  },
+  "to": {
+    "account": "{{monoDepAccountId}}",
+    "asset": "{{depositAssetId}}",
+    "amount": 250
+  },
+  "category": "{{depositsCategoryId}}",
+  "description": "Open deposit",
+  "tags": [],
+  "datetime": "2024-01-05T12:14:20Z"
+}
+
+> {%
+    client.global.set("openDepositTransactionId", response.body[0].id);
+%}
+
+### Create transaction: buy headphones
+POST localhost:8081/api/transactions
+Content-Type: application/json
+
+{
+  "type": "spending",
+  "from": {
+    "account": "{{monoBlackAccountId}}",
+    "asset": "{{uahAssetId}}",
+    "amount": 999.99
+  },
+  "category": "{{gadgetsCategoryId}}",
+  "description": "Headphones",
+  "date": "2024-01-16T15:10:20Z"
+}
+
+> {%
+    client.global.set("headphonesTransactionId", response.body[0].id);
+%}
+
+### Create transaction: Exchange currencies
+POST localhost:8081/api/transactions
+Content-Type: application/json
+
+{
+  "type": "transfer",
+  "from": {
+    "account": "{{monoWhiteAccountId}}",
+    "asset": "{{uahAssetId}}",
+    "amount": 3810.65
+  },
+  "to": {
+    "account": "{{monoUsdAccountId}}",
+    "asset": "{{usdAssetId}}",
+    "amount": 100
+  },
+  "category": "{{exchangeCategoryId}}",
+  "description": "Buy USD",
+  "date": "2024-01-018T11:10:20Z"
+}
+
+> {%
+    client.global.set("exchangeTransactionId", response.body[0].id);
+%}
+
+
+### Get transactions: Mono white account
+GET localhost:8081/api/transactions?account={{monoWhiteAccountId}}
+
+### Get transactions: Mono black account
+GET localhost:8081/api/transactions?account={{monoBlackAccountId}}
