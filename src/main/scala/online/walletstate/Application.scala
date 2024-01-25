@@ -38,7 +38,9 @@ object Application extends ZIOAppDefault {
         GroupsRoutes.layer,
         AccountsRoutes.layer,
         CategoriesRoutes.layer,
-        RecordsRoutes.layer,
+        AssetsRoutes.layer,
+        ExchangeRatesRoutes.layer,
+        TransactionsRoutes.layer,
 
         // services
         WalletsServiceLive.layer,
@@ -48,7 +50,9 @@ object Application extends ZIOAppDefault {
         GroupsServiceLive.layer,
         AccountsServiceLive.layer,
         CategoriesServiceLive.layer,
-        RecordsServiceLive.layer,
+        AssetsServiceLive.layer,
+        ExchangeRatesServiceLive.layer,
+        TransactionsServiceLive.layer,
 
         // DB
         Quill.DataSource.fromPrefix("db"),

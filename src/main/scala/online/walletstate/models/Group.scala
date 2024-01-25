@@ -13,8 +13,7 @@ final case class Group(
     wallet: Wallet.Id,
     `type`: Group.Type,
     name: String,
-    orderingIndex: Int,
-    createdBy: User.Id
+    orderingIndex: Int
 )
 
 object Group {
@@ -35,18 +34,18 @@ object Group {
 
   object Type {
     def fromString(typeStr: String): Either[String, Type] =
-      Try(Type.valueOf(typeStr.capitalize)).toEither.left.map(_ => "Not a group type")
+      Try(Type.valueOf(typeStr.capitalize)).toEither.left.map(_ => s"$typeStr is not a group type")
 
     def asString(`type`: Type): String = `type`.toString.toLowerCase
 
-    //TODO investigate 500 response for invalid group type in path
+    // TODO investigate 500 response for invalid group type in path
     val path: PathCodec[Type] = zio.http.string("group-type").transformOrFailLeft(fromString)(asString)
 
     given codec: JsonCodec[Type] = JsonCodec[String].transformOrFail(fromString, asString)
   }
 
-  def make(wallet: Wallet.Id, `type`: Type, name: String, orderingIndex: Int, createdBy: User.Id): UIO[Group] =
-    Id.random.map(Group(_, wallet, `type`, name, orderingIndex, createdBy))
+  def make(wallet: Wallet.Id, `type`: Type, name: String, orderingIndex: Int): UIO[Group] =
+    Id.random.map(Group(_, wallet, `type`, name, orderingIndex))
 
   given codec: JsonCodec[Group] = DeriveJsonCodec.gen[Group]
 }

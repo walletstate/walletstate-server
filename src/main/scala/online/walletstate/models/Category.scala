@@ -12,8 +12,8 @@ final case class Category(
     group: Group.Id,
     name: String,
     icon: String,
-    orderingIndex: Int,
-    createdBy: User.Id
+    tags: Seq[String],
+    orderingIndex: Int
 ) extends Groupable
 
 object Category {
@@ -28,8 +28,8 @@ object Category {
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
   }
 
-  def make(wallet: Wallet.Id, createdBy: User.Id, info: CreateCategory): UIO[Category] =
-    Id.random.map(Category(_, info.group, info.name, info.icon, info.orderingIndex, createdBy))
+  def make(info: CreateCategory): UIO[Category] =
+    Id.random.map(Category(_, info.group, info.name, info.icon, info.tags, info.orderingIndex))
 
   given codec: JsonCodec[Category] = DeriveJsonCodec.gen[Category]
 }

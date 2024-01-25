@@ -42,7 +42,14 @@ package object errors {
   /////////// categories errors
   case object CategoryNotExist extends AppError with ToResponse(Status.NotFound, "Category not found")
 
-  /////////// records errors
-  case object RecordNotExist extends AppError with ToResponse(Status.NotFound, "Record not found")
+  /////////// transactions errors
+  case object TransactionNotExist extends AppError with ToResponse(Status.NotFound, "Transaction not found")
+  case class InvalidTransactionInfo(msg: String) extends AppError with ToResponse(Status.BadRequest, msg)
+
+  /////////// assets errors
+  case object AssetNotExist extends AppError with ToResponse(Status.NotFound, "Asset not found")
+
+  /////////// exchange rates errors
+  case object ExchangeRateNotExist extends AppError with ToResponse(Status.NotFound, "Exchange rate not found")
 
 }
