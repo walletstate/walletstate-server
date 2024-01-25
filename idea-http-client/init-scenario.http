@@ -300,6 +300,20 @@ GET localhost:8081/api/accounts
 GET localhost:8081/api/accounts/grouped
 
 
+### Get account transactions: Mono Black
+GET localhost:8081/api/accounts/{{monoBlackAccountId}}/transactions
+
+### Get account balance: Mono Black
+GET localhost:8081/api/accounts/{{monoBlackAccountId}}/balance
+
+### Get account transactions: Mono White
+GET localhost:8081/api/accounts/{{monoWhiteAccountId}}/transactions
+
+### Get account balance: Mono White
+GET localhost:8081/api/accounts/{{monoWhiteAccountId}}/balance
+
+
+
 
 
 
@@ -1006,7 +1020,8 @@ Content-Type: application/json
   },
   "category": "{{gadgetsCategoryId}}",
   "description": "Headphones",
-  "date": "2024-01-16T15:10:20Z"
+  "tags": [],
+  "datetime": "2024-01-16T15:10:20Z"
 }
 
 > {%
@@ -1031,7 +1046,8 @@ Content-Type: application/json
   },
   "category": "{{exchangeCategoryId}}",
   "description": "Buy USD",
-  "date": "2024-01-018T11:10:20Z"
+  "tags": [],
+  "datetime": "2024-01-18T11:10:20Z"
 }
 
 > {%

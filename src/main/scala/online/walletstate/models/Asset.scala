@@ -3,7 +3,7 @@ package online.walletstate.models
 import online.walletstate.models.api.CreateAsset
 import zio.*
 import zio.http.codec.PathCodec
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.json.{DeriveJsonCodec, JsonCodec, JsonFieldEncoder}
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -34,6 +34,8 @@ object Asset {
     val path: PathCodec[Id] = zio.http.uuid("asset-id").transform(Id(_))(_.id)
 
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
+    
+    given fieldEncoder: JsonFieldEncoder[Id] = JsonFieldEncoder.string.contramap(_.id.toString)
   }
 
   enum Type {
