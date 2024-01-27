@@ -55,5 +55,7 @@ package object errors {
 
   /////////// exchange rates errors
   case object ExchangeRateNotExist extends AppError with ToResponse(Status.NotFound, "Exchange rate not found")
-
+  
+  /////////// icons
+  case class InvalidIconId(msg: String) extends BadRequestError(msg)
 }

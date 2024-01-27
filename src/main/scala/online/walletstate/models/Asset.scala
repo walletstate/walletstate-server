@@ -15,7 +15,7 @@ final case class Asset(
     `type`: Asset.Type,
     ticker: String,
     name: String,
-    icon: String,
+    icon: Option[Icon.Id],
     tags: Seq[String],
     startDate: Option[ZonedDateTime],
     endDate: Option[ZonedDateTime],
@@ -34,7 +34,7 @@ object Asset {
     val path: PathCodec[Id] = zio.http.uuid("asset-id").transform(Id(_))(_.id)
 
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
-    
+
     given fieldEncoder: JsonFieldEncoder[Id] = JsonFieldEncoder.string.contramap(_.id.toString)
   }
 

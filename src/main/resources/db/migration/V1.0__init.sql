@@ -50,7 +50,7 @@ CREATE TABLE accounts
     "group"        UUID          NOT NULL,
     name           VARCHAR(255)  NOT NULL,
     ordering_index INTEGER       NOT NULL             DEFAULT 0,
-    icon           TEXT,
+    icon           CHAR(64),
     tags           VARCHAR(50)[] NOT NULL             DEFAULT '{}',
     CONSTRAINT accounts_groups_fk FOREIGN KEY ("group") REFERENCES groups (id)
 );
@@ -60,7 +60,7 @@ CREATE TABLE categories
     id             UUID          NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
     "group"        UUID          NOT NULL,
     name           VARCHAR(255)  NOT NULL,
-    icon           TEXT,
+    icon           CHAR(64),
     tags           VARCHAR(50)[] NOT NULL             DEFAULT '{}',
     ordering_index INTEGER       NOT NULL             DEFAULT 0,
     CONSTRAINT categories_group_fk FOREIGN KEY ("group") REFERENCES groups (id)
@@ -75,7 +75,7 @@ CREATE TABLE assets
     type           asset_type    NOT NULL,
     ticker         VARCHAR(25)   NOT NULL,
     name           VARCHAR(255)  NOT NULL,
-    icon           TEXT,
+    icon           CHAR(64),
     tags           VARCHAR(50)[] NOT NULL             DEFAULT '{}',
     start_date     TIMESTAMP WITH TIME ZONE           DEFAULT NULL,
     end_date       TIMESTAMP WITH TIME ZONE           DEFAULT NULL,
@@ -119,4 +119,15 @@ CREATE TABLE transactions
     CONSTRAINT transactions_category_fk FOREIGN KEY (category) REFERENCES categories (id),
     CONSTRAINT transactions_spent_on_fk FOREIGN KEY (spent_on) REFERENCES assets (id),
     CONSTRAINT transactions_generated_by_fk FOREIGN KEY (generated_by) REFERENCES assets (id)
+);
+
+-- Simple implementation to store icons in base64 encoded string.
+-- There are no foreign keys to icons and from icons because it is one of the possible implementations of icon storage.
+-- This implementation is not optimal but it doesn't require any dependencies to store icons and is sufficient for small load.
+CREATE TABLE icons
+(
+    wallet  UUID     NOT NULL,
+    id      CHAR(64) NOT NULL,
+    content TEXT     NOT NULL,
+    CONSTRAINT icons_pk PRIMARY KEY (wallet, id)
 );
