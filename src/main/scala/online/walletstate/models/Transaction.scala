@@ -1,14 +1,14 @@
 package online.walletstate.models
 
 import online.walletstate.models.api.CreateTransaction
-import online.walletstate.models.errors.InvalidTransactionInfo
+import online.walletstate.models.errors.{InvalidPageToken, InvalidTransactionInfo}
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.http.codec.PathCodec
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.json.{DeriveJsonCodec, DeriveJsonEncoder, JsonCodec}
 import zio.{Random, Task, UIO, ZIO}
 
 import java.time.ZonedDateTime
-import java.util.UUID
+import java.util.{Base64, UUID}
 import scala.util.Try
 
 final case class Transaction(
@@ -130,6 +130,51 @@ object Transaction {
           info.generatedBy
         )
       )
+  }
+
+  final case class Page(items: Seq[Transaction], nextPage: Option[Page.Token])
+
+  object Page {
+
+    case class Token private[Transaction] (id: Transaction.Id, dt: ZonedDateTime)
+    object Token {
+
+      private val plainCodec = DeriveJsonCodec.gen[Token]
+
+      private def base64Encode(stringJson: String): String =
+        Base64.getEncoder.withoutPadding().encodeToString(stringJson.getBytes)
+
+      private def base64Decode(base64String: String): Either[String, String] =
+        Try(Base64.getDecoder.decode(base64String)).toEither
+          .map(byteArray => new String(byteArray))
+          .left
+          .map(_.getMessage)
+
+      // TODO make some more compact token
+      given codec: JsonCodec[Token] =
+        JsonCodec.string
+          .transformOrFail[Token](
+            string => base64Decode(string).flatMap(plainCodec.decoder.decodeJson),
+            token => base64Encode(plainCodec.encoder.encodeJson(token).toString)
+          )
+
+      def from(string: String): Task[Token] = for {
+        json  <- ZIO.fromEither(base64Decode(string)).mapError(e => InvalidPageToken(e))
+        token <- ZIO.fromEither(plainCodec.decoder.decodeJson(json)).mapError(e => InvalidPageToken(e))
+      } yield token
+
+      def from(optString: Option[String]): Task[Option[Token]] = optString match {
+        case Some(value) => from(value).map(Some(_))
+        case None        => ZIO.succeed(None)
+      }
+    }
+
+    given codec: JsonCodec[Page] = DeriveJsonCodec.gen[Page]
+  }
+
+  def page(transactions: Seq[Transaction], isNotLastPage: Boolean): Page = {
+    val token = if (isNotLastPage) transactions.lastOption.map(t => Page.Token(t.id, t.datetime)) else None
+    Page(transactions, token)
   }
 
   given codec: JsonCodec[Transaction] = DeriveJsonCodec.gen[Transaction]

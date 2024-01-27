@@ -4,6 +4,9 @@ import zio.http.Status
 
 package object errors {
 
+  abstract class BadRequestError(msg: String) extends AppError with ToResponse(Status.BadRequest, msg)
+  abstract class NotFoundError(msg: String) extends AppError with ToResponse(Status.NotFound, msg)
+  
   /////////// auth errors
   case object InvalidCredentials extends AppError with ToResponse(Status.Unauthorized, "Invalid credentials")
 
@@ -43,9 +46,10 @@ package object errors {
   case object CategoryNotExist extends AppError with ToResponse(Status.NotFound, "Category not found")
 
   /////////// transactions errors
-  case object TransactionNotExist extends AppError with ToResponse(Status.NotFound, "Transaction not found")
-  case class InvalidTransactionInfo(msg: String) extends AppError with ToResponse(Status.BadRequest, msg)
-
+  case object TransactionNotExist extends NotFoundError("Transaction not found")
+  case class InvalidTransactionInfo(msg: String) extends BadRequestError(msg)
+  case class InvalidPageToken(error: String) extends BadRequestError(s"Invalid next page token: $error")
+  
   /////////// assets errors
   case object AssetNotExist extends AppError with ToResponse(Status.NotFound, "Asset not found")
 
