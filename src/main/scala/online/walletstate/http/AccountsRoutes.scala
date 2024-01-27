@@ -1,7 +1,7 @@
 package online.walletstate.http
 
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
-import online.walletstate.models.Account
+import online.walletstate.models.{Account, Transaction}
 import online.walletstate.models.api.CreateAccount
 import online.walletstate.services.{AccountsService, TransactionsService}
 import online.walletstate.utils.RequestOps.as
@@ -42,7 +42,8 @@ case class AccountsRoutes(
 
   private val getTransactionsHandler = Handler.fromFunctionZIO[(Account.Id, WalletContext, Request)] { (id, ctx, req) =>
     for {
-      transactions <- transactionsService.list(ctx.wallet, id)
+      nextPageToken <- Transaction.Page.Token.from(req.url.queryParams.get("page"))
+      transactions  <- transactionsService.list(ctx.wallet, id, nextPageToken)
     } yield Response.json(transactions.toJson)
   }
 
