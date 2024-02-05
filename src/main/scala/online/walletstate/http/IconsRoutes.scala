@@ -3,9 +3,11 @@ package online.walletstate.http
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Icon
 import online.walletstate.services.IconsService
-import zio.ZLayer
+import zio.{Chunk, ZLayer}
 import zio.http.*
 import zio.json.*
+
+import java.util.Base64
 
 case class IconsRoutes(auth: AuthMiddleware, iconsService: IconsService) {
 
@@ -17,9 +19,23 @@ case class IconsRoutes(auth: AuthMiddleware, iconsService: IconsService) {
   }
 
   private val getIconHandler = Handler.fromFunctionZIO[(Icon.Id, WalletContext, Request)] { (id, ctx, req) =>
-    for {
-      iconContent <- iconsService.get(ctx.wallet, id)
-    } yield Response.text(iconContent)
+    iconsService.get(ctx.wallet, id).map(base64ImageToResponse)
+  }
+
+  private def base64ImageToResponse(base64: String): Response = {
+    // TODO Quick solution. Make more safe
+    val contentType = base64.split(",").head.replace("data:", "").replace(";base64", "")
+    val mediaType   = MediaType.forContentType(contentType)
+
+    val base64Content = base64.split(",").last
+
+    val bodyArray: Array[Byte] = Base64.getDecoder.decode(base64Content)
+    val response               = Response(Status.Ok, body = Body.fromChunk(Chunk.fromArray(bodyArray)))
+
+    mediaType match {
+      case Some(mType) => response.addHeader(Header.ContentType(mType))
+      case None        => response
+    }
   }
 
   private val getIconsIdsHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
