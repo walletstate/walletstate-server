@@ -30,9 +30,9 @@ final case class IconsServiceDBLive(quill: WalletStateQuillContext) extends Icon
   override def listIds(wallet: Wallet.Id): Task[Seq[Icon.Id]] = run(selectIds(wallet))
 
   //  queries
-  private inline def insert(icon: Icon) = quote(query[Icon].insertValue(lift(icon)))
+  private inline def insert(icon: Icon) = quote(query[Icon].insertValue(lift(icon)).onConflictIgnore)
   private inline def selectIcon(wallet: Wallet.Id, id: Icon.Id) =
-    quote(query[Icon].filter(_.wallet == lift(wallet)).filter(_.id == lift(id)))
+    quote(query[Icon].filter(_.id == lift(id))) //TODO Make icons available for all wallets
   private inline def selectIds(wallet: Wallet.Id) =
     quote(query[Icon].filter(_.wallet == lift(wallet)).map(_.id))
 }

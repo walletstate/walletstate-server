@@ -15,7 +15,7 @@ case class IconsRoutes(auth: AuthMiddleware, iconsService: IconsService) {
     for {
       iconContent <- req.body.asString
       icon        <- iconsService.create(ctx.wallet, iconContent)
-    } yield Response.text(icon.id.id)
+    } yield Response.json(icon.id.toJson)
   }
 
   private val getIconHandler = Handler.fromFunctionZIO[(Icon.Id, WalletContext, Request)] { (id, ctx, req) =>
