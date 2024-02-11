@@ -11,7 +11,7 @@ final case class Category(
     id: Category.Id,
     group: Group.Id,
     name: String,
-    icon: String,
+    icon: Option[Icon.Id],
     tags: Seq[String],
     orderingIndex: Int
 ) extends Groupable

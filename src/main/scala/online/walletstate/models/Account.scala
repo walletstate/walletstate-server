@@ -13,7 +13,7 @@ final case class Account(
     group: Group.Id,
     name: String,
     orderingIndex: Int,
-    icon: String,
+    icon: Option[Icon.Id],
     tags: Seq[String]
 ) extends Groupable
 
