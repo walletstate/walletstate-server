@@ -21,8 +21,8 @@ case class TransactionsRoutes(auth: AuthMiddleware, transactionsService: Transac
 
   private val getTransactionsHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
-      account       <- ZIO.fromOption(req.url.queryParams.get("account")).flatMap(Account.Id.from)
-      nextPageToken <- Transaction.Page.Token.from(req.url.queryParams.get("page"))
+      account       <- ZIO.fromOption(req.url.queryParams.queryParam("account")).flatMap(Account.Id.from)
+      nextPageToken <- Transaction.Page.Token.from(req.url.queryParams.queryParam("page"))
       transactions  <- transactionsService.list(ctx.wallet, account, nextPageToken)
     } yield Response.json(transactions.toJson)
   }

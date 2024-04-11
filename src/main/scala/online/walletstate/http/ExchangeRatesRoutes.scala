@@ -20,8 +20,8 @@ final case class ExchangeRatesRoutes(auth: AuthMiddleware, exchangeRatesService:
 
   private val getExchangeRatesHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
     for {
-      from  <- ZIO.fromOption(req.url.queryParams.get("from")).flatMap(Asset.Id.from) // TODO add correct errors
-      to    <- ZIO.fromOption(req.url.queryParams.get("to")).flatMap(Asset.Id.from)   // TODO add correct errors
+      from  <- ZIO.fromOption(req.url.queryParams.queryParam("from")).flatMap(Asset.Id.from) // TODO add correct errors
+      to    <- ZIO.fromOption(req.url.queryParams.queryParam("to")).flatMap(Asset.Id.from)   // TODO add correct errors
       rates <- exchangeRatesService.list(ctx.wallet, from, to)
     } yield Response.json(rates.toJson)
   }
