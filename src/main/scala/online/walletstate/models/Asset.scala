@@ -2,8 +2,9 @@ package online.walletstate.models
 
 import online.walletstate.models.api.CreateAsset
 import zio.*
-import zio.http.codec.PathCodec
+import zio.http.codec.{PathCodec, QueryCodec}
 import zio.json.{DeriveJsonCodec, JsonCodec, JsonFieldEncoder}
+import zio.schema.{DeriveSchema, Schema}
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -16,7 +17,7 @@ final case class Asset(
     ticker: String,
     name: String,
     icon: Option[Icon.Id],
-    tags: Seq[String],
+    tags: Chunk[String],
     startDate: Option[ZonedDateTime],
     endDate: Option[ZonedDateTime],
     denominatedIn: Option[Asset.Id],
@@ -32,8 +33,10 @@ object Asset {
     def from(id: String): Task[Id] = ZIO.attempt(UUID.fromString(id)).map(Id(_))
 
     val path: PathCodec[Id] = zio.http.uuid("asset-id").transform(Id(_))(_.id)
+    def query(name: String): QueryCodec[Id] = QueryCodec.queryTo[UUID](name).transform(Id(_))(_.id)
 
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
+    given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
 
     given fieldEncoder: JsonFieldEncoder[Id] = JsonFieldEncoder.string.contramap(_.id.toString)
   }
@@ -72,4 +75,5 @@ object Asset {
     )
 
   given codec: JsonCodec[Asset] = DeriveJsonCodec.gen[Asset]
+  given schema: Schema[Asset] = DeriveSchema.gen[Asset]
 }

@@ -4,6 +4,7 @@ import online.walletstate.models.errors.InvalidIconId
 import zio.{Task, ZIO}
 import zio.http.codec.PathCodec
 import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.schema.Schema
 
 import java.security.MessageDigest
 import java.util.HexFormat
@@ -31,4 +32,5 @@ object Icon {
   } yield Icon(wallet, iconId, content)
 
   given codec: JsonCodec[Icon] = DeriveJsonCodec.gen[Icon]
+  given schema: Schema[Id] = Schema[String].transform(Id(_), _.id)
 }

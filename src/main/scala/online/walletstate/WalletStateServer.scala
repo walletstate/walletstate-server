@@ -2,16 +2,16 @@ package online.walletstate
 
 import online.walletstate.db.Migrations
 import online.walletstate.http.*
-import online.walletstate.models.errors.ToResponse
 import zio.*
 import zio.http.*
-import zio.json.*
+import zio.http.endpoint.Endpoint
+import zio.http.endpoint.openapi.{OpenAPIGen, SwaggerUI}
 
 final case class WalletStateServer(
     health: HealthRoutes,
     auth: AuthRoutes,
     wallets: WalletsRoutes,
-    accountsGroupsRoutes: GroupsRoutes,
+    groupsRoutes: GroupsRoutes,
     accounts: AccountsRoutes,
     categories: CategoriesRoutes,
     assets: AssetsRoutes,
@@ -21,22 +21,28 @@ final case class WalletStateServer(
     migrations: Migrations
 ) {
 
+  private val openAPISpec = OpenAPIGen.fromEndpoints(
+    title = "WalletState.online API",
+    version = "0.0.1",
+    accounts.endpoints ++ assets.endpoints ++ categories.endpoints ++
+      exchangeRates.endpoints ++ groupsRoutes.endpoints ++ transactions.endpoints ++
+      wallets.endpoints
+  )
+
   private val routes =
     health.routes ++
       auth.routes ++
       wallets.routes ++
-      accountsGroupsRoutes.routes ++
+      groupsRoutes.routes ++
       accounts.routes ++
       categories.routes ++
       assets.routes ++
       exchangeRates.routes ++
       transactions.routes ++
-      icons.routes
+      icons.routes ++
+      SwaggerUI.routes(Endpoint(Method.GET / "api" / "docs").route.pathCodec, openAPISpec)
 
-  def app = routes.handleError { // TODO Investigate what was changed
-    case e: ToResponse => e.toResponse
-    case e             => Response.error(Status.InternalServerError) // .debug(s"Error ${e.toString}")
-  } @@ Middleware.requestLogging()
+  def app = routes.handleError(e => Response.error(Status.InternalServerError)) @@ Middleware.requestLogging()
 
   def start = for {
     _ <- migrations.migrate

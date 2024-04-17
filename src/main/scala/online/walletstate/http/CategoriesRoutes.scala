@@ -1,5 +1,6 @@
 package online.walletstate.http
 
+import online.walletstate.http.api.endpoints.CategoriesEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Category
 import online.walletstate.models.api.CreateCategory
@@ -9,39 +10,26 @@ import zio.*
 import zio.http.*
 import zio.json.*
 
-case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesService) {
+case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesService) extends CategoriesEndpoints {
+  import auth.implementWithWalletCtx
+  
+  private val createRoute = create.implementWithWalletCtx[(CreateCategory, WalletContext)] {
+    Handler.fromFunctionZIO((info, ctx) => categoriesService.create(ctx.wallet, ctx.user, info))
+  }()
 
-  private val createCategoryHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      info     <- req.as[CreateCategory]
-      category <- categoriesService.create(ctx.wallet, ctx.user, info)
-    } yield Response.json(category.toJson)
-  }
+  private val listRoute = list.implementWithWalletCtx[WalletContext] {
+    Handler.fromFunctionZIO(ctx => categoriesService.list(ctx.wallet).map(Chunk.from))
+  }()
 
-  private val getCategoriesHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      categories <- categoriesService.list(ctx.wallet)
-    } yield Response.json(categories.toJson)
-  }
+  private val listGroupedRoute = listGrouped.implementWithWalletCtx[WalletContext] {
+    Handler.fromFunctionZIO(ctx => categoriesService.grouped(ctx.wallet).map(Chunk.from))
+  }()
 
-  private val getGroupedCategoriesHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      categories <- categoriesService.grouped(ctx.wallet)
-    } yield Response.json(categories.toJson)
-  }
+  private val getRoute = get.implementWithWalletCtx[(Category.Id, WalletContext)] {
+    Handler.fromFunctionZIO((id, ctx) => categoriesService.get(ctx.wallet, id))
+  }()
 
-  private val getCategoryHandler = Handler.fromFunctionZIO[(Category.Id, WalletContext, Request)] { (id, ctx, req) =>
-    for {
-      category <- categoriesService.get(ctx.wallet, id)
-    } yield Response.json(category.toJson)
-  }
-
-  val routes = Routes(
-    Method.POST / "api" / "categories"                   -> auth.walletCtx -> createCategoryHandler,
-    Method.GET / "api" / "categories"                    -> auth.walletCtx -> getCategoriesHandler,
-    Method.GET / "api" / "categories" / "grouped"        -> auth.walletCtx -> getGroupedCategoriesHandler,
-    Method.GET / "api" / "categories" / Category.Id.path -> auth.walletCtx -> getCategoryHandler
-  )
+  val routes = Routes(createRoute, listRoute, listGroupedRoute, getRoute)
 }
 
 object CategoriesRoutes {

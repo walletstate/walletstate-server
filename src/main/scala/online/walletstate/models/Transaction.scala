@@ -3,9 +3,10 @@ package online.walletstate.models
 import online.walletstate.models.api.CreateTransaction
 import online.walletstate.models.errors.{InvalidPageToken, InvalidTransactionInfo}
 import online.walletstate.utils.ZIOExtensions.getOrError
-import zio.http.codec.PathCodec
+import zio.http.codec.{PathCodec, QueryCodec}
 import zio.json.{DeriveJsonCodec, DeriveJsonEncoder, JsonCodec}
-import zio.{Random, Task, UIO, ZIO}
+import zio.schema.{DeriveSchema, Schema}
+import zio.{Chunk, Random, Task, UIO, ZIO}
 
 import java.time.ZonedDateTime
 import java.util.{Base64, UUID}
@@ -20,7 +21,7 @@ final case class Transaction(
     amount: BigDecimal,
     datetime: ZonedDateTime,
     description: Option[String],
-    tags: Seq[String],
+    tags: Chunk[String],
     externalId: Option[String],
     spentOn: Option[Asset.Id],
     generatedBy: Option[Asset.Id]
@@ -36,6 +37,7 @@ object Transaction {
     val path: PathCodec[Id] = zio.http.uuid("transaction-id").transform(Id(_))(_.id)
 
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
+    given schema: Schema[Id]   = Schema[UUID].transform(Id(_), _.id)
   }
 
   enum Type {
@@ -49,6 +51,7 @@ object Transaction {
     def asString(`type`: Type): String = `type`.toString.toLowerCase
 
     given codec: JsonCodec[Type] = JsonCodec[String].transform(t => Type.valueOf(t.capitalize), _.toString.toLowerCase)
+    given schema: Schema[Type]   = DeriveSchema.gen[Type]
   }
 
   // TODO improve validation and model mapping
@@ -67,7 +70,7 @@ object Transaction {
           to.toAmount,
           info.datetime,
           info.description,
-          info.tags,
+          Chunk.from(info.tags),
           info.externalId,
           None,
           info.generatedBy
@@ -88,7 +91,7 @@ object Transaction {
           from.fromAmount,
           info.datetime,
           info.description,
-          info.tags,
+          Chunk.from(info.tags),
           info.externalId,
           info.spentOn,
           None
@@ -110,7 +113,7 @@ object Transaction {
           from.fromAmount,
           info.datetime,
           info.description,
-          info.tags,
+          Chunk.from(info.tags),
           info.externalId,
           info.spentOn,
           None
@@ -124,7 +127,7 @@ object Transaction {
           to.toAmount,
           info.datetime,
           info.description,
-          info.tags,
+          Chunk.from(info.tags),
           info.externalId,
           None,
           info.generatedBy
@@ -132,7 +135,7 @@ object Transaction {
       )
   }
 
-  final case class Page(items: Seq[Transaction], nextPage: Option[Page.Token])
+  final case class Page(items: Chunk[Transaction], nextPage: Option[Page.Token])
 
   object Page {
 
@@ -158,6 +161,11 @@ object Transaction {
             token => base64Encode(plainCodec.encoder.encodeJson(token).toString)
           )
 
+      given schema: Schema[Token] = Schema[String].transformOrFail[Token](
+        string => base64Decode(string).flatMap(plainCodec.decoder.decodeJson),
+        token => Right(base64Encode(plainCodec.encoder.encodeJson(token).toString))
+      )
+
       def from(string: String): Task[Token] = for {
         json  <- ZIO.fromEither(base64Decode(string)).mapError(e => InvalidPageToken(e))
         token <- ZIO.fromEither(plainCodec.decoder.decodeJson(json)).mapError(e => InvalidPageToken(e))
@@ -167,15 +175,24 @@ object Transaction {
         case Some(value) => from(value).map(Some(_))
         case None        => ZIO.succeed(None)
       }
+
+      val queryCodec: QueryCodec[Token] =
+        QueryCodec
+          .query("page")
+          .transformOrFail { string => base64Decode(string).flatMap(plainCodec.decoder.decodeJson) } { token =>
+            Right(base64Encode(plainCodec.encoder.encodeJson(token).toString))
+          }
     }
 
     given codec: JsonCodec[Page] = DeriveJsonCodec.gen[Page]
+    given schema: Schema[Page]   = DeriveSchema.gen[Page]
   }
 
   def page(transactions: Seq[Transaction], isNotLastPage: Boolean): Page = {
     val token = if (isNotLastPage) transactions.lastOption.map(t => Page.Token(t.id, t.datetime)) else None
-    Page(transactions, token)
+    Page(Chunk.from(transactions), token)
   }
 
   given codec: JsonCodec[Transaction] = DeriveJsonCodec.gen[Transaction]
+  given schema: Schema[Transaction]   = DeriveSchema.gen[Transaction]
 }

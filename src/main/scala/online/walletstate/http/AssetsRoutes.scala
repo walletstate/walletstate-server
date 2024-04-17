@@ -1,41 +1,29 @@
 package online.walletstate.http
 
+import online.walletstate.http.api.endpoints.AssetsEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Asset
 import online.walletstate.models.api.CreateAsset
 import online.walletstate.services.AssetsService
-import online.walletstate.utils.RequestOps.as
-import zio.ZLayer
 import zio.http.*
-import zio.json.*
+import zio.{Chunk, ZLayer}
 
-final case class AssetsRoutes(auth: AuthMiddleware, assetsService: AssetsService) {
+final case class AssetsRoutes(auth: AuthMiddleware, assetsService: AssetsService) extends AssetsEndpoints {
+  import auth.implementWithWalletCtx
 
-  private val createAssetHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      info  <- req.as[CreateAsset]
-      asset <- assetsService.create(ctx.wallet, ctx.user, info)
-    } yield Response.json(asset.toJson)
-  }
+  private val createRoute = create.implementWithWalletCtx[(CreateAsset, WalletContext)] {
+    Handler.fromFunctionZIO((info, ctx) => assetsService.create(ctx.wallet, ctx.user, info))
+  }()
 
-  private val getAssetsHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      assets <- assetsService.list(ctx.wallet)
-    } yield Response.json(assets.toJson)
-  }
+  private val listRoute = list.implementWithWalletCtx[WalletContext] {
+    Handler.fromFunctionZIO(ctx => assetsService.list(ctx.wallet).map(Chunk.from))
+  }()
 
-  private val getAssetHandler = Handler.fromFunctionZIO[(Asset.Id, WalletContext, Request)] { (id, ctx, req) =>
-    for {
-      asset <- assetsService.get(ctx.wallet, id)
-    } yield Response.json(asset.toJson)
-  }
+  private val getRoute = get.implementWithWalletCtx[(Asset.Id, WalletContext)] {
+    Handler.fromFunctionZIO[(Asset.Id, WalletContext)]((id, ctx) => assetsService.get(ctx.wallet, id))
+  }()
 
-  val routes = Routes(
-    Method.POST / "api" / "assets"                -> auth.walletCtx -> createAssetHandler,
-    Method.GET / "api" / "assets"                 -> auth.walletCtx -> getAssetsHandler,
-    Method.GET / "api" / "assets" / Asset.Id.path -> auth.walletCtx -> getAssetHandler
-  )
-
+  val routes = Routes(createRoute, listRoute, getRoute)
 }
 
 object AssetsRoutes {

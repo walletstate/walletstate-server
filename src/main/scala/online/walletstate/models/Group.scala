@@ -3,6 +3,7 @@ package online.walletstate.models
 import online.walletstate.models
 import zio.http.codec.PathCodec
 import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.schema.{DeriveSchema, Schema}
 import zio.{Random, Task, UIO, ZIO}
 
 import java.util.UUID
@@ -26,6 +27,7 @@ object Group {
     val path: PathCodec[Id] = zio.http.uuid("group-id").transform(Id(_))(_.id)
 
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
+    given schema: Schema[Id]   = Schema[UUID].transform(Id(_), _.id)
   }
 
   enum Type {
@@ -48,4 +50,5 @@ object Group {
     Id.random.map(Group(_, wallet, `type`, name, orderingIndex))
 
   given codec: JsonCodec[Group] = DeriveJsonCodec.gen[Group]
+  given schema: Schema[Group]   = DeriveSchema.gen[Group]
 }

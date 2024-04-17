@@ -14,7 +14,7 @@ import zio.json.*
 import java.security.MessageDigest
 import java.util.HexFormat
 
-trait AuthRoutesHandler {
+trait AuthRoutesHandler { //TODO Rename to IdentityProviderHandler
 
   def login(req: Request): Task[Response]
 

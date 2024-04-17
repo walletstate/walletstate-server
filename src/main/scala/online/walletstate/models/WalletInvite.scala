@@ -2,6 +2,7 @@ package online.walletstate.models
 
 import zio.http.codec.PathCodec
 import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.schema.{DeriveSchema, Schema}
 import zio.{Random, Task, UIO, ZIO}
 
 import java.time.Instant
@@ -23,10 +24,12 @@ object WalletInvite {
     val path: PathCodec[Id] = zio.http.uuid("wallet-invite-id").transform(Id(_))(_.id)
 
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
+    given schema: Schema[Id]   = Schema[UUID].transform(Id(_), _.id)
   }
 
   def make(wallet: Wallet.Id, inviteCode: String, createdBy: User.Id, validTo: Instant): UIO[WalletInvite] =
     Id.random.map(WalletInvite(_, wallet, inviteCode, createdBy, validTo))
 
   given codec: JsonCodec[WalletInvite] = DeriveJsonCodec.gen[WalletInvite]
+  given schema: Schema[WalletInvite]   = DeriveSchema.gen[WalletInvite]
 }

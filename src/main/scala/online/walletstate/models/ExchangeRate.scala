@@ -4,6 +4,7 @@ import online.walletstate.models.api.CreateExchangeRate
 import zio.http.codec.PathCodec
 import zio.{Random, Task, UIO, ZIO}
 import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.schema.{DeriveSchema, Schema}
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -27,10 +28,12 @@ object ExchangeRate {
     val path: PathCodec[Id] = zio.http.uuid("exchange-rate-id").transform(Id(_))(_.id)
 
     given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
+    given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
   def make(wallet: Wallet.Id, info: CreateExchangeRate): UIO[ExchangeRate] =
     Id.random.map(ExchangeRate(_, info.from, info.to, info.rate, info.datetime))
 
   given codec: JsonCodec[ExchangeRate] = DeriveJsonCodec.gen[ExchangeRate]
+  given schema: Schema[ExchangeRate] = DeriveSchema.gen[ExchangeRate]
 }
