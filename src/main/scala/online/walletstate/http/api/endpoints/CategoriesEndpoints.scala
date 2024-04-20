@@ -37,6 +37,13 @@ trait CategoriesEndpoints {
     list
     //    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
   )
+
+  val endpointsMap = Map(
+    "create" -> create,
+    "get" -> get,
+    "list" -> list,
+    "listGrouped" -> listGrouped
+  )
 }
 
 object CategoriesEndpoints extends CategoriesEndpoints

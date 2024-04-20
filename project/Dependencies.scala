@@ -19,6 +19,8 @@ object Dependencies {
     val flyway     = "9.16.0"
 
     val zioTestContainers = "0.10.0"
+
+    val zioProcess = "0.7.2"
   }
 
   private val zio     = "dev.zio" %% "zio"      % Versions.zio
@@ -48,7 +50,9 @@ object Dependencies {
 
   val jwt = "com.github.jwt-scala" %% "jwt-core" % Versions.jwt
 
-  val all = Seq(zio, zioJson, zioHttp, jwt) ++ zioConfig ++ db ++ logging
+  val zioProcess = "dev.zio" %% "zio-process" % Versions.zioProcess
+
+  val all = Seq(zio, zioJson, zioHttp, jwt) ++ zioConfig ++ db ++ logging ++ Seq(zioProcess)
 
   val tests = Seq(
     "dev.zio"               %% "zio-test"                          % Versions.zio               % Test,

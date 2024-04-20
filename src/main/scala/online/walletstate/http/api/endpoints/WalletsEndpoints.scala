@@ -34,6 +34,13 @@ trait WalletsEndpoints {
 
   val endpoints = Chunk(create, getCurrent, createInvite, join)
 
+  val endpointsMap = Map(
+    "create"       -> create,
+    "getCurrent"   -> getCurrent,
+    "createInvite" -> createInvite,
+    "join"         -> join
+  )
+
 }
 
 object WalletsEndpoints extends WalletsEndpoints

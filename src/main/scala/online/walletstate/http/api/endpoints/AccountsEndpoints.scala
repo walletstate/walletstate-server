@@ -63,6 +63,15 @@ trait AccountsEndpoints {
     listTransactions,
     getBalance
   )
+
+  val endpointsMap = Map(
+    "create"           -> create,
+    "get"              -> get,
+    "list"             -> list,
+    "listGrouped"      -> listGrouped,
+    "listTransactions" -> listTransactions,
+    "getBalance"       -> getBalance
+  )
 }
 
 object AccountsEndpoints extends AccountsEndpoints

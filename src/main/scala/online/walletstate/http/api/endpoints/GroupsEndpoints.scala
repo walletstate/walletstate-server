@@ -4,6 +4,7 @@ import online.walletstate.models.Group
 import online.walletstate.models.api.{CreateGroup, UpdateGroup}
 import online.walletstate.models.errors.{BadRequestError, UnauthorizedError}
 import zio.Chunk
+import zio.http.codec.Doc
 import zio.http.{Method, Status}
 import zio.http.endpoint.Endpoint
 
@@ -28,7 +29,7 @@ trait GroupsEndpoints {
 
   val update =
     Endpoint(Method.PUT / "api" / "groups" / Group.Type.path / Group.Id.path)
-      .in[UpdateGroup]
+      .in[UpdateGroup](Doc.h1("Test doc"))
       .out[Unit](Status.NoContent)
       .outError[UnauthorizedError.type](Status.Unauthorized)
       .outError[BadRequestError](Status.BadRequest)
@@ -39,6 +40,14 @@ trait GroupsEndpoints {
       .outError[UnauthorizedError.type](Status.Unauthorized)
 
   val endpoints = Chunk(create, list, get, update, delete)
+
+  val endpointsMap = Map(
+    "create" -> create,
+    "get" -> get,
+    "list" -> list,
+    "update" -> update,
+    "delete" -> delete
+  )
 }
 
 object GroupsEndpoints extends GroupsEndpoints

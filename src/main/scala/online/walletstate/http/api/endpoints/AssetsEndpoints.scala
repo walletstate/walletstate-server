@@ -29,6 +29,12 @@ trait AssetsEndpoints {
       .outError[BadRequestError](Status.BadRequest)
 
   val endpoints = Chunk(create, list, get)
+
+  val endpointsMap = Map(
+    "create" -> create,
+    "get" -> get,
+    "list" -> list
+  )
 }
 
 object AssetsEndpoints extends AssetsEndpoints
