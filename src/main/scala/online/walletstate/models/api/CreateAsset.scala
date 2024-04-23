@@ -2,7 +2,6 @@ package online.walletstate.models.api
 
 import online.walletstate.models.{Asset, Icon}
 import zio.Chunk
-import zio.json.{DeriveJsonCodec, JsonCodec}
 import zio.schema.{DeriveSchema, Schema}
 
 import java.time.ZonedDateTime
@@ -20,6 +19,5 @@ final case class CreateAsset(
 )
 
 object CreateAsset {
-  given codec: JsonCodec[CreateAsset] = DeriveJsonCodec.gen[CreateAsset]
   given schema: Schema[CreateAsset] = DeriveSchema.gen[CreateAsset]
 }

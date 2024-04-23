@@ -3,7 +3,6 @@ package online.walletstate.models
 import online.walletstate.models
 import online.walletstate.models.api.CreateAccount
 import zio.http.codec.{PathCodec, QueryCodec}
-import zio.json.{DeriveJsonCodec, JsonCodec}
 import zio.schema.{DeriveSchema, Schema}
 import zio.{Chunk, Random, Task, UIO, ZIO}
 
@@ -27,14 +26,12 @@ object Account {
 
     val path: PathCodec[Id]   = zio.http.uuid("account-id").transform(Id(_))(_.id)
     val query: QueryCodec[Id] = QueryCodec.queryTo[UUID]("account").transform(Id(_))(_.id)
-
-    given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
+    
     given schema: Schema[Id]   = Schema[UUID].transform(Id(_), _.id)
   }
 
   def make(info: CreateAccount): UIO[Account] =
     Id.random.map(Account(_, info.group, info.name, info.orderingIndex, info.icon, info.tags))
-
-  given codec: JsonCodec[Account] = DeriveJsonCodec.gen[Account]
+  
   given schema: Schema[Account]   = DeriveSchema.gen[Account]
 }

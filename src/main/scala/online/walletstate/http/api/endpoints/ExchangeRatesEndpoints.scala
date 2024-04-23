@@ -28,14 +28,15 @@ trait ExchangeRatesEndpoints {
     Endpoint(Method.GET / "api" / "exchange-rates" / ExchangeRate.Id.path)
       .out[ExchangeRate]
       .outError[UnauthorizedError.type](Status.Unauthorized)
-
-  val endpoints = Chunk(create, list, get)
-
+  
   val endpointsMap = Map(
     "create" -> create,
     "get" -> get,
     "list" -> list
   )
+
+  val endpoints = endpointsMap.values
+
 }
 
 object ExchangeRatesEndpoints extends ExchangeRatesEndpoints

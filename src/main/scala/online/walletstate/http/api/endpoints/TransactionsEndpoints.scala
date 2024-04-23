@@ -28,14 +28,15 @@ trait TransactionsEndpoints {
     Endpoint(Method.GET / "api" / "transactions" / Transaction.Id.path)
       .out[Chunk[Transaction]]
       .outError[UnauthorizedError.type](Status.Unauthorized)
-    
-  val endpoints = Chunk(create, list, get)
 
   val endpointsMap = Map(
     "create" -> create,
-    "get" -> get,
-    "list" -> list
+    "get"    -> get,
+    "list"   -> list
   )
+
+  val endpoints = endpointsMap.values
+
 }
 
 object TransactionsEndpoints extends TransactionsEndpoints

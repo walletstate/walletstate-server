@@ -4,7 +4,7 @@ import online.walletstate.models.errors.InvalidIconId
 import zio.{Task, ZIO}
 import zio.http.codec.PathCodec
 import zio.json.{DeriveJsonCodec, JsonCodec}
-import zio.schema.Schema
+import zio.schema.{DeriveSchema, Schema}
 
 import java.security.MessageDigest
 import java.util.HexFormat
@@ -22,7 +22,8 @@ object Icon {
 
     val path: PathCodec[Id] = zio.http.string("icon-id").transformOrFailLeft(make)(_.id)
 
-    given codec: JsonCodec[Id] = JsonCodec[String].transformOrFail(make, _.id)
+    given schema: Schema[Id]   = Schema[String].transformOrFail(make, id => Right(id.id))
+    given codec: JsonCodec[Id] = zio.schema.codec.JsonCodec.jsonCodec(schema)
   }
 
   def make(wallet: Wallet.Id, content: String): Task[Icon] = for {
@@ -31,6 +32,5 @@ object Icon {
     iconId        <- ZIO.fromEither(Id.make(contentHash)).mapError(e => InvalidIconId(e))
   } yield Icon(wallet, iconId, content)
 
-  given codec: JsonCodec[Icon] = DeriveJsonCodec.gen[Icon]
-  given schema: Schema[Id] = Schema[String].transform(Id(_), _.id)
+  given schema: Schema[Icon] = DeriveSchema.gen[Icon]
 }

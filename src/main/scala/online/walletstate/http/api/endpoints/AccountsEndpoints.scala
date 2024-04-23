@@ -54,6 +54,15 @@ trait AccountsEndpoints {
       .outError[UnauthorizedError.type](Status.Unauthorized)
       .outError[AccountNotExist](Status.NotFound)
       .??(Doc.h1("Get account balance"))
+  
+  val endpointsMap = Map(
+    "create"           -> create,
+    "get"              -> get,
+    "list"             -> list,
+    "listGrouped"      -> listGrouped,
+    "listTransactions" -> listTransactions,
+    "getBalance"       -> getBalance
+  )
 
   val endpoints = Chunk(
     create,
@@ -64,14 +73,6 @@ trait AccountsEndpoints {
     getBalance
   )
 
-  val endpointsMap = Map(
-    "create"           -> create,
-    "get"              -> get,
-    "list"             -> list,
-    "listGrouped"      -> listGrouped,
-    "listTransactions" -> listTransactions,
-    "getBalance"       -> getBalance
-  )
 }
 
 object AccountsEndpoints extends AccountsEndpoints

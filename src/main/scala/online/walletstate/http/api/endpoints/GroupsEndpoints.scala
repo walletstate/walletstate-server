@@ -38,9 +38,7 @@ trait GroupsEndpoints {
     Endpoint(Method.DELETE / "api" / "groups" / Group.Type.path / Group.Id.path)
       .out[Unit](Status.NoContent)
       .outError[UnauthorizedError.type](Status.Unauthorized)
-
-  val endpoints = Chunk(create, list, get, update, delete)
-
+  
   val endpointsMap = Map(
     "create" -> create,
     "get" -> get,
@@ -48,6 +46,8 @@ trait GroupsEndpoints {
     "update" -> update,
     "delete" -> delete
   )
+
+  val endpoints = endpointsMap.values
 }
 
 object GroupsEndpoints extends GroupsEndpoints

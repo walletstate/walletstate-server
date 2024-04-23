@@ -28,13 +28,14 @@ trait AssetsEndpoints {
       .outError[UnauthorizedError.type](Status.Unauthorized)
       .outError[BadRequestError](Status.BadRequest)
 
-  val endpoints = Chunk(create, list, get)
-
+  
   val endpointsMap = Map(
     "create" -> create,
     "get" -> get,
     "list" -> list
   )
+
+  val endpoints = endpointsMap.values
 }
 
 object AssetsEndpoints extends AssetsEndpoints

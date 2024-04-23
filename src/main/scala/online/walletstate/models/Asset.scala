@@ -3,7 +3,6 @@ package online.walletstate.models
 import online.walletstate.models.api.CreateAsset
 import zio.*
 import zio.http.codec.{PathCodec, QueryCodec}
-import zio.json.{DeriveJsonCodec, JsonCodec, JsonFieldEncoder}
 import zio.schema.{DeriveSchema, Schema}
 
 import java.time.ZonedDateTime
@@ -34,11 +33,8 @@ object Asset {
 
     val path: PathCodec[Id] = zio.http.uuid("asset-id").transform(Id(_))(_.id)
     def query(name: String): QueryCodec[Id] = QueryCodec.queryTo[UUID](name).transform(Id(_))(_.id)
-
-    given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
+    
     given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
-
-    given fieldEncoder: JsonFieldEncoder[Id] = JsonFieldEncoder.string.contramap(_.id.toString)
   }
 
   enum Type {
@@ -53,8 +49,6 @@ object Asset {
 
     // TODO investigate 500 response for invalid asset type in path
     val path: PathCodec[Type] = zio.http.string("asset-type").transformOrFailLeft(fromString)(asString)
-
-    given codec: JsonCodec[Type] = JsonCodec[String].transformOrFail(fromString, asString)
   }
 
   def make(wallet: Wallet.Id, info: CreateAsset): UIO[Asset] =
@@ -73,7 +67,6 @@ object Asset {
         info.denomination
       )
     )
-
-  given codec: JsonCodec[Asset] = DeriveJsonCodec.gen[Asset]
+  
   given schema: Schema[Asset] = DeriveSchema.gen[Asset]
 }

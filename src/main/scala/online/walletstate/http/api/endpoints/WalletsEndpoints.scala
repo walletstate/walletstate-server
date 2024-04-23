@@ -32,8 +32,6 @@ trait WalletsEndpoints {
       .out[Wallet]
       .outError[UnauthorizedError.type](Status.Unauthorized)
 
-  val endpoints = Chunk(create, getCurrent, createInvite, join)
-
   val endpointsMap = Map(
     "create"       -> create,
     "getCurrent"   -> getCurrent,
@@ -41,6 +39,7 @@ trait WalletsEndpoints {
     "join"         -> join
   )
 
+  val endpoints = endpointsMap.values
 }
 
 object WalletsEndpoints extends WalletsEndpoints

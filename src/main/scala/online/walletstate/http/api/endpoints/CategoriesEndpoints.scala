@@ -30,19 +30,19 @@ trait CategoriesEndpoints {
     Endpoint(Method.GET / "api" / "categories" / Category.Id.path)
       .out[Category]
       .outError[UnauthorizedError.type](Status.Unauthorized)
-
-  val endpoints = Chunk(
-    create,
-    get,
-    list
-    //    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-  )
-
+  
   val endpointsMap = Map(
     "create" -> create,
     "get" -> get,
     "list" -> list,
     "listGrouped" -> listGrouped
+  )
+ 
+  val endpoints = Chunk(
+    create,
+    get,
+    list
+    //    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
   )
 }
 

@@ -49,9 +49,6 @@ object Transaction {
       Try(Type.valueOf(typeStr.capitalize)).toEither.left.map(_ => s"$typeStr is not a transaction type")
 
     def asString(`type`: Type): String = `type`.toString.toLowerCase
-
-    given codec: JsonCodec[Type] = JsonCodec[String].transform(t => Type.valueOf(t.capitalize), _.toString.toLowerCase)
-    given schema: Schema[Type]   = DeriveSchema.gen[Type]
   }
 
   // TODO improve validation and model mapping
@@ -154,27 +151,10 @@ object Transaction {
           .map(_.getMessage)
 
       // TODO make some more compact token
-      given codec: JsonCodec[Token] =
-        JsonCodec.string
-          .transformOrFail[Token](
-            string => base64Decode(string).flatMap(plainCodec.decoder.decodeJson),
-            token => base64Encode(plainCodec.encoder.encodeJson(token).toString)
-          )
-
       given schema: Schema[Token] = Schema[String].transformOrFail[Token](
         string => base64Decode(string).flatMap(plainCodec.decoder.decodeJson),
         token => Right(base64Encode(plainCodec.encoder.encodeJson(token).toString))
       )
-
-      def from(string: String): Task[Token] = for {
-        json  <- ZIO.fromEither(base64Decode(string)).mapError(e => InvalidPageToken(e))
-        token <- ZIO.fromEither(plainCodec.decoder.decodeJson(json)).mapError(e => InvalidPageToken(e))
-      } yield token
-
-      def from(optString: Option[String]): Task[Option[Token]] = optString match {
-        case Some(value) => from(value).map(Some(_))
-        case None        => ZIO.succeed(None)
-      }
 
       val queryCodec: QueryCodec[Token] =
         QueryCodec
@@ -184,8 +164,7 @@ object Transaction {
           }
     }
 
-    given codec: JsonCodec[Page] = DeriveJsonCodec.gen[Page]
-    given schema: Schema[Page]   = DeriveSchema.gen[Page]
+    given schema: Schema[Page] = DeriveSchema.gen[Page]
   }
 
   def page(transactions: Seq[Transaction], isNotLastPage: Boolean): Page = {
@@ -193,6 +172,5 @@ object Transaction {
     Page(Chunk.from(transactions), token)
   }
 
-  given codec: JsonCodec[Transaction] = DeriveJsonCodec.gen[Transaction]
-  given schema: Schema[Transaction]   = DeriveSchema.gen[Transaction]
+  given schema: Schema[Transaction] = DeriveSchema.gen[Transaction]
 }
