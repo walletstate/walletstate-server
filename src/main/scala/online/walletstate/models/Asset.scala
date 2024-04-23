@@ -2,8 +2,8 @@ package online.walletstate.models
 
 import online.walletstate.models.api.CreateAsset
 import zio.*
-import zio.http.codec.PathCodec
-import zio.json.{DeriveJsonCodec, JsonCodec, JsonFieldEncoder}
+import zio.http.codec.{PathCodec, QueryCodec}
+import zio.schema.{DeriveSchema, Schema}
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -16,7 +16,7 @@ final case class Asset(
     ticker: String,
     name: String,
     icon: Option[Icon.Id],
-    tags: Seq[String],
+    tags: Chunk[String],
     startDate: Option[ZonedDateTime],
     endDate: Option[ZonedDateTime],
     denominatedIn: Option[Asset.Id],
@@ -32,10 +32,9 @@ object Asset {
     def from(id: String): Task[Id] = ZIO.attempt(UUID.fromString(id)).map(Id(_))
 
     val path: PathCodec[Id] = zio.http.uuid("asset-id").transform(Id(_))(_.id)
-
-    given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
-
-    given fieldEncoder: JsonFieldEncoder[Id] = JsonFieldEncoder.string.contramap(_.id.toString)
+    def query(name: String): QueryCodec[Id] = QueryCodec.queryTo[UUID](name).transform(Id(_))(_.id)
+    
+    given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
   enum Type {
@@ -50,8 +49,6 @@ object Asset {
 
     // TODO investigate 500 response for invalid asset type in path
     val path: PathCodec[Type] = zio.http.string("asset-type").transformOrFailLeft(fromString)(asString)
-
-    given codec: JsonCodec[Type] = JsonCodec[String].transformOrFail(fromString, asString)
   }
 
   def make(wallet: Wallet.Id, info: CreateAsset): UIO[Asset] =
@@ -70,6 +67,6 @@ object Asset {
         info.denomination
       )
     )
-
-  given codec: JsonCodec[Asset] = DeriveJsonCodec.gen[Asset]
+  
+  given schema: Schema[Asset] = DeriveSchema.gen[Asset]
 }

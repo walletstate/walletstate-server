@@ -1,5 +1,6 @@
 package online.walletstate.http
 
+import online.walletstate.http.api.endpoints.GroupsEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Group
 import online.walletstate.models.api.{CreateGroup, UpdateGroup}
@@ -9,50 +10,34 @@ import zio.*
 import zio.http.*
 import zio.json.*
 
-case class GroupsRoutes(auth: AuthMiddleware, accountsGroupsService: GroupsService) {
+case class GroupsRoutes(auth: AuthMiddleware, groupsService: GroupsService) extends GroupsEndpoints {
+  import auth.implementWithWalletCtx
 
-  private val createGroupHandler = Handler.fromFunctionZIO[(Group.Type, WalletContext, Request)] { (`type`, ctx, req) =>
-    for {
-      groupInfo <- req.as[CreateGroup]
-      group     <- accountsGroupsService.create(ctx.wallet, `type`, groupInfo.name, groupInfo.orderingIndex, ctx.user)
-    } yield Response.json(group.toJson)
-  }
+  private val createRoute = create.implementWithWalletCtx[(Group.Type, CreateGroup, WalletContext)] {
+    Handler.fromFunctionZIO((`type`, groupInfo, ctx) =>
+      groupsService.create(ctx.wallet, `type`, groupInfo.name, groupInfo.orderingIndex, ctx.user)
+    )
+  }()
 
-  private val updateGroupHandler = Handler.fromFunctionZIO[(Group.Type, Group.Id, WalletContext, Request)] {
-    (`type`, id, ctx, req) =>
-      for {
-        updateInfo <- req.as[UpdateGroup]
-        _          <- accountsGroupsService.update(ctx.wallet, `type`, id, updateInfo.name, updateInfo.orderingIndex)
-      } yield Response.ok
-  }
+  private val listRoute = list.implementWithWalletCtx[(Group.Type, WalletContext)] {
+    Handler.fromFunctionZIO((`type`, ctx) => groupsService.list(ctx.wallet, `type`).map(Chunk.from))
+  }()
 
-  private val deleteGroupHandler = Handler.fromFunctionZIO[(Group.Type, Group.Id, WalletContext, Request)] {
-    (`type`, id, ctx, req) =>
-      for {
-        _ <- accountsGroupsService.delete(ctx.wallet, `type`, id)
-      } yield Response.ok
-  }
+  private val getRoute = get.implementWithWalletCtx[(Group.Type, Group.Id, WalletContext)] {
+    Handler.fromFunctionZIO((`type`, id, ctx) => groupsService.get(ctx.wallet, `type`, id))
+  }()
 
-  private val getGroupsHandler = Handler.fromFunctionZIO[(Group.Type, WalletContext, Request)] { (`type`, ctx, req) =>
-    for {
-      groups <- accountsGroupsService.list(ctx.wallet, `type`)
-    } yield Response.json(groups.toJson)
-  }
+  private val updateRoute = update.implementWithWalletCtx[(Group.Type, Group.Id, UpdateGroup, WalletContext)] {
+    Handler.fromFunctionZIO((`type`, id, updateInfo, ctx) =>
+      groupsService.update(ctx.wallet, `type`, id, updateInfo.name, updateInfo.orderingIndex)
+    )
+  }()
 
-  private val getGroupHandler = Handler.fromFunctionZIO[(Group.Type, Group.Id, WalletContext, Request)] {
-    (`type`, id, ctx, req) =>
-      for {
-        group <- accountsGroupsService.get(ctx.wallet, `type`, id)
-      } yield Response.json(group.toJson)
-  }
+  private val deleteRoute = delete.implementWithWalletCtx[(Group.Type, Group.Id, WalletContext)] {
+    Handler.fromFunctionZIO((`type`, id, ctx) => groupsService.delete(ctx.wallet, `type`, id))
+  }()
 
-  val routes = Routes(
-    Method.POST / "api" / "groups" / Group.Type.path                   -> auth.walletCtx -> createGroupHandler,
-    Method.GET / "api" / "groups" / Group.Type.path                    -> auth.walletCtx -> getGroupsHandler,
-    Method.GET / "api" / "groups" / Group.Type.path / Group.Id.path    -> auth.walletCtx -> getGroupHandler,
-    Method.PUT / "api" / "groups" / Group.Type.path / Group.Id.path    -> auth.walletCtx -> updateGroupHandler,
-    Method.DELETE / "api" / "groups" / Group.Type.path / Group.Id.path -> auth.walletCtx -> deleteGroupHandler
-  )
+  val routes = Routes(createRoute, listRoute, getRoute, updateRoute, deleteRoute)
 }
 
 object GroupsRoutes {

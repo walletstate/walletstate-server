@@ -1,5 +1,6 @@
 package online.walletstate.http
 
+import online.walletstate.http.api.endpoints.ExchangeRatesEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.{Asset, ExchangeRate}
 import online.walletstate.models.api.CreateExchangeRate
@@ -9,36 +10,24 @@ import zio.*
 import zio.http.*
 import zio.json.*
 
-final case class ExchangeRatesRoutes(auth: AuthMiddleware, exchangeRatesService: ExchangeRatesService) {
+final case class ExchangeRatesRoutes(auth: AuthMiddleware, exchangeRatesService: ExchangeRatesService)
+    extends ExchangeRatesEndpoints {
+  import auth.implementWithWalletCtx
+  
+  private val createRoute = create.implementWithWalletCtx[(CreateExchangeRate, WalletContext)] {
+    Handler.fromFunctionZIO((info, ctx) => exchangeRatesService.create(ctx.wallet, info))
+  }()
 
-  private val createHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      info <- req.as[CreateExchangeRate]
-      rate <- exchangeRatesService.create(ctx.wallet, info)
-    } yield Response.json(rate.toJson)
-  }
+  private val listRoute = list.implementWithWalletCtx[(Asset.Id, Asset.Id, WalletContext)]{
+    Handler.fromFunctionZIO((from, to, ctx) => exchangeRatesService.list(ctx.wallet, from, to).map(Chunk.from))
+  }()
+  
+  private val getRoute = get.implementWithWalletCtx[(ExchangeRate.Id, WalletContext)]{
+    Handler.fromFunctionZIO((id, ctx) => exchangeRatesService.get(ctx.wallet, id))
+  }()
+  
 
-  private val getExchangeRatesHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      from  <- ZIO.fromOption(req.url.queryParams.get("from")).flatMap(Asset.Id.from) // TODO add correct errors
-      to    <- ZIO.fromOption(req.url.queryParams.get("to")).flatMap(Asset.Id.from)   // TODO add correct errors
-      rates <- exchangeRatesService.list(ctx.wallet, from, to)
-    } yield Response.json(rates.toJson)
-  }
-
-  private val getExchangeRateHandler = Handler.fromFunctionZIO[(ExchangeRate.Id, WalletContext, Request)] {
-    (id, ctx, req) =>
-      for {
-        rate <- exchangeRatesService.get(ctx.wallet, id)
-      } yield Response.json(rate.toJson)
-  }
-
-  val routes = Routes(
-    Method.POST / "api" / "exchange-rates"                       -> auth.walletCtx -> createHandler,
-    Method.GET / "api" / "exchange-rates"                        -> auth.walletCtx -> getExchangeRatesHandler,
-    Method.GET / "api" / "exchange-rates" / ExchangeRate.Id.path -> auth.walletCtx -> getExchangeRateHandler
-  )
-
+  val routes = Routes(createRoute, listRoute, getRoute)
 }
 
 object ExchangeRatesRoutes {

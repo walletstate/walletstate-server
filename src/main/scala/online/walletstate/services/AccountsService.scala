@@ -27,7 +27,7 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsServi
   } yield account
 
   override def get(wallet: Wallet.Id, id: Account.Id): Task[Account] =
-    run(accountsById(wallet, id)).map(_.headOption).getOrError(AccountNotExist)
+    run(accountsById(wallet, id)).map(_.headOption).getOrError(AccountNotExist())
 
   override def list(wallet: Wallet.Id): Task[Seq[Account]] =
     run(accountsByWallet(wallet))

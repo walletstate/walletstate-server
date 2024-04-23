@@ -2,7 +2,7 @@ package online.walletstate.models
 
 import online.walletstate.models
 import zio.http.codec.PathCodec
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.schema.{DeriveSchema, Schema}
 import zio.{Random, Task, UIO, ZIO}
 
 import java.util.UUID
@@ -24,8 +24,8 @@ object Group {
     def from(id: String): Task[Id] = ZIO.attempt(UUID.fromString(id)).map(Id(_))
 
     val path: PathCodec[Id] = zio.http.uuid("group-id").transform(Id(_))(_.id)
-
-    given codec: JsonCodec[Id] = JsonCodec[UUID].transform(Id(_), _.id)
+    
+    given schema: Schema[Id]   = Schema[UUID].transform(Id(_), _.id)
   }
 
   enum Type {
@@ -40,12 +40,10 @@ object Group {
 
     // TODO investigate 500 response for invalid group type in path
     val path: PathCodec[Type] = zio.http.string("group-type").transformOrFailLeft(fromString)(asString)
-
-    given codec: JsonCodec[Type] = JsonCodec[String].transformOrFail(fromString, asString)
   }
 
   def make(wallet: Wallet.Id, `type`: Type, name: String, orderingIndex: Int): UIO[Group] =
     Id.random.map(Group(_, wallet, `type`, name, orderingIndex))
-
-  given codec: JsonCodec[Group] = DeriveJsonCodec.gen[Group]
+  
+  given schema: Schema[Group]   = DeriveSchema.gen[Group]
 }

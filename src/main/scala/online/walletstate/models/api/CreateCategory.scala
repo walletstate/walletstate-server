@@ -1,16 +1,17 @@
 package online.walletstate.models.api
 
 import online.walletstate.models.{Group, Icon}
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.Chunk
+import zio.schema.{DeriveSchema, Schema}
 
 final case class CreateCategory(
     group: Group.Id,
     name: String,
     icon: Option[Icon.Id],
-    tags: Seq[String],
+    tags: Chunk[String],
     orderingIndex: Int
 )
 
 object CreateCategory {
-  given codec: JsonCodec[CreateCategory] = DeriveJsonCodec.gen[CreateCategory]
+  given schema: Schema[CreateCategory]   = DeriveSchema.gen[CreateCategory]
 }

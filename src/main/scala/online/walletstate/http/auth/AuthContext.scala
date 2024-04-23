@@ -1,11 +1,10 @@
 package online.walletstate.http.auth
 
-import online.walletstate.http.auth.AuthCookiesOps.getAuthCookies
-import online.walletstate.models.{Wallet, User}
+import online.walletstate.models.{User, Wallet}
 import zio.*
-import zio.http.*
 import zio.json.*
 import zio.json.internal.Write
+import zio.schema.{DeriveSchema, Schema}
 
 sealed trait AuthContext {
   def user: User.Id
@@ -14,13 +13,15 @@ sealed trait AuthContext {
 final case class UserContext(user: User.Id) extends AuthContext
 
 object UserContext {
-  given codec: JsonCodec[UserContext] = DeriveJsonCodec.gen[UserContext]
+  given schema: Schema[UserContext]   = DeriveSchema.gen[UserContext]
+  given codec: JsonCodec[UserContext] = zio.schema.codec.JsonCodec.jsonCodec(schema)
 }
 
 final case class WalletContext(user: User.Id, wallet: Wallet.Id) extends AuthContext
 
 object WalletContext {
-  given codec: JsonCodec[WalletContext] = DeriveJsonCodec.gen[WalletContext]
+  given schema: Schema[WalletContext]   = DeriveSchema.gen[WalletContext]
+  given codec: JsonCodec[WalletContext] = zio.schema.codec.JsonCodec.jsonCodec(schema)
 }
 
 object AuthContext {

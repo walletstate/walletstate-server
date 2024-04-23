@@ -19,7 +19,7 @@ case class TransactionsServiceLive(quill: WalletStateQuillContext) extends Trans
   import quill.{*, given}
   import io.getquill.extras.ZonedDateTimeOps
 
-  private inline val PageSize = 50 // TODO Move to configs
+  private inline val PageSize = 3 // TODO Move to configs
 
   override def create(wallet: Wallet.Id, info: CreateTransaction): Task[Seq[Transaction]] = for {
     // TODO check all assets and accounts are in the wallet

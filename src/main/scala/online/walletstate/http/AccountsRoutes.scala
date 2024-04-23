@@ -1,65 +1,53 @@
 package online.walletstate.http
 
+import online.walletstate.http.api.endpoints.AccountsEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
-import online.walletstate.models.{Account, Transaction}
 import online.walletstate.models.api.CreateAccount
+import online.walletstate.models.{Account, Transaction}
+import online.walletstate.models.errors.AccountNotExist
 import online.walletstate.services.{AccountsService, TransactionsService}
-import online.walletstate.utils.RequestOps.as
 import zio.*
 import zio.http.*
-import zio.json.*
 
 case class AccountsRoutes(
     auth: AuthMiddleware,
     accountsService: AccountsService,
     transactionsService: TransactionsService
-) {
+) extends AccountsEndpoints {
+  import auth.implementWithWalletCtx
 
-  private val createAccountHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      accInfo <- req.as[CreateAccount]
-      account <- accountsService.create(ctx.wallet, ctx.user, accInfo)
-    } yield Response.json(account.toJson)
-  }
+  private val createRoute = create.implementWithWalletCtx[(CreateAccount, WalletContext)] {
+    Handler.fromFunctionZIO((accInfo, ctx) => accountsService.create(ctx.wallet, ctx.user, accInfo))
+  }()
 
-  private val getAccountsHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      accounts <- accountsService.list(ctx.wallet)
-    } yield Response.json(accounts.toJson)
-  }
+  private val listRoute = list.implementWithWalletCtx[WalletContext] {
+    Handler.fromFunctionZIO(ctx => accountsService.list(ctx.wallet).map(Chunk.from))
+  }()
 
-  private val getGroupedAccountsHandler = Handler.fromFunctionZIO[(WalletContext, Request)] { (ctx, req) =>
-    for {
-      accounts <- accountsService.grouped(ctx.wallet)
-    } yield Response.json(accounts.toJson)
-  }
+  private val listGroupedRoute = listGrouped.implementWithWalletCtx[WalletContext] {
+    Handler.fromFunctionZIO(ctx => accountsService.grouped(ctx.wallet).map(Chunk.from))
+  }()
 
-  private val getAccountHandler = Handler.fromFunctionZIO[(Account.Id, WalletContext, Request)] { (id, ctx, req) =>
-    for {
-      account <- accountsService.get(ctx.wallet, id)
-    } yield Response.json(account.toJson)
-  }
+  private val getRoute = get.implementWithWalletCtx[(Account.Id, WalletContext)] {
+    Handler.fromFunctionZIO((id, ctx) => accountsService.get(ctx.wallet, id))
+  } { case e: AccountNotExist => Right(e) }
 
-  private val getTransactionsHandler = Handler.fromFunctionZIO[(Account.Id, WalletContext, Request)] { (id, ctx, req) =>
-    for {
-      nextPageToken <- Transaction.Page.Token.from(req.url.queryParams.get("page"))
-      transactions  <- transactionsService.list(ctx.wallet, id, nextPageToken)
-    } yield Response.json(transactions.toJson)
-  }
+  private val listTransactionsRoute =
+    listTransactions.implementWithWalletCtx[(Account.Id, Option[Transaction.Page.Token], WalletContext)] {
+      Handler.fromFunctionZIO((id, token, ctx) => transactionsService.list(ctx.wallet, id, token))
+    }()
 
-  private val getBalanceHandler = Handler.fromFunctionZIO[(Account.Id, WalletContext, Request)] { (id, ctx, req) =>
-    for {
-      balance <- transactionsService.balance(ctx.wallet, id)
-    } yield Response.json(balance.toJson)
-  }
+  private val getBalanceRoute = getBalance.implementWithWalletCtx[(Account.Id, WalletContext)] {
+    Handler.fromFunctionZIO((id, ctx) => transactionsService.balance(ctx.wallet, id))
+  }()
 
   def routes = Routes(
-    Method.POST / "api" / "accounts"                                   -> auth.walletCtx -> createAccountHandler,
-    Method.GET / "api" / "accounts" / "grouped"                        -> auth.walletCtx -> getGroupedAccountsHandler,
-    Method.GET / "api" / "accounts"                                    -> auth.walletCtx -> getAccountsHandler,
-    Method.GET / "api" / "accounts" / Account.Id.path                  -> auth.walletCtx -> getAccountHandler,
-    Method.GET / "api" / "accounts" / Account.Id.path / "transactions" -> auth.walletCtx -> getTransactionsHandler,
-    Method.GET / "api" / "accounts" / Account.Id.path / "balance"      -> auth.walletCtx -> getBalanceHandler
+    createRoute,
+    listGroupedRoute,
+    getRoute,
+    listRoute,
+    listTransactionsRoute,
+    getBalanceRoute
   )
 }
 
