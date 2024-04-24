@@ -32,7 +32,7 @@ CREATE TABLE wallet_invites
     CONSTRAINT invites_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
-CREATE TYPE group_type AS ENUM ('accounts', 'categories');
+CREATE TYPE group_type AS ENUM ('Accounts', 'Categories');
 
 CREATE TABLE "groups"
 (
@@ -66,7 +66,7 @@ CREATE TABLE categories
     CONSTRAINT categories_group_fk FOREIGN KEY ("group") REFERENCES groups (id)
 );
 
-CREATE TYPE asset_type AS ENUM ('fiat', 'crypto', 'deposit', 'bond', 'stock', 'other');
+CREATE TYPE asset_type AS ENUM ('Fiat', 'Crypto', 'Deposit', 'Bond', 'Stock', 'Other');
 
 CREATE TABLE assets
 (
@@ -97,7 +97,7 @@ CREATE TABLE exchange_rates
     CONSTRAINT exchange_rates_to_fk FOREIGN KEY ("to") REFERENCES assets (id)
 );
 
-CREATE TYPE transaction_type AS ENUM ('income', 'spending', 'transfer');
+CREATE TYPE transaction_type AS ENUM ('Income', 'Spending', 'Transfer');
 
 CREATE TABLE transactions
 (

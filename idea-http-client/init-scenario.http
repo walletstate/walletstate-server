@@ -19,6 +19,14 @@ Content-Type: application/json
     client.global.set("walletId", response.body.id);
 %}
 
+### Get wallet cookies
+POST localhost:8081/auth/wallet/{{walletId}}
+Content-Type: application/json
+
+> {%
+    client.global.set("walletId", response.body.id);
+%}
+
 ### Get wallet
 GET localhost:8081/api/wallets/current
 
@@ -57,7 +65,7 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAZlBMVEUzMz
 
 
 ### Create "Main accounts" accounts group
-POST localhost:8081/api/groups/accounts
+POST localhost:8081/api/groups/Accounts
 Content-Type: application/json
 
 {
@@ -70,7 +78,7 @@ Content-Type: application/json
 %}
 
 ### Create "Saving" accounts group
-POST localhost:8081/api/groups/accounts
+POST localhost:8081/api/groups/Accounts
 Content-Type: application/json
 
 {
@@ -83,7 +91,7 @@ Content-Type: application/json
 %}
 
 ### Create "Crypto" accounts group
-POST localhost:8081/api/groups/accounts
+POST localhost:8081/api/groups/Accounts
 Content-Type: application/json
 
 {
@@ -96,7 +104,7 @@ Content-Type: application/json
 %}
 
 ### List accounts groups
-GET localhost:8081/api/groups/accounts
+GET localhost:8081/api/groups/Accounts
 
 
 
@@ -353,7 +361,7 @@ GET localhost:8081/api/accounts/{{monoWhiteAccountId}}/balance
 
 
 ### Create "Everyday spending" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups/Categories
 Content-Type: application/json
 
 {
@@ -366,7 +374,7 @@ Content-Type: application/json
 %}
 
 ### Create "Purchases" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups/Categories
 Content-Type: application/json
 
 {
@@ -379,7 +387,7 @@ Content-Type: application/json
 %}
 
 ### Create "House" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups/Categories
 Content-Type: application/json
 
 {
@@ -392,7 +400,7 @@ Content-Type: application/json
 %}
 
 ### Create "Transport" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups/Categories
 Content-Type: application/json
 
 {
@@ -405,7 +413,7 @@ Content-Type: application/json
 %}
 
 ### Create "Investments" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups/Categories
 Content-Type: application/json
 
 {
@@ -418,7 +426,7 @@ Content-Type: application/json
 %}
 
 ### Create "Income" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups/Categories
 Content-Type: application/json
 
 {
@@ -431,7 +439,7 @@ Content-Type: application/json
 %}
 
 ### Create "Transfers" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups/Categories
 Content-Type: application/json
 
 {
@@ -752,7 +760,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "fiat",
+  "type": "Fiat",
   "ticker": "UAH",
   "name": "UA Hryvnia",
   "icon": null,
@@ -772,7 +780,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "fiat",
+  "type": "Fiat",
   "ticker": "USD",
   "name": "US Dollar",
   "icon": null,
@@ -792,7 +800,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "fiat",
+  "type": "Fiat",
   "ticker": "EUR",
   "name": "Euro",
   "icon": null,
@@ -814,7 +822,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "crypto",
+  "type": "Crypto",
   "ticker": "BTC",
   "name": "Bitcoin",
   "icon": null,
@@ -834,7 +842,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "crypto",
+  "type": "Crypto",
   "ticker": "ETH",
   "name": "Ethereum",
   "icon": null,
@@ -854,7 +862,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "crypto",
+  "type": "Crypto",
   "ticker": "USDT",
   "name": "Teaser USD",
   "icon": null,
@@ -874,7 +882,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "crypto",
+  "type": "Crypto",
   "ticker": "SOL",
   "name": "Solana",
   "icon": null,
@@ -896,7 +904,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "bond",
+  "type": "Bond",
   "ticker": "UA10988712",
   "name": "ОВДП",
   "icon": null,
@@ -916,7 +924,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "deposit",
+  "type": "Deposit",
   "ticker": "DEPMono1",
   "name": "Mono deposit",
   "icon": null,
@@ -972,7 +980,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "income",
+  "type": "Income",
   "to": {
     "account": "{{monoWhiteAccountId}}",
     "asset": "{{uahAssetId}}",
@@ -993,7 +1001,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "transfer",
+  "type": "Transfer",
   "from": {
     "account": "{{monoWhiteAccountId}}",
     "asset": "{{uahAssetId}}",
@@ -1019,7 +1027,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "transfer",
+  "type": "Transfer",
   "from": {
     "account": "{{monoWhiteAccountId}}",
     "asset": "{{uahAssetId}}",
@@ -1045,7 +1053,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "spending",
+  "type": "Spending",
   "from": {
     "account": "{{monoBlackAccountId}}",
     "asset": "{{uahAssetId}}",
@@ -1066,7 +1074,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "transfer",
+  "type": "Transfer",
   "from": {
     "account": "{{monoWhiteAccountId}}",
     "asset": "{{uahAssetId}}",

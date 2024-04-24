@@ -24,7 +24,7 @@ object Group {
     def from(id: String): Task[Id] = ZIO.attempt(UUID.fromString(id)).map(Id(_))
 
     val path: PathCodec[Id] = zio.http.uuid("group-id").transform(Id(_))(_.id)
-    
+
     given schema: Schema[Id]   = Schema[UUID].transform(Id(_), _.id)
   }
 
@@ -34,9 +34,9 @@ object Group {
 
   object Type {
     def fromString(typeStr: String): Either[String, Type] =
-      Try(Type.valueOf(typeStr.capitalize)).toEither.left.map(_ => s"$typeStr is not a group type")
+      Try(Type.valueOf(typeStr)).toEither.left.map(_ => s"$typeStr is not a group type")
 
-    def asString(`type`: Type): String = `type`.toString.toLowerCase
+    def asString(`type`: Type): String = `type`.toString
 
     // TODO investigate 500 response for invalid group type in path
     val path: PathCodec[Type] = zio.http.string("group-type").transformOrFailLeft(fromString)(asString)
@@ -44,6 +44,6 @@ object Group {
 
   def make(wallet: Wallet.Id, `type`: Type, name: String, orderingIndex: Int): UIO[Group] =
     Id.random.map(Group(_, wallet, `type`, name, orderingIndex))
-  
+
   given schema: Schema[Group]   = DeriveSchema.gen[Group]
 }

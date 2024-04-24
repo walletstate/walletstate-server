@@ -33,7 +33,7 @@ object Asset {
 
     val path: PathCodec[Id] = zio.http.uuid("asset-id").transform(Id(_))(_.id)
     def query(name: String): QueryCodec[Id] = QueryCodec.queryTo[UUID](name).transform(Id(_))(_.id)
-    
+
     given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
@@ -43,9 +43,9 @@ object Asset {
 
   object Type {
     def fromString(typeStr: String): Either[String, Type] =
-      Try(Type.valueOf(typeStr.capitalize)).toEither.left.map(_ => s"$typeStr is not an asset type")
+      Try(Type.valueOf(typeStr)).toEither.left.map(_ => s"$typeStr is not an asset type")
 
-    def asString(`type`: Type): String = `type`.toString.toLowerCase
+    def asString(`type`: Type): String = `type`.toString
 
     // TODO investigate 500 response for invalid asset type in path
     val path: PathCodec[Type] = zio.http.string("asset-type").transformOrFailLeft(fromString)(asString)
@@ -67,6 +67,6 @@ object Asset {
         info.denomination
       )
     )
-  
+
   given schema: Schema[Asset] = DeriveSchema.gen[Asset]
 }

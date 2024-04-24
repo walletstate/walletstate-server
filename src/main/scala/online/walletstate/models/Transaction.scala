@@ -46,9 +46,9 @@ object Transaction {
 
   object Type {
     def fromString(typeStr: String): Either[String, Type] =
-      Try(Type.valueOf(typeStr.capitalize)).toEither.left.map(_ => s"$typeStr is not a transaction type")
+      Try(Type.valueOf(typeStr)).toEither.left.map(_ => s"$typeStr is not a transaction type")
 
-    def asString(`type`: Type): String = `type`.toString.toLowerCase
+    def asString(`type`: Type): String = `type`.toString
   }
 
   // TODO improve validation and model mapping

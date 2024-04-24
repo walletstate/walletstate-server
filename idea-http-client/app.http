@@ -22,6 +22,15 @@ Content-Type: application/json
     client.global.set("wallet", response.body.id);
 %}
 
+### Get wallet cookies
+POST localhost:8081/auth/wallet/{{walletId}}
+Content-Type: application/json
+
+> {%
+    client.global.set("walletId", response.body.id);
+%}
+
+
 ### Get wallet
 GET localhost:8081/api/wallets/current
 
@@ -59,7 +68,7 @@ GET localhost:8081/api/icons
 
 
 ### Create accounts group
-POST localhost:8081/api/groups/accounts
+POST localhost:8081/api/groups/Accounts
 Content-Type: application/json
 
 {
@@ -72,10 +81,10 @@ Content-Type: application/json
 %}
 
 ### List accounts groups
-GET localhost:8081/api/groups/accounts
+GET localhost:8081/api/groups/Accounts
 
 ### Get accounts group
-GET localhost:8081/api/groups/accounts/{{accountGroupId}}
+GET localhost:8081/api/groups/Accounts/{{accountGroupId}}
 
 ### Create account
 POST localhost:8081/api/accounts
@@ -107,7 +116,7 @@ GET localhost:8081/api/accounts/grouped
 GET localhost:8081/api/accounts/{{accountId}}
 
 ### Create categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups/Categories
 Content-Type: application/json
 
 {
@@ -153,7 +162,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "fiat",
+  "type": "Fiat",
   "ticker": "USD",
   "name": "US Dollar",
   "icon": "",
@@ -173,7 +182,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "bond",
+  "type": "Bond",
   "ticker": "UA10988712",
   "name": "ОВДП",
   "icon": "",
@@ -225,7 +234,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "income",
+  "type": "Income",
   "to": {
     "account": "{{account0Id}}",
     "asset": "{{fromAssetId}}",
@@ -246,7 +255,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "spending",
+  "type": "Spending",
   "from": {
     "account": "{{account0Id}}",
     "asset": "{{fromAssetId}}",
@@ -267,7 +276,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "transfer",
+  "type": "Transfer",
   "from": {
     "account": "{{account0Id}}",
     "asset": "{{fromAssetId}}",

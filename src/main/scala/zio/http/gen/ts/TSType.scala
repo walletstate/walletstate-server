@@ -70,7 +70,7 @@ object TSType {
 
     def renderContent: String =
       s"""export enum $name {
-         |${cases.mkString("  ", ",\n  ", "")}
+         |${cases.map(c => s"$c = '$c'").mkString("  ", ",\n  ", "")}
          |}
          |""".stripMargin
   }
