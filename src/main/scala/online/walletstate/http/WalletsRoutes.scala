@@ -1,14 +1,12 @@
 package online.walletstate.http
 
-import online.walletstate.http.api.endpoints.WalletsEndpoints
+import online.walletstate.http.api.WalletsEndpoints
 import online.walletstate.http.auth.*
-import online.walletstate.models.Wallet
+import online.walletstate.models.{AppError, Wallet}
 import online.walletstate.models.api.{CreateWallet, JoinWallet}
 import online.walletstate.services.*
-import online.walletstate.utils.RequestOps.as
 import zio.*
 import zio.http.*
-import zio.json.*
 
 final case class WalletsRoutes(auth: AuthMiddleware, walletsService: WalletsService) extends WalletsEndpoints {
   import auth.{implementWithUserCtx, implementWithWalletCtx}
@@ -27,7 +25,10 @@ final case class WalletsRoutes(auth: AuthMiddleware, walletsService: WalletsServ
 
   private val joinRoute = join.implementWithUserCtx[(JoinWallet, UserContext)] {
     Handler.fromFunctionZIO((joinInfo, ctx) => walletsService.joinWallet(ctx.user, joinInfo.inviteCode))
-  }()
+  } {
+    case e: AppError.WalletInviteNotExist.type => Left(Right(e))
+    case e: AppError.WalletInviteExpired.type  => Right(e)
+  }
 
   val routes = Routes(createRoute, getCurrentRoute, createInviteRoute, joinRoute)
 }

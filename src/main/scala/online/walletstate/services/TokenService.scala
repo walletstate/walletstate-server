@@ -2,8 +2,8 @@ package online.walletstate.services
 
 import online.walletstate.config.AuthConfig
 import online.walletstate.config.AuthConfig.config
-import online.walletstate.models.AuthToken
-import online.walletstate.models.errors.{AppError, InvalidAuthToken, InvalidAuthContext}
+import online.walletstate.models.AppError.{InvalidAuthContext, InvalidAuthToken}
+import online.walletstate.models.{AppError, AuthToken}
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
 import zio.*
 import zio.json.*

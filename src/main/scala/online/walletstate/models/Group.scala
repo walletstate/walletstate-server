@@ -13,7 +13,7 @@ final case class Group(
     wallet: Wallet.Id,
     `type`: Group.Type,
     name: String,
-    orderingIndex: Int
+    idx: Int
 )
 
 object Group {
@@ -37,13 +37,10 @@ object Group {
       Try(Type.valueOf(typeStr)).toEither.left.map(_ => s"$typeStr is not a group type")
 
     def asString(`type`: Type): String = `type`.toString
-
-    // TODO investigate 500 response for invalid group type in path
-    val path: PathCodec[Type] = zio.http.string("group-type").transformOrFailLeft(fromString)(asString)
   }
 
-  def make(wallet: Wallet.Id, `type`: Type, name: String, orderingIndex: Int): UIO[Group] =
-    Id.random.map(Group(_, wallet, `type`, name, orderingIndex))
+  def make(wallet: Wallet.Id, `type`: Type, name: String, idx: Int): UIO[Group] =
+    Id.random.map(Group(_, wallet, `type`, name, idx))
 
   given schema: Schema[Group]   = DeriveSchema.gen[Group]
 }

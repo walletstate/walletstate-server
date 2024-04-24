@@ -1,9 +1,8 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
-import online.walletstate.models.WalletInvite
-import online.walletstate.models.errors.WalletInviteNotExist
-import online.walletstate.utils.ZIOExtensions.getOrError
+import online.walletstate.models.{AppError, WalletInvite}
+import online.walletstate.utils.ZIOExtensions.headOrError
 import zio.*
 
 trait WalletInvitesService {
@@ -20,7 +19,7 @@ case class WalletInvitesServiceLive(quill: WalletStateQuillContext) extends Wall
     run(insert(invite)).map(_ => invite)
 
   override def get(code: String): Task[WalletInvite] =
-    run(inviteByCode(code)).map(_.headOption).getOrError(WalletInviteNotExist)
+    run(inviteByCode(code)).headOrError(AppError.WalletInviteNotExist)
 
   override def delete(id: WalletInvite.Id): Task[Unit] =
     run(inviteById(id).delete).map(_ => ())

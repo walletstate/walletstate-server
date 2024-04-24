@@ -1,17 +1,16 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
+import online.walletstate.models.AppError.TransactionNotExist
 import online.walletstate.models.api.CreateTransaction
-import online.walletstate.models.errors.TransactionNotExist
-import online.walletstate.models.{Account, Asset, Transaction, Wallet}
-import online.walletstate.utils.ZIOExtensions.getOrError
+import online.walletstate.models.{Account, Asset, AssetBalance, Transaction, Wallet}
 import zio.{Task, ZIO, ZLayer}
 
 trait TransactionsService {
-  def create(wallet: Wallet.Id, info: CreateTransaction): Task[Seq[Transaction]]
-  def get(wallet: Wallet.Id, id: Transaction.Id): Task[Seq[Transaction]]
+  def create(wallet: Wallet.Id, info: CreateTransaction): Task[List[Transaction]]
+  def get(wallet: Wallet.Id, id: Transaction.Id): Task[List[Transaction]]
   def list(wallet: Wallet.Id, account: Account.Id, pageToken: Option[Transaction.Page.Token]): Task[Transaction.Page]
-  def balance(wallet: Wallet.Id, account: Account.Id): Task[Map[Asset.Id, BigDecimal]]
+  def balance(wallet: Wallet.Id, account: Account.Id): Task[List[AssetBalance]]
 }
 
 case class TransactionsServiceLive(quill: WalletStateQuillContext) extends TransactionsService {
@@ -19,15 +18,15 @@ case class TransactionsServiceLive(quill: WalletStateQuillContext) extends Trans
   import quill.{*, given}
   import io.getquill.extras.ZonedDateTimeOps
 
-  private inline val PageSize = 3 // TODO Move to configs
+  private inline val PageSize = 50 // TODO Move to configs
 
-  override def create(wallet: Wallet.Id, info: CreateTransaction): Task[Seq[Transaction]] = for {
+  override def create(wallet: Wallet.Id, info: CreateTransaction): Task[List[Transaction]] = for {
     // TODO check all assets and accounts are in the wallet
     transactions <- Transaction.make(info)
     _            <- run(insert(transactions))
   } yield transactions
 
-  override def get(wallet: Wallet.Id, id: Transaction.Id): Task[Seq[Transaction]] = for {
+  override def get(wallet: Wallet.Id, id: Transaction.Id): Task[List[Transaction]] = for {
     transactions <- run(transactionsById(id))
     // TODO check transaction is for current wallet
     _ <- if (transactions.isEmpty) ZIO.fail(TransactionNotExist) else ZIO.unit
@@ -50,10 +49,10 @@ case class TransactionsServiceLive(quill: WalletStateQuillContext) extends Trans
     }
   }
 
-  override def balance(wallet: Wallet.Id, account: Account.Id): Task[Map[Asset.Id, BigDecimal]] = for {
+  override def balance(wallet: Wallet.Id, account: Account.Id): Task[List[AssetBalance]] = for {
     // TODO check account is for current wallet
     balances <- run(balanceByAccount(account))
-  } yield balances.toMap
+  } yield balances
 
   // queries utils
   // TODO needs for `quote(transaction.id <= lift(id))`. Investigate more general options for AnyVal
@@ -86,7 +85,7 @@ case class TransactionsServiceLive(quill: WalletStateQuillContext) extends Trans
     Tables.Transactions.filter(_.account == lift(account))
 
   private inline def balanceByAccount(account: Account.Id) =
-    Tables.Transactions.filter(_.account == lift(account)).groupByMap(_.asset)(t => (t.asset, sum(t.amount)))
+    Tables.Transactions.filter(_.account == lift(account)).groupByMap(_.asset)(t => AssetBalance(t.asset, sum(t.amount)))
 }
 
 object TransactionsServiceLive {

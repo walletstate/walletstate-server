@@ -52,9 +52,12 @@ POST localhost:8081/api/wallets/join
 
 ### Create icon
 POST localhost:8081/api/icons
-Content-Type: text/plain
+Content-Type: application/json
 
-data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAAAAAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAiACIDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAgGBwkF/8QALhAAAgEDBAECBAYDAQAAAAAAAQIDBAUGAAcREiEIEwkxUXEUFSIkMkEWM0JS/8QAGQEAAwEBAQAAAAAAAAAAAAAABAUGBwMI/8QAMxEAAQIEBAIGCgMAAAAAAAAAAQIRAAMEIQUGEjFBURMiNHFywRQVMzVCYXOBobGy0fH/2gAMAwEAAhEDEQA/ANJCR/ZA++lij+I16YprjfqWnv8AfJ6LHPcNZdYrRI9IVRupePg+5Infhe4j68leSAQdRf1G+pLcvZzNLBnuFwy5NYLpeqTHnxtmiijqhMCEeORmDxTl/wCJ6MCPD+ADpGzn+3+WZRl2yke2t+eWvv13qZbfj93pZLXQQRSSVFU1M0yRtKiJBI4aRwh88ALwhw7CMrqqpHpE2WpaTpbQQCL9ZwbkgM3Dv2h5KVKWsoWvTY78+EagbGer3ZD1BypR4HfquGvl9009DdKQ0s9Ssf8AsMXJKyFR5ZVYuo8lQPOrp+2serFvf6Yze7S2KZZNjVHV1kX40VdnNFU0LIjtDV089MvtiSOTrwzAsvPglC6NdY+JRn2Q1KYFg1NjFwyGghdq29uhegrI0ZVE1MisG5kBLsrACMgjhh50LPyzUVE5qOUtCWdpgIYO25AB2/RDg2IqpKKZIUmYFg2sRv3cv8jRnsv00aVm2epy4XC20lfLmFugepgjmaL9qehZQSvIbg8c8aNKjgdWCxH7/qBOlEVRvNiGK57kFssua3OuoIrfZbhdrDJQVqQVDXiKWDo8ff8AQ8kScOkZI7nsvPnlVtsXojzD/ILjFt1upb77lV9jrIKG61EX4KzXKkrKZ46qnMjn3o68LMx9oIyD9Q7co6hvNydtsV3Ux4Y3lNE0sdPMlZR1EPUTUdUnmOaMkEBgT8iCGUkEEHUe2zp8wvMuUWfOchpMzx6GtNNS3Gqtq0ss1SjEVEYiUtG0Ub8Ksg6nusgUcAHVOrM1XgFF01OpJSmxSr5ndPAm7kEp2O/wsMKwyRiswyFuFsWIuPvy/Lvw40bsP8NTPsIzf873urMISWlpKiaz43U1IrfzllULIzBeBHHGJAe5DcMU5XjUJ3t252kptz9v7BtViGR4VfskuFDIt3tcjR0sVPL57Rp2IMqt/wCWUDofBBGm0yG25xjt8pZMGw6gutnqYxBd2kyOpp7hLCA3ECGQlGhBIbozhefkvPnVD3LZ71PXy+2u+ZDlq+/abp+bWqkgnj/AWOJWJEZm6K07lAY+gUoqEnkngDlh+aRidenEaqoCAEkaSvSC4LPLSVOxudfOxJZIbTMCn0dLMpAjWSbEJ259YtuGFn24XMNXSr7FLDDU0zVc0carJUOqhpmA4LkAcAk+fH10aWyf18bG008lPVwX2CeJiksSUayLG4PBUP2HYA8jngc/PRo71HiKr9CYlNYFnhj7zJJDj9fNDIySLQzurKeCGELEEH6g+edcDZeOOLZ/CBEioGx63uQo45ZoEZj9yzEk/wBkk/3o0ahM2e7U/UH8VRZZM7VM8PnEz/6P20nW7eY5dBvPmtkhym7x26Ky1HSjWulEC/tGPhA3UefPy+ejRqeyr2tXh8xFjinsh3+RiDSYjikkjO+MWlmYkkmijJJ+v8dGjRr0iIzA7x//2Q==
+{
+  "contentType": "image/jpeg",
+  "content": "/9j/4AAQSkZJRgABAQAAAAAAAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAiACIDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAgGBwkF/8QALhAAAgEDBAECBAYDAQAAAAAAAQIDBAUGAAcREiEIEwkxUXEUFSIkMkEWM0JS/8QAGQEAAwEBAQAAAAAAAAAAAAAABAUGBwMI/8QAMxEAAQIEBAIGCgMAAAAAAAAAAQIRAAMEIQUGEjFBURMiNHFywRQVMzVCYXOBobGy0fH/2gAMAwEAAhEDEQA/ANJCR/ZA++lij+I16YprjfqWnv8AfJ6LHPcNZdYrRI9IVRupePg+5Infhe4j68leSAQdRf1G+pLcvZzNLBnuFwy5NYLpeqTHnxtmiijqhMCEeORmDxTl/wCJ6MCPD+ADpGzn+3+WZRl2yke2t+eWvv13qZbfj93pZLXQQRSSVFU1M0yRtKiJBI4aRwh88ALwhw7CMrqqpHpE2WpaTpbQQCL9ZwbkgM3Dv2h5KVKWsoWvTY78+EagbGer3ZD1BypR4HfquGvl9009DdKQ0s9Ssf8AsMXJKyFR5ZVYuo8lQPOrp+2serFvf6Yze7S2KZZNjVHV1kX40VdnNFU0LIjtDV089MvtiSOTrwzAsvPglC6NdY+JRn2Q1KYFg1NjFwyGghdq29uhegrI0ZVE1MisG5kBLsrACMgjhh50LPyzUVE5qOUtCWdpgIYO25AB2/RDg2IqpKKZIUmYFg2sRv3cv8jRnsv00aVm2epy4XC20lfLmFugepgjmaL9qehZQSvIbg8c8aNKjgdWCxH7/qBOlEVRvNiGK57kFssua3OuoIrfZbhdrDJQVqQVDXiKWDo8ff8AQ8kScOkZI7nsvPnlVtsXojzD/ILjFt1upb77lV9jrIKG61EX4KzXKkrKZ46qnMjn3o68LMx9oIyD9Q7co6hvNydtsV3Ux4Y3lNE0sdPMlZR1EPUTUdUnmOaMkEBgT8iCGUkEEHUe2zp8wvMuUWfOchpMzx6GtNNS3Gqtq0ss1SjEVEYiUtG0Ub8Ksg6nusgUcAHVOrM1XgFF01OpJSmxSr5ndPAm7kEp2O/wsMKwyRiswyFuFsWIuPvy/Lvw40bsP8NTPsIzf873urMISWlpKiaz43U1IrfzllULIzBeBHHGJAe5DcMU5XjUJ3t252kptz9v7BtViGR4VfskuFDIt3tcjR0sVPL57Rp2IMqt/wCWUDofBBGm0yG25xjt8pZMGw6gutnqYxBd2kyOpp7hLCA3ECGQlGhBIbozhefkvPnVD3LZ71PXy+2u+ZDlq+/abp+bWqkgnj/AWOJWJEZm6K07lAY+gUoqEnkngDlh+aRidenEaqoCAEkaSvSC4LPLSVOxudfOxJZIbTMCn0dLMpAjWSbEJ259YtuGFn24XMNXSr7FLDDU0zVc0carJUOqhpmA4LkAcAk+fH10aWyf18bG008lPVwX2CeJiksSUayLG4PBUP2HYA8jngc/PRo71HiKr9CYlNYFnhj7zJJDj9fNDIySLQzurKeCGELEEH6g+edcDZeOOLZ/CBEioGx63uQo45ZoEZj9yzEk/wBkk/3o0ahM2e7U/UH8VRZZM7VM8PnEz/6P20nW7eY5dBvPmtkhym7x26Ky1HSjWulEC/tGPhA3UefPy+ejRqeyr2tXh8xFjinsh3+RiDSYjikkjO+MWlmYkkmijJJ+v8dGjRr0iIzA7x//2Q=="
+}
 
 > {%
     client.global.set("iconId", response.body);
@@ -68,12 +71,13 @@ GET localhost:8081/api/icons
 
 
 ### Create accounts group
-POST localhost:8081/api/groups/Accounts
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Accounts",
   "name": "main accounts",
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -81,10 +85,10 @@ Content-Type: application/json
 %}
 
 ### List accounts groups
-GET localhost:8081/api/groups/Accounts
+GET localhost:8081/api/groups?groupType=Accounts
 
 ### Get accounts group
-GET localhost:8081/api/groups/Accounts/{{accountGroupId}}
+GET localhost:8081/api/groups/{{accountGroupId}}
 
 ### Create account
 POST localhost:8081/api/accounts
@@ -93,7 +97,7 @@ Content-Type: application/json
 {
   "group": "{{accountGroupId}}",
   "name": "monobank white card",
-  "orderingIndex": 0,
+  "idx": 0,
   "icon": "",
   "tags": ["mono", "uah"]
 }
@@ -116,12 +120,13 @@ GET localhost:8081/api/accounts/grouped
 GET localhost:8081/api/accounts/{{accountId}}
 
 ### Create categories group
-POST localhost:8081/api/groups/Categories
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Categories",
   "name": "Food",
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -137,7 +142,7 @@ Content-Type: application/json
   "name": "Cafes 2",
   "icon": "test",
   "tags": ["tag1"],
-  "orderingIndex": 0
+  "idx": 0
 }
 
 > {%

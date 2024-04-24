@@ -4,7 +4,7 @@ import io.getquill.jdbczio.Quill
 import online.walletstate.config.HttpServerConfig
 import online.walletstate.db.{Migrations, WalletStateQuillContext}
 import online.walletstate.http.*
-import online.walletstate.http.auth.{AuthMiddleware, AuthRoutesHandler, ConfiguredUsersAuthRoutesHandler}
+import online.walletstate.http.auth.AuthMiddleware
 import online.walletstate.services.*
 import zio.*
 import zio.config.typesafe.*
@@ -28,8 +28,9 @@ object Application extends ZIOAppDefault {
         WalletStateServer.layer,
 
         // auth
-        AuthRoutesHandler.layer,
+        IdentityProviderService.layer,
         AuthMiddleware.layer,
+        AuthServiceLive.layer,
 
         // routes
         HealthRoutes.layer,

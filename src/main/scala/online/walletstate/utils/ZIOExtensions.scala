@@ -1,6 +1,6 @@
 package online.walletstate.utils
 
-import online.walletstate.models.errors.AppError
+import online.walletstate.models.AppError
 import zio.*
 
 object ZIOExtensions {
@@ -11,5 +11,8 @@ object ZIOExtensions {
         case Some(value) => ZIO.succeed(value)
         case None        => ZIO.fail(error)
       }
+
+  extension [T](task: Task[Iterable[T]])
+    def headOrError[E <: AppError](error: E): Task[T] = task.map(_.headOption).getOrError(error)
 
 }

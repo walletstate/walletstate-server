@@ -2,16 +2,15 @@ package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.api.{CreateCategory, Grouped}
-import online.walletstate.models.errors.CategoryNotExist
-import online.walletstate.models.{Category, Group, User, Wallet}
+import online.walletstate.models.{AppError, Category, Group, User, Wallet}
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
 trait CategoriesService {
   def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateCategory): Task[Category]
   def get(wallet: Wallet.Id, id: Category.Id): Task[Category]
-  def list(wallet: Wallet.Id): Task[Seq[Category]]
-  def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Category]]]
+  def list(wallet: Wallet.Id): Task[List[Category]]
+  def grouped(wallet: Wallet.Id): Task[List[Grouped[Category]]]
 }
 
 final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -25,12 +24,12 @@ final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsSer
   } yield category
 
   override def get(wallet: Wallet.Id, id: Category.Id): Task[Category] =
-    run(categoriesById(wallet, id)).map(_.headOption).getOrError(CategoryNotExist)
+    run(categoriesById(wallet, id)).map(_.headOption).getOrError(AppError.CategoryNotExist)
 
-  override def list(wallet: Wallet.Id): Task[Seq[Category]] =
+  override def list(wallet: Wallet.Id): Task[List[Category]] =
     run(categoriesByWallet(wallet))
 
-  override def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Category]]] =
+  override def grouped(wallet: Wallet.Id): Task[List[Grouped[Category]]] =
     groupsService.group(wallet, Group.Type.Categories, list(wallet))
 
   // queries

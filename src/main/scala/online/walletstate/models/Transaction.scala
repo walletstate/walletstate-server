@@ -1,7 +1,7 @@
 package online.walletstate.models
 
+import online.walletstate.models.AppError.InvalidTransactionInfo
 import online.walletstate.models.api.CreateTransaction
-import online.walletstate.models.errors.{InvalidPageToken, InvalidTransactionInfo}
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.http.codec.{PathCodec, QueryCodec}
 import zio.json.{DeriveJsonCodec, DeriveJsonEncoder, JsonCodec}
@@ -21,7 +21,7 @@ final case class Transaction(
     amount: BigDecimal,
     datetime: ZonedDateTime,
     description: Option[String],
-    tags: Chunk[String],
+    tags: List[String],
     externalId: Option[String],
     spentOn: Option[Asset.Id],
     generatedBy: Option[Asset.Id]
@@ -52,12 +52,12 @@ object Transaction {
   }
 
   // TODO improve validation and model mapping
-  def make(info: CreateTransaction): Task[Seq[Transaction]] = info.`type` match {
+  def make(info: CreateTransaction): Task[List[Transaction]] = info.`type` match {
     case Type.Income =>
       for {
         id <- Id.random
         to <- ZIO.succeed(info.to).getOrError(InvalidTransactionInfo("Income transaction must have `to` field"))
-      } yield Seq(
+      } yield List(
         Transaction(
           id,
           to.account,
@@ -67,7 +67,7 @@ object Transaction {
           to.toAmount,
           info.datetime,
           info.description,
-          Chunk.from(info.tags),
+          info.tags,
           info.externalId,
           None,
           info.generatedBy
@@ -78,7 +78,7 @@ object Transaction {
       for {
         id   <- Id.random
         from <- ZIO.succeed(info.from).getOrError(InvalidTransactionInfo("Spending transaction must have `from` field"))
-      } yield Seq(
+      } yield List(
         Transaction(
           id,
           from.account,
@@ -88,7 +88,7 @@ object Transaction {
           from.fromAmount,
           info.datetime,
           info.description,
-          Chunk.from(info.tags),
+          info.tags,
           info.externalId,
           info.spentOn,
           None
@@ -100,7 +100,7 @@ object Transaction {
         id   <- Id.random
         from <- ZIO.succeed(info.from).getOrError(InvalidTransactionInfo("Transfer transaction must have `from` field"))
         to   <- ZIO.succeed(info.to).getOrError(InvalidTransactionInfo("Transfer transaction must have `to` field"))
-      } yield Seq(
+      } yield List(
         Transaction(
           id,
           from.account,
@@ -110,7 +110,7 @@ object Transaction {
           from.fromAmount,
           info.datetime,
           info.description,
-          Chunk.from(info.tags),
+          info.tags,
           info.externalId,
           info.spentOn,
           None
@@ -124,7 +124,7 @@ object Transaction {
           to.toAmount,
           info.datetime,
           info.description,
-          Chunk.from(info.tags),
+          info.tags,
           info.externalId,
           None,
           info.generatedBy
@@ -167,7 +167,7 @@ object Transaction {
     given schema: Schema[Page] = DeriveSchema.gen[Page]
   }
 
-  def page(transactions: Seq[Transaction], isNotLastPage: Boolean): Page = {
+  def page(transactions: List[Transaction], isNotLastPage: Boolean): Page = {
     val token = if (isNotLastPage) transactions.lastOption.map(t => Page.Token(t.id, t.datetime)) else None
     Page(Chunk.from(transactions), token)
   }

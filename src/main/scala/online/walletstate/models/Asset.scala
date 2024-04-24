@@ -16,7 +16,7 @@ final case class Asset(
     ticker: String,
     name: String,
     icon: Option[Icon.Id],
-    tags: Chunk[String],
+    tags: List[String],
     startDate: Option[ZonedDateTime],
     endDate: Option[ZonedDateTime],
     denominatedIn: Option[Asset.Id],
@@ -46,9 +46,6 @@ object Asset {
       Try(Type.valueOf(typeStr)).toEither.left.map(_ => s"$typeStr is not an asset type")
 
     def asString(`type`: Type): String = `type`.toString
-
-    // TODO investigate 500 response for invalid asset type in path
-    val path: PathCodec[Type] = zio.http.string("asset-type").transformOrFailLeft(fromString)(asString)
   }
 
   def make(wallet: Wallet.Id, info: CreateAsset): UIO[Asset] =

@@ -8,8 +8,8 @@ final case class CreateCategory(
     group: Group.Id,
     name: String,
     icon: Option[Icon.Id],
-    tags: Chunk[String],
-    orderingIndex: Int
+    tags: List[String],
+    idx: Int
 )
 
 object CreateCategory {

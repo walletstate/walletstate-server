@@ -1,6 +1,6 @@
 package online.walletstate.http
 
-import online.walletstate.http.api.endpoints.AssetsEndpoints
+import online.walletstate.http.api.AssetsEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Asset
 import online.walletstate.models.api.CreateAsset
@@ -16,7 +16,7 @@ final case class AssetsRoutes(auth: AuthMiddleware, assetsService: AssetsService
   }()
 
   private val listRoute = list.implementWithWalletCtx[WalletContext] {
-    Handler.fromFunctionZIO(ctx => assetsService.list(ctx.wallet).map(Chunk.from))
+    Handler.fromFunctionZIO(ctx => assetsService.list(ctx.wallet))
   }()
 
   private val getRoute = get.implementWithWalletCtx[(Asset.Id, WalletContext)] {

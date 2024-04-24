@@ -2,8 +2,11 @@ package online.walletstate
 
 import online.walletstate.db.Migrations
 import online.walletstate.http.*
+import online.walletstate.models.AppError
+import online.walletstate.utils.RequestOps
 import zio.*
 import zio.http.*
+import zio.http.codec.HttpCodecError
 import zio.http.endpoint.Endpoint
 import zio.http.endpoint.openapi.{OpenAPIGen, SwaggerUI}
 
@@ -26,7 +29,7 @@ final case class WalletStateServer(
     version = "0.0.1",
     accounts.endpoints ++ assets.endpoints ++ categories.endpoints ++
       exchangeRates.endpoints ++ groupsRoutes.endpoints ++ transactions.endpoints ++
-      wallets.endpoints
+      wallets.endpoints ++ icons.endpoints
   )
 
   private val routes =

@@ -1,6 +1,15 @@
 package zio.http.gen
 
-import online.walletstate.http.api.endpoints.*
+import online.walletstate.http.api.{
+  AccountsEndpoints,
+  AssetsEndpoints,
+  CategoriesEndpoints,
+  ExchangeRatesEndpoints,
+  GroupsEndpoints,
+  IconsEndpoints,
+  TransactionsEndpoints,
+  WalletsEndpoints
+}
 import online.walletstate.models.Wallet
 import zio.http.Method
 import zio.http.codec.{Doc, QueryCodec}
@@ -23,7 +32,8 @@ object GenPlayground extends ZIOAppDefault {
     "ExchangeRatesHttpClient" -> ExchangeRatesEndpoints.endpointsMap,
     "GroupsHttpClient"        -> GroupsEndpoints.endpointsMap,
     "TransactionsHttpClient"  -> TransactionsEndpoints.endpointsMap,
-    "WalletsHttpClient"       -> WalletsEndpoints.endpointsMap
+    "WalletsHttpClient"       -> WalletsEndpoints.endpointsMap,
+    "IconsHttpClient"         -> IconsEndpoints.endpointsMap
   )
 
   def run = {

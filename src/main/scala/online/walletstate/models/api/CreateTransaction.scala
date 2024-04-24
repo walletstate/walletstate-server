@@ -24,7 +24,7 @@ final case class CreateTransaction(
     category: Category.Id,
     datetime: ZonedDateTime,
     description: Option[String],
-    tags: Chunk[String],
+    tags: List[String],
     externalId: Option[String],
     spentOn: Option[Asset.Id],
     generatedBy: Option[Asset.Id]
