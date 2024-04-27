@@ -6,7 +6,7 @@ import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.fixtures.{WalletsFixtures, UsersFixtures}
 import online.walletstate.models.User
-import online.walletstate.models.errors.UserNotExist
+import online.walletstate.models.AppError.UserNotExist
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*

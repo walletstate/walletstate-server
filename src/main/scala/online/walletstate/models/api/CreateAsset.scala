@@ -11,7 +11,7 @@ final case class CreateAsset(
     ticker: String,
     name: String,
     icon: Option[Icon.Id],
-    tags: Chunk[String],
+    tags: List[String],
     startDate: Option[ZonedDateTime],
     endDate: Option[ZonedDateTime],
     denominatedIn: Option[Asset.Id],

@@ -19,15 +19,26 @@ Content-Type: application/json
     client.global.set("walletId", response.body.id);
 %}
 
+### Get wallet cookies
+POST localhost:8081/auth/wallet/{{walletId}}
+Content-Type: application/json
+
+> {%
+    client.global.set("walletId", response.body.id);
+%}
+
 ### Get wallet
 GET localhost:8081/api/wallets/current
 
 
 ### Create mono icon
 POST localhost:8081/api/icons
-Content-Type: text/plain
+Content-Type: application/json
 
-data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBw8PEA8NDQ0NDhUQDw4QEBAVDQ8TGBEVFhUWFhUVFRMYHSggGBonGxUVITEiJSkrLi8uGB8zODMtNygtLisBCgoKDQ0NDw0NDysZFRkrKysyLSsrLSstNysrKzcrLSsrKysrKy0rKysrLSsrKysrKysrKysrKysrKysrKysrK//AABEIAOEA4QMBIgACEQEDEQH/xAAcAAACAgMBAQAAAAAAAAAAAAAAAQYHBAUIAwL/xABJEAABAwICBgUGCggFBQEAAAABAAIDBBEFIQYHEjFBURNhcYGRIjJSdKGxNDVCcnOCkrKzwRQjU2KUosLDFyQzQ9FFVJPT8BX/xAAWAQEBAQAAAAAAAAAAAAAAAAAAAQL/xAAXEQEBAQEAAAAAAAAAAAAAAAAAAREx/9oADAMBAAIRAxEAPwC8UIQgEIQgEIQgEIXhJUAbs0HuvN87Rxv2LEkkJ3nL2KK4zp7h1Ldpn6d4v+rhAkseRffZB6r3QTA1XIeK8zM48VUGJ616h1xSUsMI9KQukdbsGyAfFRmt0zxOa+3XTNB4RlsQ/kAVw10E5x4k+K8H1cY86aMdsjR+a5sqKmST/Vlkl+fI5/vK8tgch4K4mul21kR3TRHskZ/yvdrzwJ7iuYdkch4L1gldHnG98Z5tcW+5MNdOCZ3Nejak8QCudqLSzEYbdHXVGXBz+kHg+6kmG606xmVTBBUDLNu1E7xF2nwCmC6mztPV2r1UBwfWJh1RZr5HUrjwlADf/ILt8SFLYZcg5jgQcwQQQezmmK2KFjx1PpZda9weSgaEIQCEIQCEIQCEIQCEIQCEIQC+JJA3evmaYNy3lavEsQip431FTK2NjRdz3HwAHE8gEGXLKXdnJQvSjWFSURdFD/mphkWNd5DD+/Juv1C552UF0x1hT1m1BSbdNBuJBtJKP3iPNb+6O88FCbKyI3uP6W11cSJ5y1h3Qx3YwDkQM3fWJWjSTWg0JJohoSTQNCSaBoSTQC2mCaQ1dEb0s72C9zGfKY7tYcu8WPWtWhBcWjWsmnqLRVoFLIbAPuTE4/OObO/LrU8ilIsWm4OfMFcxKT6Jaa1NARGSZ4L5wudmwc43Hzezd2b1LFdAxSh3byXoo/gmMwVkQqKWTbG4jc5jvRe3gVuYJ75Hf71lXuhCEAhCEAhCEAhCEAvKeXZGW9fUj9kX8FqcUxCOnikqah4YyNpc93uAHEnIAdiDwx3GIKKF1TUv2WjIDe57jua0cSVRGlelE+JS9JKdiNpPQwA+TGOZ9J3N3hYL50u0llxKcyvuyNlxBDfKNvM83HK57uC0i1Ih3TSQiGhCFQ0JJoGhJNA0JJoGhJNA0JJoBMJJqjY4FjU9DMJ6Z9juew5tkb6Lhx7d4V5aL6RQ4hD00J2XNsJYifKjd18xyPHxC58WwwLGJqKdtTTmxbk5pvsyN4sd1H2ZFSxXStPLfI7/AHr3Ud0fxmKtgZUwHI5OaTnG8b2O6x7cjxW+hk2h1jesK9EIQgEIQgEIXhVSWFufuQeE0m0fYFR+s7Sr9MnNJA79RTvIJByllGRd1tGYHeeIU61n6RmipOhidszVO0xhG9jP9x/UbHZHW6/BUa1WRDTSQqhpr5TQNNJCBoQEKhoSTQNCSaBoSTQNCQTQNCSaBoSTVEj0H0ldh1QHOJMMtmzt32HCQDm2/eLjkr4gmHkvYQ4EAgg3DgcwQVzIrZ1TaQ9LG7D5XXdCNuEnjFfNv1SfBw5LNVaQN8wmsalf8nvCyVlQhCEAsCV9ySf/AILKqHWaevJQrWVi5pMOmLDZ89qeM3sQX32iOsMDz22QU9prjhr62aoBvGD0UA4CNlwCO03d9ZaMJBNaQ0JJohppKWaOaA1VfTtqoZqVjXOe0Ne6UOu02PmtI9qCKJqff4TV3/c0P2p//WtLpToXUYbHHNPLTyCSTowIzISDsl1ztNGVmlFRtMLMwjCKmsf0VLA+ZwttWGTAeLnHJvep9heqWUgOq6xkfNkUZeftusB4FBWqFbx1S0dsqutvzvBbw2PzWjxrVXUxAvo52VIGfRub0b+wG5a4/ZTRXyF9TROY50cjXMc0lrmuaQWkbwQdxXy0XIABJJAAAuSTkABxKoaApngmrWuqAHzFlG07ukBc/wD8QtbvIKlEOqalA/WVlW482thYPAtd700VKhWnWapY7f5eulaeUsTHg97dm3gVBNItGqrD3BtTGNlxIZK07THnkHcD1EApo1CEk0Q0JJoGs3BcSfSVENVHvieHW9Ju5ze9pI71gpqq6Xo6psrI54jtNe1sjDza4XHsK2gN81WuqTFempH0zjd1M+zc8+jfdzfB22OwBWLSuytyWKr2QhCgxqs7h3ql9deI7VRTUYJtFEZnctqQkDvAZ/MrknN3HwXOen9Z0+J1r73DZjE3qEYEfvaVYNAmkhVk00kIGrz1SfFcX01T98qjFeeqT4ri+mqfvlKqYqO6Z6Nf/pNpYXSdGyOo6WVw84tDHN2W9ZLhnwzUiTCisXDcOhpY2wU0TYmN3NA8STvJ6zmspQvSXWRR0jnQwg1kjSQ4McGsYRwdJnn80FRqPW7NtDaoIS2+YE7wbdpbb2JgthC1GjOkVPiMPTU5cNk7MkbrB0buRtkQeBH/ACtuoIFrR0W/SY21lNEXTxljHtaM5mOIaB85pIz5X6rbDQfQqLD2CaUNlqXDyn2uIr/Ij/N289mSlq1OkOkdLh7A+qksXX2I2jafJb0W8us2HWqNukqrqtbj9o9BQMDeBfObntDRYeJW80U1jQ1kjaaeE00jzaM7e2x7uDdqwLSeF8uF72TBOFi4nh8VVDJTzsD2SNs4cuRB4EHMFZSFBzdjGHPpaialkNzDIWX9Ib2u72kHvWGpprcgDcRDh/uU0Lz1kOez3MCha2hoSTRDQkmgmGqzEOhxFkZPk1EckR+cBttPi0j6yvKmd5VuYXNGE1ZgqIJwbdFNFJ3NcCfZddJxuzB6wpVjPQhCyrXvOZPWSuW6qo6WSSb9pJJJ9pxd+a6crnWjldyjkPg0rluLzR2BWJX2mkgKoaaSEDV6apPiuL6ap++VRavPVH8VxfTVP3ylVMlCtbOLTU1ExsDzGaiboXvHnBmw5xDTwvsgX5XU1Vd67PglL63/AGpFmKqABNfKa2ynepypc2vkiB8mWmk2hzLHMLT3Au8VdCpHVF8Zj1af+lXcs1oibAnqXNOI4nNWSuqql+2+SxJ4NHBrRwaNwC6WfuPYVy5D5rfmj3JEr0TDy2zmktLSHNI3gjMEd6STtxWh05STdJHHIflxsf8AaaD+a9Vi4T8Hp/oIfuBZSwqnNcnw+H1KL8WZQRTrXL8Ph9Si/GnUFWpxDQkmqhoSTQBGRXR+BVHS0tLL+0poH/aY0/mucQugNCXXw6h9WiHgLfkpViUdKhYu0hZVi17bxTDnFIP5SuXI9w7Auq3tzI6yFyxND0bnxH/bc6M/VJb+SsSvlMJIVQ00kIGr01R/FcX01T+IVRavTVH8VxfTVP4hSqmSrvXZ8EpfW/7UisRV3rs+CUvrf9qRZiqfCa+QmtMprqh+Mx6tP/SrvVIaofjMerT/ANKu9SrCfuPYVy5D5rfmj3LqN+49hXLcPmt+aPckHok7cexNJ+49io6Ywn4PT/QQ/cCyli4T8Hp/oIfuBZSyqm9cvw+H1KL8aZQRTvXL8Ph9Si/GnUEWohoSTVQ0BJNAwugdCBbDaH1aM+IuufbrozRyn6KjpIvQpadp7RG0KVY2dkLK6JCyrHnFnHxXNunFJ0GJV0VrD9IfIOyS0g++ulqtuYPUqQ11Yd0dZBVAZVEGwcvlxGxufmvZ9lUV6mkhVDTSQiGr11R/FUX01T+IVRSvXVF8VRfTVP4hSqmSrvXZ8EpfW/7UisRV1rt+CUvrf9qRSKp9CEKsprqh+Mx6tP8A0q8FR+qD4zHq1R/SrwUqk/cewrluHzW/NHuXUj9x7CuW4fNb80e5IPtJ249iaTtx7FR0zhPwen+gh+4FlLFwn4PT/QQ/cCyllVN65fh8PqUX406ganmuX4fD6lF+NOoGtRDQkmqhoSTQZFBTGaWKAZ9LLHH9pwb+a6XiYLho3ZAdiovVjh/T4lC612wNknd9UbLP5nNPcr5pm3d2ZrNWMxCEKK8qht29magGtjCf0nDpJGi7qVwqB80AiT+Qk/VViLWzxA7UbgHAgtIPEEZjwQcqpraaU4M6grJ6Q3sx14iflRuzYevLI9YK1SqGmkhUNSTA9N6+ihbTU0kTWNc9wDoWuN3G5zPWo2hETP8AxOxX9rB/DMWr0g0urcQYyKrfG5sb+kaGxNZ5Vi3eOolaFARTTSQiNjgeMz0M36RTOa1+w5l3MDhZ1r5HsCkX+JuK/tYP4dihqEVMjrMxX9rB/DsUOaLADkLIQgaChCIl0GsfE2NbG2WCzGta3/LsOQFhn3L0/wATMV/awfw7FDkIrZ49jtRXytnqnMc5sYiBawNGyHOcMh1uK1ySEDQhCqGgJLJw6jfUSxU8Qu+V7Y29RJ3nqG89QKC1tTmFbFPNWOGc79hh/cjuCe95cPqqzKVuRPNazCqFlPDDTRDyYmMjb12FrnrO/vW5aLADks1o0IQoBY9Uz5XLeshIhBV2t7Rz9Ipm10TbyUoO2AM3wk3d9k+V2bSpVdWzR2JaRcH2hc+6xNFTh1TeNv6icudAfQO90R7OHVbkVRFEIQqhpr5TQNNJCIYTSCEDTSQgaaSEDTSQgaaSEDTSQgaaSEDVoan9HvPxOVvpRUwI3jdJIPuj6yhGiej8mI1Ladl2tHlzSAf6cd8/rHcOvqBXQdFSMjZHBCwMaxrWMaNzWgWCKzKVme1y3LKSY2wACayoQhCAQhCDzmj2h18FodIMGhrqeSkqGktfuI86Nw817TzB/McVIl4zxXzG/wB6DlvSHA56Cd9LUNzGbHgeTKzg9v8AxwNwtYukdLNGYMSgMEw2XNuYpQPKidzHMHK449oBFAY/glRQTGmqmbLsyxwuWyN9Jh4j2jiqNchJNVDTXymgaaSEQ00kIGmkhA0IQgYTXymgaEk0DWThtBLUysp6dhkfIbNb7yTwA3kpYdQS1MrKenjdI95s1o9pJ4AcSVemhOiMWGx3OzJPIB0stt3HYZyaD47zwAKy9EdHI8OpxAyz3us6aW3+o/q5NG4D8yVJ6eLZFzvK+KeH5R7lkrKhCEIBCEIBCEIBCEIPCeC+Y3+9aLSDAaevhNPVR7Q3tcMnxu9JjuB9h43UkXnLEHdR5oObNL9C6rDXF7h00BNmVDW5C+4SD5DvYeB4KNLqueHIse0ODgQQQCHA7wQd4Va6VaqopdqbDXineczTuv0TvmEZx9mY6gqKeTWbi+D1NG/oquCSF18toeS7rY8ZOHYVgqoaaSEDTSQiGmldCBppIQNCFkUFDNUPEVNDJM8/JY0uPaeQ6zkg8FutGdGarEX7FOyzWkCSdwIZH3/Kd+6M+zepxovqr82XE37s/wBGjdv6pJB7m+Ks6io2RsbDBGyNjBZrGtDWtHUAitRotovTYdHsQDae4DpZnAbUh5fut5NHtOakkEHF3gvSKADM5leqyoQhCAQhCAQhCAQhCAQhCAQhCBEA5HNY8lN6PgslCDU1tHHKx0U8TJWOycx7A5p7jkoJjeqiimu+kklo3G/kj9ZHf5jjcdzrdStAgHIi68n0wO7JUc+4rqxxSC5ijiq233xSAOtzLH29l1F63C6mAkVFNUQ237cMjR4kWXUrqd3CxXm6M7iD4IOUg4HcQU103VYJRzf61HSS/Pp4ne8LAdoZhR/6bR90LR7Amo50QSuihoXhQ/6bSd8QPvWbS6P0MWcNDRx9baaIe0BXRzhR0U05Aggmmv8As4nv+6CpNhmrnFJ/Op20zcvKmka3+Rt3eICvuOMgWa3LkBkvVtO49SmitMG1TU0dnVs8lSeMbP1TO8g7R7iFPMNw2GnYIqWCOFvosYBfrNt56yto2mHE3Xs1oG4WRWNHT+ll1LJa0DICyaFAIQhAIQhAIQhAIQhAIQhAIQhAIQhAIQhAIQhAIQhB5TLFchCBNWVChCD2QhCAQhCAQhCAQhCAQhCAQhCAQhCD/9k=
+{
+  "contentType": "image/jpeg",
+  "content": "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"
+}
 
 > {%
     client.global.set("monoIconId", response.body);
@@ -35,9 +46,12 @@ data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBw8PEA8NDQ0NDhUQDw4QE
 
 ### Create whitebit icon
 POST localhost:8081/api/icons
-Content-Type: text/plain
+Content-Type: application/json
 
-data:image/jpeg;base64,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
+{
+  "contentType": "image/jpeg",
+  "content": "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"
+}
 
 > {%
     client.global.set("whiteBitIconId", response.body);
@@ -45,9 +59,12 @@ data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAHBhIQBxMQEBASEBUVF
 
 ### Create binance icon
 POST localhost:8081/api/icons
-Content-Type: text/plain
+Content-Type: application/json
 
-data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAZlBMVEUzMzPwuQv1vQkrLjQuMDPXpxLyuwonLDQjKTQ8OTEwMjLirw/uuAtxXilIQS85NzJqWSpBPTBfUS1VSy42NTLoswxaTi0gKDXJnRXTpBJMRC/BlxeJbyUXIzVuXCo/OzFkVCx2YSm395DeAAAE0UlEQVR42u1d7XLiMAwksTFJaElpoS1w1969/0teyHBMActWUqC2tPsbZlistVb+kCcTAAAAAAAAAAAAAAAAAAAAAAAAAAAAABiHpmpkE7Sr3cpKJmjaaTltjeARrKdlUU5rsaNoJx3BoqM4EUrRNj3BPcVGJEVTHwjuKdYCtWjbI8E9xdaKDdFCaKCa1QnBPcWVEarBQqQW7eqCYD+KVqgG5WnRE6KyAtVSBAshBo4IUTmBevCiNMXcPaqpgwTz1+KJVaMo5mzgghqUoEXTMgj2o5hpoNqaRTDfpOG1ahTFHA0cS4M5a9HUAwjmmDTsMIL5aXFQiOYYqAMmmTynG1OPIJiTFm07imA+Bm6EBvPSomlHE8zDwNn6GwRzSBqRgpdDMe2S+BsazEOLjDThypyTBiNNuPUv57JNGowQdQ/Pvx8ZFNMMVLNiEHydTaoPBsUUt204GixeZt0nq6fSZahFyxnB51n/2YoTqKnZcJ4GZ4dPV/lpkWHVeg3+R/XEmVETClSGVTshyKSYjoEbFqIZBirDi7rijOCeImNGTcOjctLEw8vs4nu8QDU5avBI8SMPLb69D9bgEC2+v/38GC7WbswIskbRrRcJKNEs5mXcqhEUwwaunC+SyIlmO3fDQ5QRqG6+TSTpmyUZqJ40wU4abr1MxtWYJRGo3jTBTBrlfJmQbSMCNTDJRKebdEL0ON24oRoMatElMskEtcgk6KWYkgZJLTI0SGoxLQ0SWmSPoGcUU9OgN1AHETyj+PMhao2lAtXFZlHqu19mVEeFqDF3snD28/3PLGzgSKtmthsiAI8GjrRq1d/N510o7gteaoQOSYMM0U6rJaWxQ6CSaaIb5fuUxP2SBTlP9lokrVo/35LzZG/gSA328+09FjYOFX2QRJB+ESQRpn+Pqv9Y0QcCcfo8C/seOhAfIyF8+6r/y6oaOZnYxsTqSHIyMcRK95c68raBerL5wrLV3lQSSAgMc37LbZuzVbVBSf3Mtw5K6meO53ZavNh8GUDxorwaYMwujPmttm08K9tsc+0pkdnm2lMi30aL3s0X5ih6lzmYgeqtHm+xbUMs/LIoestjZpFLLFVdP2mQmy+MGZUgyKJIrqheO1ADmy9RLZLLVAwtBvY2rutRg5svkQXDwFJjVIvB/alrJo3IOZmgFoPLxZGkEdnXuN65myZ2CKEzcNTPtNt55N7TfEv9TBM7s9Hlxeu0Eal20btLa/JXbqLf3RD/TvMZ35naVRhD6FDLXKogHyrwNAp8qYLaQkF96K3xX0XV+ArWaRSstSlYL1Ww5q1g30LB3pOC/UMFe8AK9vFZST3vsxgsYybvPI34M1Hiz7WJP5so/nyp+DPC4s95iz+rL/6+hfw7MwruPYm/uyb//qGCO6QK7gEruMut4D6+gp4KCvpiKOhtoqA/jYIeQwr6RCno9aWgX5uCnnsK+iYq6H2poH+pgh60CvoIK+gFraCft4Ke7Ar66it4G0HB+xYK3ihR8M6MgreCFLz3pODNLgXvril4O0/B+4cK3rBU8A6pgrdkFbwHrOBNZwXvcit4W/1Ei9I0eBGoEkP0xKNK8KJBAyfFqtFVf8YVPc/d7FZ2IhpN1UwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYBz+AVGZYh6JqwoKAAAAAElFTkSuQmCC
+{
+  "contentType": "image/png",
+  "content": "iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAZlBMVEUzMzPwuQv1vQkrLjQuMDPXpxLyuwonLDQjKTQ8OTEwMjLirw/uuAtxXilIQS85NzJqWSpBPTBfUS1VSy42NTLoswxaTi0gKDXJnRXTpBJMRC/BlxeJbyUXIzVuXCo/OzFkVCx2YSm395DeAAAE0UlEQVR42u1d7XLiMAwksTFJaElpoS1w1969/0teyHBMActWUqC2tPsbZlistVb+kCcTAAAAAAAAAAAAAAAAAAAAAAAAAAAAABiHpmpkE7Sr3cpKJmjaaTltjeARrKdlUU5rsaNoJx3BoqM4EUrRNj3BPcVGJEVTHwjuKdYCtWjbI8E9xdaKDdFCaKCa1QnBPcWVEarBQqQW7eqCYD+KVqgG5WnRE6KyAtVSBAshBo4IUTmBevCiNMXcPaqpgwTz1+KJVaMo5mzgghqUoEXTMgj2o5hpoNqaRTDfpOG1ahTFHA0cS4M5a9HUAwjmmDTsMIL5aXFQiOYYqAMmmTynG1OPIJiTFm07imA+Bm6EBvPSomlHE8zDwNn6GwRzSBqRgpdDMe2S+BsazEOLjDThypyTBiNNuPUv57JNGowQdQ/Pvx8ZFNMMVLNiEHydTaoPBsUUt204GixeZt0nq6fSZahFyxnB51n/2YoTqKnZcJ4GZ4dPV/lpkWHVeg3+R/XEmVETClSGVTshyKSYjoEbFqIZBirDi7rijOCeImNGTcOjctLEw8vs4nu8QDU5avBI8SMPLb69D9bgEC2+v/38GC7WbswIskbRrRcJKNEs5mXcqhEUwwaunC+SyIlmO3fDQ5QRqG6+TSTpmyUZqJ40wU4abr1MxtWYJRGo3jTBTBrlfJmQbSMCNTDJRKebdEL0ON24oRoMatElMskEtcgk6KWYkgZJLTI0SGoxLQ0SWmSPoGcUU9OgN1AHETyj+PMhao2lAtXFZlHqu19mVEeFqDF3snD28/3PLGzgSKtmthsiAI8GjrRq1d/N510o7gteaoQOSYMM0U6rJaWxQ6CSaaIb5fuUxP2SBTlP9lokrVo/35LzZG/gSA328+09FjYOFX2QRJB+ESQRpn+Pqv9Y0QcCcfo8C/seOhAfIyF8+6r/y6oaOZnYxsTqSHIyMcRK95c68raBerL5wrLV3lQSSAgMc37LbZuzVbVBSf3Mtw5K6meO53ZavNh8GUDxorwaYMwujPmttm08K9tsc+0pkdnm2lMi30aL3s0X5ih6lzmYgeqtHm+xbUMs/LIoestjZpFLLFVdP2mQmy+MGZUgyKJIrqheO1ADmy9RLZLLVAwtBvY2rutRg5svkQXDwFJjVIvB/alrJo3IOZmgFoPLxZGkEdnXuN65myZ2CKEzcNTPtNt55N7TfEv9TBM7s9Hlxeu0Eal20btLa/JXbqLf3RD/TvMZ35naVRhD6FDLXKogHyrwNAp8qYLaQkF96K3xX0XV+ArWaRSstSlYL1Ww5q1g30LB3pOC/UMFe8AK9vFZST3vsxgsYybvPI34M1Hiz7WJP5so/nyp+DPC4s95iz+rL/6+hfw7MwruPYm/uyb//qGCO6QK7gEruMut4D6+gp4KCvpiKOhtoqA/jYIeQwr6RCno9aWgX5uCnnsK+iYq6H2poH+pgh60CvoIK+gFraCft4Ke7Ar66it4G0HB+xYK3ihR8M6MgreCFLz3pODNLgXvril4O0/B+4cK3rBU8A6pgrdkFbwHrOBNZwXvcit4W/1Ei9I0eBGoEkP0xKNK8KJBAyfFqtFVf8YVPc/d7FZ2IhpN1UwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYBz+AVGZYh6JqwoKAAAAAElFTkSuQmCC"
+}
 
 > {%
     client.global.set("binanceIconId", response.body);
@@ -57,12 +74,13 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAZlBMVEUzMz
 
 
 ### Create "Main accounts" accounts group
-POST localhost:8081/api/groups/accounts
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Accounts",
   "name": "Main",
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -70,12 +88,13 @@ Content-Type: application/json
 %}
 
 ### Create "Saving" accounts group
-POST localhost:8081/api/groups/accounts
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Accounts",
   "name": "Savings",
-  "orderingIndex": 2
+  "idx": 2
 }
 
 > {%
@@ -83,12 +102,13 @@ Content-Type: application/json
 %}
 
 ### Create "Crypto" accounts group
-POST localhost:8081/api/groups/accounts
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Accounts",
   "name": "Crypto",
-  "orderingIndex": 3
+  "idx": 3
 }
 
 > {%
@@ -96,7 +116,7 @@ Content-Type: application/json
 %}
 
 ### List accounts groups
-GET localhost:8081/api/groups/accounts
+GET localhost:8081/api/groups?groupType=Accounts
 
 
 
@@ -107,7 +127,7 @@ Content-Type: application/json
 {
   "group": "{{mainAccountsGroupId}}",
   "name": "Cash",
-  "orderingIndex": 1,
+  "idx": 1,
   "icon": null,
   "tags": ["uah"]
 }
@@ -123,7 +143,7 @@ Content-Type: application/json
 {
   "group": "{{mainAccountsGroupId}}",
   "name": "MonoBank Black",
-  "orderingIndex": 2,
+  "idx": 2,
   "icon": "{{monoIconId}}",
   "tags": ["uah", "mono"]
 }
@@ -139,7 +159,7 @@ Content-Type: application/json
 {
   "group": "{{mainAccountsGroupId}}",
   "name": "MonoBank White",
-  "orderingIndex": 3,
+  "idx": 3,
   "icon": "{{monoIconId}}",
   "tags": ["uah", "mono"]
 }
@@ -155,7 +175,7 @@ Content-Type: application/json
 {
   "group": "{{mainAccountsGroupId}}",
   "name": "PryvatBank Universal",
-  "orderingIndex": 4,
+  "idx": 4,
   "icon": null,
   "tags": ["uah", "pryvat"]
 }
@@ -171,7 +191,7 @@ Content-Type: application/json
 {
   "group": "{{savingAccountsGroupId}}",
   "name": "MonoBank USD",
-  "orderingIndex": 1,
+  "idx": 1,
   "icon": "{{monoIconId}}",
   "tags": ["usd", "mono"]
 }
@@ -187,7 +207,7 @@ Content-Type: application/json
 {
   "group": "{{savingAccountsGroupId}}",
   "name": "MonoBank EUR",
-  "orderingIndex": 2,
+  "idx": 2,
   "icon": "{{monoIconId}}",
   "tags": ["eur", "mono"]
 }
@@ -203,7 +223,7 @@ Content-Type: application/json
 {
   "group": "{{savingAccountsGroupId}}",
   "name": "MonoBank Deposits",
-  "orderingIndex": 3,
+  "idx": 3,
   "icon": "{{monoIconId}}",
   "tags": ["uah", "mono"]
 }
@@ -219,7 +239,7 @@ Content-Type: application/json
 {
   "group": "{{savingAccountsGroupId}}",
   "name": "PryvatBank Deposits",
-  "orderingIndex": 4,
+  "idx": 4,
   "icon": null,
   "tags": ["uah", "pryvat"]
 }
@@ -235,7 +255,7 @@ Content-Type: application/json
 {
   "group": "{{savingAccountsGroupId}}",
   "name": "SenseBank Bonds",
-  "orderingIndex": 5,
+  "idx": 5,
   "icon": null,
   "tags": ["bonds", "sense"]
 }
@@ -251,7 +271,7 @@ Content-Type: application/json
 {
   "group": "{{cryptoAccountsGroupId}}",
   "name": "Binance main",
-  "orderingIndex": 4,
+  "idx": 4,
   "icon": "{{binanceIconId}}",
   "tags": ["btc", "eth", "sol", "binance"]
 }
@@ -267,7 +287,7 @@ Content-Type: application/json
 {
   "group": "{{cryptoAccountsGroupId}}",
   "name": "Binance Earn",
-  "orderingIndex": 5,
+  "idx": 5,
   "icon": "{{binanceIconId}}",
   "tags": ["eth", "sol", "binance"]
 }
@@ -283,7 +303,7 @@ Content-Type: application/json
 {
   "group": "{{cryptoAccountsGroupId}}",
   "name": "WhiteBit Main",
-  "orderingIndex": 6,
+  "idx": 6,
   "icon": "{{whiteBitIconId}}",
   "tags": ["eth", "btc", "usdt", "whitebit"]
 }
@@ -299,7 +319,7 @@ Content-Type: application/json
 {
   "group": "{{cryptoAccountsGroupId}}",
   "name": "WhiteBit Earn",
-  "orderingIndex": 7,
+  "idx": 7,
   "icon": "{{whiteBitIconId}}",
   "tags": ["eth", "btc", "whitebit"]
 }
@@ -315,7 +335,7 @@ Content-Type: application/json
 {
   "group": "{{cryptoAccountsGroupId}}",
   "name": "Ledger BTC",
-  "orderingIndex": 8,
+  "idx": 8,
   "icon": null,
   "tags": ["btc", "ledger"]
 }
@@ -353,12 +373,13 @@ GET localhost:8081/api/accounts/{{monoWhiteAccountId}}/balance
 
 
 ### Create "Everyday spending" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Categories",
   "name": "Everyday spending",
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -366,12 +387,13 @@ Content-Type: application/json
 %}
 
 ### Create "Purchases" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Categories",
   "name": "Purchases",
-  "orderingIndex": 2
+  "idx": 2
 }
 
 > {%
@@ -379,12 +401,13 @@ Content-Type: application/json
 %}
 
 ### Create "House" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Categories",
   "name": "House",
-  "orderingIndex": 3
+  "idx": 3
 }
 
 > {%
@@ -392,12 +415,13 @@ Content-Type: application/json
 %}
 
 ### Create "Transport" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Categories",
   "name": "Transport",
-  "orderingIndex": 4
+  "idx": 4
 }
 
 > {%
@@ -405,12 +429,13 @@ Content-Type: application/json
 %}
 
 ### Create "Investments" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Categories",
   "name": "Investments",
-  "orderingIndex": 5
+  "idx": 5
 }
 
 > {%
@@ -418,12 +443,13 @@ Content-Type: application/json
 %}
 
 ### Create "Income" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Categories",
   "name": "Income",
-  "orderingIndex": 6
+  "idx": 6
 }
 
 > {%
@@ -431,12 +457,13 @@ Content-Type: application/json
 %}
 
 ### Create "Transfers" categories group
-POST localhost:8081/api/groups/categories
+POST localhost:8081/api/groups
 Content-Type: application/json
 
 {
+  "type": "Categories",
   "name": "Transfers",
-  "orderingIndex": 7
+  "idx": 7
 }
 
 > {%
@@ -455,7 +482,7 @@ Content-Type: application/json
   "name": "Supermarkets",
   "icon": null,
   "tags": [],
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -471,7 +498,7 @@ Content-Type: application/json
   "name": "Cafes",
   "icon": null,
   "tags": [],
-  "orderingIndex": 2
+  "idx": 2
 }
 
 > {%
@@ -487,7 +514,7 @@ Content-Type: application/json
   "name": "Restaurants",
   "icon": null,
   "tags": [],
-  "orderingIndex": 3
+  "idx": 3
 }
 
 > {%
@@ -503,7 +530,7 @@ Content-Type: application/json
   "name": "Delivery",
   "icon": null,
   "tags": [],
-  "orderingIndex": 4
+  "idx": 4
 }
 
 > {%
@@ -519,7 +546,7 @@ Content-Type: application/json
   "name": "Clothes",
   "icon": null,
   "tags": [],
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -535,7 +562,7 @@ Content-Type: application/json
   "name": "Gadgets",
   "icon": null,
   "tags": [],
-  "orderingIndex": 2
+  "idx": 2
 }
 
 > {%
@@ -551,7 +578,7 @@ Content-Type: application/json
   "name": "Utilities",
   "icon": null,
   "tags": [],
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -567,7 +594,7 @@ Content-Type: application/json
   "name": "Repair",
   "icon": null,
   "tags": [],
-  "orderingIndex": 2
+  "idx": 2
 }
 
 > {%
@@ -583,7 +610,7 @@ Content-Type: application/json
   "name": "Car",
   "icon": null,
   "tags": [],
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -599,7 +626,7 @@ Content-Type: application/json
   "name": "Taxi",
   "icon": null,
   "tags": [],
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -615,7 +642,7 @@ Content-Type: application/json
   "name": "Stocks",
   "icon": null,
   "tags": [],
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -631,7 +658,7 @@ Content-Type: application/json
   "name": "Bonds",
   "icon": null,
   "tags": [],
-  "orderingIndex": 2
+  "idx": 2
 }
 
 > {%
@@ -647,7 +674,7 @@ Content-Type: application/json
   "name": "Deposits",
   "icon": null,
   "tags": [],
-  "orderingIndex": 3
+  "idx": 3
 }
 
 > {%
@@ -663,7 +690,7 @@ Content-Type: application/json
   "name": "Salary",
   "icon": null,
   "tags": [],
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -679,7 +706,7 @@ Content-Type: application/json
   "name": "Capitalization",
   "icon": null,
   "tags": [],
-  "orderingIndex": 2
+  "idx": 2
 }
 
 > {%
@@ -695,7 +722,7 @@ Content-Type: application/json
   "name": "Dividends",
   "icon": null,
   "tags": [],
-  "orderingIndex": 3
+  "idx": 3
 }
 
 > {%
@@ -711,7 +738,7 @@ Content-Type: application/json
   "name": "Transfer",
   "icon": null,
   "tags": [],
-  "orderingIndex": 1
+  "idx": 1
 }
 
 > {%
@@ -727,7 +754,7 @@ Content-Type: application/json
   "name": "Exchange",
   "icon": null,
   "tags": [],
-  "orderingIndex": 2
+  "idx": 2
 }
 
 > {%
@@ -752,7 +779,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "fiat",
+  "type": "Fiat",
   "ticker": "UAH",
   "name": "UA Hryvnia",
   "icon": null,
@@ -772,7 +799,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "fiat",
+  "type": "Fiat",
   "ticker": "USD",
   "name": "US Dollar",
   "icon": null,
@@ -792,7 +819,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "fiat",
+  "type": "Fiat",
   "ticker": "EUR",
   "name": "Euro",
   "icon": null,
@@ -814,7 +841,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "crypto",
+  "type": "Crypto",
   "ticker": "BTC",
   "name": "Bitcoin",
   "icon": null,
@@ -834,7 +861,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "crypto",
+  "type": "Crypto",
   "ticker": "ETH",
   "name": "Ethereum",
   "icon": null,
@@ -854,7 +881,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "crypto",
+  "type": "Crypto",
   "ticker": "USDT",
   "name": "Teaser USD",
   "icon": null,
@@ -874,7 +901,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "crypto",
+  "type": "Crypto",
   "ticker": "SOL",
   "name": "Solana",
   "icon": null,
@@ -896,7 +923,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "bond",
+  "type": "Bond",
   "ticker": "UA10988712",
   "name": "ОВДП",
   "icon": null,
@@ -916,7 +943,7 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
-  "type": "deposit",
+  "type": "Deposit",
   "ticker": "DEPMono1",
   "name": "Mono deposit",
   "icon": null,
@@ -924,7 +951,7 @@ Content-Type: application/json
   "startDate": "2024-01-10T14:10:20Z",
   "endDate": "2024-04-10T14:10:20Z",
   "denominatedIn": "{{usdAssetId}}",
-  "denomination": 1
+  "denomination": 1000
 }
 
 > {%
@@ -972,7 +999,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "income",
+  "type": "Income",
   "to": {
     "account": "{{monoWhiteAccountId}}",
     "asset": "{{uahAssetId}}",
@@ -993,7 +1020,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "transfer",
+  "type": "Transfer",
   "from": {
     "account": "{{monoWhiteAccountId}}",
     "asset": "{{uahAssetId}}",
@@ -1019,7 +1046,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "transfer",
+  "type": "Transfer",
   "from": {
     "account": "{{monoWhiteAccountId}}",
     "asset": "{{uahAssetId}}",
@@ -1045,7 +1072,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "spending",
+  "type": "Spending",
   "from": {
     "account": "{{monoBlackAccountId}}",
     "asset": "{{uahAssetId}}",
@@ -1066,7 +1093,7 @@ POST localhost:8081/api/transactions
 Content-Type: application/json
 
 {
-  "type": "transfer",
+  "type": "Transfer",
   "from": {
     "account": "{{monoWhiteAccountId}}",
     "asset": "{{uahAssetId}}",

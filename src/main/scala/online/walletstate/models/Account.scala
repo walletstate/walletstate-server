@@ -12,9 +12,9 @@ final case class Account(
     id: Account.Id,
     group: Group.Id,
     name: String,
-    orderingIndex: Int,
+    idx: Int,
     icon: Option[Icon.Id],
-    tags: Chunk[String]
+    tags: List[String]
 ) extends Groupable
 
 object Account {
@@ -31,7 +31,7 @@ object Account {
   }
 
   def make(info: CreateAccount): UIO[Account] =
-    Id.random.map(Account(_, info.group, info.name, info.orderingIndex, info.icon, info.tags))
+    Id.random.map(Account(_, info.group, info.name, info.idx, info.icon, info.tags))
   
   given schema: Schema[Account]   = DeriveSchema.gen[Account]
 }

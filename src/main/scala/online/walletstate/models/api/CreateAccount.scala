@@ -7,9 +7,9 @@ import zio.schema.{DeriveSchema, Schema}
 final case class CreateAccount(
     group: Group.Id,
     name: String,
-    orderingIndex: Int,
+    idx: Int,
     icon: Option[Icon.Id],
-    tags: Chunk[String]
+    tags: List[String]
 )
 
 object CreateAccount {

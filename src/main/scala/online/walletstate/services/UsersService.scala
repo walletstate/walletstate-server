@@ -1,9 +1,9 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
-import online.walletstate.models.errors.UserNotExist
-import online.walletstate.models.{Wallet, User}
-import online.walletstate.utils.ZIOExtensions.getOrError
+import online.walletstate.models.AppError.UserNotExist
+import online.walletstate.models.{User, Wallet}
+import online.walletstate.utils.ZIOExtensions.headOrError
 import zio.*
 
 trait UsersService {
@@ -20,7 +20,7 @@ final case class UsersServiceLive(quill: WalletStateQuillContext) extends UsersS
     run(insertUser(user)).map(_ => user)
 
   override def get(id: User.Id): Task[User] =
-    run(userById(id)).map(_.headOption).getOrError(UserNotExist)
+    run(userById(id)).headOrError(UserNotExist)
 
   override def setWallet(user: User.Id, wallet: Wallet.Id): Task[Unit] =
     run(updateWallet(user, wallet)).map(_ => ())

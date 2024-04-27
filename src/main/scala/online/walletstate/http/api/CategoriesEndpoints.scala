@@ -1,8 +1,7 @@
-package online.walletstate.http.api.endpoints
+package online.walletstate.http.api
 
-import online.walletstate.models.Category
+import online.walletstate.models.{AppError, Category}
 import online.walletstate.models.api.{CreateCategory, Grouped}
-import online.walletstate.models.errors.{BadRequestError, UnauthorizedError}
 import zio.Chunk
 import zio.http.{Method, Status}
 import zio.http.endpoint.Endpoint
@@ -13,31 +12,31 @@ trait CategoriesEndpoints {
     Endpoint(Method.POST / "api" / "categories")
       .in[CreateCategory]
       .out[Category](Status.Created)
-      .outError[UnauthorizedError.type](Status.Unauthorized)
-      .outError[BadRequestError](Status.BadRequest)
+      .outError[AppError.Unauthorized](Status.Unauthorized)
+      .outError[AppError.BadRequest](Status.BadRequest)
 
   val list =
     Endpoint(Method.GET / "api" / "categories")
-      .out[Chunk[Category]]
-      .outError[UnauthorizedError.type](Status.Unauthorized)
+      .out[List[Category]]
+      .outError[AppError.Unauthorized](Status.Unauthorized)
 
   val listGrouped =
     Endpoint(Method.GET / "api" / "categories" / "grouped")
-      .out[Chunk[Grouped[Category]]]
-      .outError[UnauthorizedError.type](Status.Unauthorized)
+      .out[List[Grouped[Category]]]
+      .outError[AppError.Unauthorized](Status.Unauthorized)
 
   val get =
     Endpoint(Method.GET / "api" / "categories" / Category.Id.path)
       .out[Category]
-      .outError[UnauthorizedError.type](Status.Unauthorized)
-  
+      .outError[AppError.Unauthorized](Status.Unauthorized)
+
   val endpointsMap = Map(
-    "create" -> create,
-    "get" -> get,
-    "list" -> list,
+    "create"      -> create,
+    "get"         -> get,
+    "list"        -> list,
     "listGrouped" -> listGrouped
   )
- 
+
   val endpoints = Chunk(
     create,
     get,

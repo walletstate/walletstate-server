@@ -2,7 +2,7 @@ package online.walletstate.db
 
 import io.getquill.jdbczio.Quill
 import io.getquill.{CompositeNamingStrategy3, NamingStrategy, PluralizedTableNames, PostgresEscape, SnakeCase}
-import online.walletstate.models.{Account, Asset, Category, ExchangeRate, Group, Transaction}
+import online.walletstate.models.{Account, Asset, Category, ExchangeRate, Group, Transaction, Wallet, WalletUser}
 import zio.ZLayer
 import org.postgresql.util.PGobject
 
@@ -25,9 +25,7 @@ class WalletStateQuillContext(override val ds: DataSource)
   private def fromDbType[T](fromString: String => Either[String, T])(index: Int, row: ResultRow, session: Session) = {
     fromString(row.getObject(index).toString) match {
       case Right(value) => value
-      case Left(msg)    =>
-        // TODO: investigate how to avoid throwing exception
-        throw new Exception(s"Cannot decode from DB type. Error: $msg")
+      case Left(msg)    => throw new Exception(s"Cannot decode from DB type. Error: $msg")
     }
   }
 
@@ -52,6 +50,8 @@ class WalletStateQuillContext(override val ds: DataSource)
   object Tables {
     import io.getquill.*
 
+    inline def Wallets: Quoted[EntityQuery[Wallet]]             = quote(query[Wallet])
+    inline def WalletUsers: Quoted[EntityQuery[WalletUser]]     = quote(query[WalletUser])
     inline def Groups: Quoted[EntityQuery[Group]]               = quote(query[Group])
     inline def Accounts: Quoted[EntityQuery[Account]]           = quote(query[Account])
     inline def Categories: Quoted[EntityQuery[Category]]        = quote(querySchema[Category]("categories"))

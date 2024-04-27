@@ -1,14 +1,12 @@
 package online.walletstate.http
 
-import online.walletstate.http.api.endpoints.CategoriesEndpoints
+import online.walletstate.http.api.CategoriesEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Category
 import online.walletstate.models.api.CreateCategory
 import online.walletstate.services.CategoriesService
-import online.walletstate.utils.RequestOps.as
 import zio.*
 import zio.http.*
-import zio.json.*
 
 case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesService) extends CategoriesEndpoints {
   import auth.implementWithWalletCtx
@@ -18,11 +16,11 @@ case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesS
   }()
 
   private val listRoute = list.implementWithWalletCtx[WalletContext] {
-    Handler.fromFunctionZIO(ctx => categoriesService.list(ctx.wallet).map(Chunk.from))
+    Handler.fromFunctionZIO(ctx => categoriesService.list(ctx.wallet))
   }()
 
   private val listGroupedRoute = listGrouped.implementWithWalletCtx[WalletContext] {
-    Handler.fromFunctionZIO(ctx => categoriesService.grouped(ctx.wallet).map(Chunk.from))
+    Handler.fromFunctionZIO(ctx => categoriesService.grouped(ctx.wallet))
   }()
 
   private val getRoute = get.implementWithWalletCtx[(Category.Id, WalletContext)] {

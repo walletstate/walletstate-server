@@ -2,15 +2,14 @@ package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.api.CreateAsset
-import online.walletstate.models.errors.AssetNotExist
-import online.walletstate.models.{Asset, User, Wallet}
-import online.walletstate.utils.ZIOExtensions.getOrError
-import zio.{Task, ZLayer}
+import online.walletstate.models.{AppError, Asset, User, Wallet}
+import online.walletstate.utils.ZIOExtensions.headOrError
+import zio.{Chunk, Task, ZLayer}
 
 trait AssetsService {
   def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAsset): Task[Asset]
   def get(wallet: Wallet.Id, id: Asset.Id): Task[Asset]
-  def list(wallet: Wallet.Id): Task[Seq[Asset]]
+  def list(wallet: Wallet.Id): Task[List[Asset]]
 }
 
 final case class AssetsServiceLive(quill: WalletStateQuillContext) extends AssetsService {
@@ -23,9 +22,9 @@ final case class AssetsServiceLive(quill: WalletStateQuillContext) extends Asset
   } yield asset
 
   override def get(wallet: Wallet.Id, id: Asset.Id): Task[Asset] =
-    run(assetsById(wallet, id)).map(_.headOption).getOrError(AssetNotExist)
+    run(assetsById(wallet, id)).headOrError(AppError.AssetNotExist)
 
-  override def list(wallet: Wallet.Id): Task[Seq[Asset]] = run(assetsByWallet(wallet))
+  override def list(wallet: Wallet.Id): Task[List[Asset]] = run(assetsByWallet(wallet))
 
 //  queries
   private inline def insert(asset: Asset)                        = quote(Tables.Assets.insertValue(lift(asset)))

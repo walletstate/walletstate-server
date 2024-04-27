@@ -5,7 +5,7 @@ import io.github.scottweaver.zio.aspect.DbMigrationAspect
 import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.fixtures.WalletInvitesFixtures
-import online.walletstate.models.errors.WalletInviteNotExist
+import online.walletstate.models.AppError.WalletInviteNotExist
 import online.walletstate.services.WalletInvitesService
 import zio.*
 import zio.test.*

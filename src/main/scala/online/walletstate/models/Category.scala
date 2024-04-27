@@ -12,8 +12,8 @@ final case class Category(
     group: Group.Id,
     name: String,
     icon: Option[Icon.Id],
-    tags: Chunk[String],
-    orderingIndex: Int
+    tags: List[String],
+    idx: Int
 ) extends Groupable
 
 object Category {
@@ -29,7 +29,7 @@ object Category {
   }
 
   def make(info: CreateCategory): UIO[Category] =
-    Id.random.map(Category(_, info.group, info.name, info.icon, info.tags, info.orderingIndex))
+    Id.random.map(Category(_, info.group, info.name, info.icon, info.tags, info.idx))
   
   given schema: Schema[Category]   = DeriveSchema.gen[Category]
 }

@@ -1,8 +1,7 @@
-package online.walletstate.http.api.endpoints
+package online.walletstate.http.api
 
-import online.walletstate.models.{Asset, ExchangeRate}
+import online.walletstate.models.{AppError, Asset, ExchangeRate}
 import online.walletstate.models.api.CreateExchangeRate
-import online.walletstate.models.errors.{BadRequestError, UnauthorizedError}
 import zio.Chunk
 import zio.http.{Method, Status}
 import zio.http.endpoint.Endpoint
@@ -13,26 +12,26 @@ trait ExchangeRatesEndpoints {
     Endpoint(Method.POST / "api" / "exchange-rates")
       .in[CreateExchangeRate]
       .out[ExchangeRate](Status.Created)
-      .outError[UnauthorizedError.type](Status.Unauthorized)
-      .outError[BadRequestError](Status.BadRequest)
+      .outError[AppError.Unauthorized](Status.Unauthorized)
+      .outError[AppError.BadRequest](Status.BadRequest)
 
   val list =
     Endpoint(Method.GET / "api" / "exchange-rates")
       .query[Asset.Id](Asset.Id.query("from"))
       .query[Asset.Id](Asset.Id.query("to"))
-      .out[Chunk[ExchangeRate]]
-      .outError[UnauthorizedError.type](Status.Unauthorized)
-      .outError[BadRequestError](Status.BadRequest)
+      .out[List[ExchangeRate]]
+      .outError[AppError.Unauthorized](Status.Unauthorized)
+      .outError[AppError.BadRequest](Status.BadRequest)
 
   val get =
     Endpoint(Method.GET / "api" / "exchange-rates" / ExchangeRate.Id.path)
       .out[ExchangeRate]
-      .outError[UnauthorizedError.type](Status.Unauthorized)
-  
+      .outError[AppError.Unauthorized](Status.Unauthorized)
+
   val endpointsMap = Map(
     "create" -> create,
-    "get" -> get,
-    "list" -> list
+    "get"    -> get,
+    "list"   -> list
   )
 
   val endpoints = endpointsMap.values

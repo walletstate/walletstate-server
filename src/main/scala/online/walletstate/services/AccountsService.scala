@@ -3,17 +3,16 @@ package online.walletstate.services
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models
 import online.walletstate.models.api.{CreateAccount, Grouped}
-import online.walletstate.models.errors.AccountNotExist
-import online.walletstate.models.{Account, Group, User, Wallet}
+import online.walletstate.models.{Account, AppError, Group, User, Wallet}
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
 trait AccountsService {
   def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAccount): Task[Account]
   def get(wallet: Wallet.Id, id: Account.Id): Task[Account]
-  def list(wallet: Wallet.Id): Task[Seq[Account]]
-  def list(wallet: Wallet.Id, group: Group.Id): Task[Seq[Account]]
-  def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Account]]]
+  def list(wallet: Wallet.Id): Task[List[Account]]
+  def list(wallet: Wallet.Id, group: Group.Id): Task[List[Account]]
+  def grouped(wallet: Wallet.Id): Task[List[Grouped[Account]]]
 }
 
 final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -27,15 +26,15 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsServi
   } yield account
 
   override def get(wallet: Wallet.Id, id: Account.Id): Task[Account] =
-    run(accountsById(wallet, id)).map(_.headOption).getOrError(AccountNotExist())
+    run(accountsById(wallet, id)).map(_.headOption).getOrError(AppError.AccountNotExist())
 
-  override def list(wallet: Wallet.Id): Task[Seq[Account]] =
+  override def list(wallet: Wallet.Id): Task[List[Account]] =
     run(accountsByWallet(wallet))
 
-  override def list(wallet: Wallet.Id, group: Group.Id): Task[Seq[Account]] =
+  override def list(wallet: Wallet.Id, group: Group.Id): Task[List[Account]] =
     run(accountsByGroup(wallet, group))
 
-  def grouped(wallet: Wallet.Id): Task[Seq[Grouped[Account]]] =
+  def grouped(wallet: Wallet.Id): Task[List[Grouped[Account]]] =
     groupsService.group(wallet, Group.Type.Accounts, list(wallet))
 
   // queries

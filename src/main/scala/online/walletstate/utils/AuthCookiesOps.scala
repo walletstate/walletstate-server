@@ -1,8 +1,8 @@
-package online.walletstate.http.auth
+package online.walletstate.utils
 
 import online.walletstate.models.AuthToken
-import zio.http.*
 import zio.Duration
+import zio.http.*
 
 object AuthCookiesOps {
 
