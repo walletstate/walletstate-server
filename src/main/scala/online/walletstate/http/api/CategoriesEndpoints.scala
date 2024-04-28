@@ -1,7 +1,7 @@
 package online.walletstate.http.api
 
 import online.walletstate.models.{AppError, Category}
-import online.walletstate.models.api.{CreateCategory, Grouped}
+import online.walletstate.models.api.{CreateCategory, Grouped, UpdateCategory}
 import zio.Chunk
 import zio.http.{Method, Status}
 import zio.http.endpoint.Endpoint
@@ -30,9 +30,17 @@ trait CategoriesEndpoints {
       .out[Category]
       .outError[AppError.Unauthorized](Status.Unauthorized)
 
+  val update =
+    Endpoint(Method.PUT / "api" / "categories" / Category.Id.path)
+      .in[UpdateCategory]
+      .out[Category](Status.Ok)
+      .outError[AppError.BadRequest](Status.BadRequest)
+      .outError[AppError.Unauthorized](Status.Unauthorized)
+
   val endpointsMap = Map(
     "create"      -> create,
     "get"         -> get,
+    "update"      -> update,
     "list"        -> list,
     "listGrouped" -> listGrouped
   )
@@ -40,6 +48,7 @@ trait CategoriesEndpoints {
   val endpoints = Chunk(
     create,
     get,
+    update,
     list
     //    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
   )

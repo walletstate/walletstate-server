@@ -2,7 +2,7 @@ package online.walletstate.http
 
 import online.walletstate.http.api.AccountsEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
-import online.walletstate.models.api.CreateAccount
+import online.walletstate.models.api.{CreateAccount, UpdateAccount}
 import online.walletstate.models.{Account, AppError, Transaction}
 import online.walletstate.services.{AccountsService, TransactionsService}
 import zio.*
@@ -31,6 +31,10 @@ case class AccountsRoutes(
     Handler.fromFunctionZIO((id, ctx) => accountsService.get(ctx.wallet, id))
   } { case e: AppError.AccountNotExist => Right(e) }
 
+  private val updateRoute = update.implementWithWalletCtx[(Account.Id, UpdateAccount, WalletContext)]{
+    Handler.fromFunctionZIO((id, info, ctx) => accountsService.update(ctx.wallet, id, info))
+  }()
+  
   private val listTransactionsRoute =
     listTransactions.implementWithWalletCtx[(Account.Id, Option[Transaction.Page.Token], WalletContext)] {
       Handler.fromFunctionZIO((id, token, ctx) => transactionsService.list(ctx.wallet, id, token))
@@ -44,6 +48,7 @@ case class AccountsRoutes(
     createRoute,
     listGroupedRoute,
     getRoute,
+    updateRoute,
     listRoute,
     listTransactionsRoute,
     getBalanceRoute

@@ -1,8 +1,7 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
-import online.walletstate.models
-import online.walletstate.models.api.{CreateAccount, Grouped}
+import online.walletstate.models.api.{CreateAccount, Grouped, UpdateAccount}
 import online.walletstate.models.{Account, AppError, Group, User, Wallet}
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
@@ -13,6 +12,7 @@ trait AccountsService {
   def list(wallet: Wallet.Id): Task[List[Account]]
   def list(wallet: Wallet.Id, group: Group.Id): Task[List[Account]]
   def grouped(wallet: Wallet.Id): Task[List[Grouped[Account]]]
+  def update(wallet: Wallet.Id, id: Account.Id, info: UpdateAccount): Task[Account]
 }
 
 final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -37,6 +37,11 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsServi
   def grouped(wallet: Wallet.Id): Task[List[Grouped[Account]]] =
     groupsService.group(wallet, Group.Type.Accounts, list(wallet))
 
+  override def update(wallet: Wallet.Id, id: Account.Id, info: UpdateAccount): Task[Account] = for {
+    // TODO check account is in wallet. check update result
+    _ <- run(update(id, info))
+  } yield Account(id, info.group, info.name, info.idx, info.icon, info.tags)
+
   // queries
   private inline def insert(account: Account) = quote(query[Account].insertValue(lift(account)))
 
@@ -53,6 +58,17 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsServi
 
   private inline def accountsById(wallet: Wallet.Id, id: Account.Id) =
     accountsByWallet(wallet).filter(_.id == lift(id))
+
+  private inline def update(id: Account.Id, info: UpdateAccount) =
+    Tables.Accounts
+      .filter(_.id == lift(id))
+      .update(
+        _.group -> lift(info.group),
+        _.name  -> lift(info.name),
+        _.icon  -> lift(info.icon),
+        _.tags  -> lift(info.tags),
+        _.idx   -> lift(info.idx)
+      )
 }
 
 object AccountsServiceLive {
