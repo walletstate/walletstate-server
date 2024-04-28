@@ -1,7 +1,7 @@
 package online.walletstate.http.api
 
 import online.walletstate.models.Transaction.Page
-import online.walletstate.models.api.{CreateAccount, Grouped}
+import online.walletstate.models.api.{CreateAccount, Grouped, UpdateAccount}
 import online.walletstate.models.{Account, AppError, Asset, AssetBalance, Transaction}
 import zio.Chunk
 import zio.http.codec.Doc
@@ -35,8 +35,16 @@ trait AccountsEndpoints {
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path)
       .out[Account]
       .outError[AppError.Unauthorized](Status.Unauthorized)
-      .outError[AppError.AccountNotExist](Status.NotFound) // change error type
+      .outError[AppError.AccountNotExist](Status.NotFound)
       .??(Doc.h1("Get an account"))
+
+  val update =
+    Endpoint(Method.PUT / "api" / "accounts" / Account.Id.path)
+      .in[UpdateAccount]
+      .out[Account](Status.Ok)
+      .outError[AppError.Unauthorized](Status.Unauthorized)
+      .outError[AppError.AccountNotExist](Status.NotFound)
+      .??(Doc.h1("Update an account"))
 
   val listTransactions =
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path / "transactions")
@@ -57,6 +65,7 @@ trait AccountsEndpoints {
   val endpointsMap = Map(
     "create"           -> create,
     "get"              -> get,
+    "update"           -> update,
     "list"             -> list,
     "listGrouped"      -> listGrouped,
     "listTransactions" -> listTransactions,
@@ -66,6 +75,7 @@ trait AccountsEndpoints {
   val endpoints = Chunk(
     create,
     get,
+    update,
     list,
     //    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
     listTransactions,
