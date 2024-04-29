@@ -22,7 +22,7 @@ import zio.{Chunk, ZIOAppDefault}
 
 object GenPlayground extends ZIOAppDefault {
 
-  /** ZIO Endpoint doesn't support `operationId` and `tags` yet which can be used as method name and class name So for
+  /** ZIO Endpoint doesn't support `operationId` and `tags` yet which can be used as method name and class name. So for
     * now decided to user following structure `Map(ServiceName -> Map(MethodName -> Endpoint)`
     */
   val apiEndpoints = Map(
@@ -48,7 +48,7 @@ object GenPlayground extends ZIOAppDefault {
 //        TSHttpService(serviceName, Chunk.from(methods))
 //    }
 
-    AngularLibraryBuilder.build(Chunk.from(httpServices), version = "0.0.3")
+    AngularLibraryBuilder.build(Chunk.from(httpServices), version = "0.0.4")
   }
 }
 

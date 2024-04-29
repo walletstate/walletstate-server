@@ -3,7 +3,7 @@ package online.walletstate.http
 import online.walletstate.http.api.AssetsEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models.Asset
-import online.walletstate.models.api.CreateAsset
+import online.walletstate.models.api.{CreateAsset, UpdateAsset}
 import online.walletstate.services.AssetsService
 import zio.http.*
 import zio.{Chunk, ZLayer}
@@ -23,7 +23,11 @@ final case class AssetsRoutes(auth: AuthMiddleware, assetsService: AssetsService
     Handler.fromFunctionZIO[(Asset.Id, WalletContext)]((id, ctx) => assetsService.get(ctx.wallet, id))
   }()
 
-  val routes = Routes(createRoute, listRoute, getRoute)
+  private val updateRoute = update.implementWithWalletCtx[(Asset.Id, UpdateAsset, WalletContext)] {
+    Handler.fromFunctionZIO((id, info, ctx) => assetsService.update(ctx.wallet, id, info))
+  }()
+
+  val routes = Routes(createRoute, listRoute, getRoute, updateRoute)
 }
 
 object AssetsRoutes {

@@ -41,7 +41,7 @@ trait AccountsEndpoints {
   val update =
     Endpoint(Method.PUT / "api" / "accounts" / Account.Id.path)
       .in[UpdateAccount]
-      .out[Account](Status.Ok)
+      .out[Unit](Status.NoContent)
       .outError[AppError.Unauthorized](Status.Unauthorized)
       .outError[AppError.AccountNotExist](Status.NotFound)
       .??(Doc.h1("Update an account"))

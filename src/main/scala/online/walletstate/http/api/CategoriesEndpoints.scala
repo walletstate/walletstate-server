@@ -33,7 +33,7 @@ trait CategoriesEndpoints {
   val update =
     Endpoint(Method.PUT / "api" / "categories" / Category.Id.path)
       .in[UpdateCategory]
-      .out[Category](Status.Ok)
+      .out[Unit](Status.NoContent)
       .outError[AppError.BadRequest](Status.BadRequest)
       .outError[AppError.Unauthorized](Status.Unauthorized)
 
