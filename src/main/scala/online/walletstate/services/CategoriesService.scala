@@ -11,7 +11,7 @@ trait CategoriesService {
   def get(wallet: Wallet.Id, id: Category.Id): Task[Category]
   def list(wallet: Wallet.Id): Task[List[Category]]
   def grouped(wallet: Wallet.Id): Task[List[Grouped[Category]]]
-  def update(wallet: Wallet.Id, id: Category.Id, info: UpdateCategory): Task[Category]
+  def update(wallet: Wallet.Id, id: Category.Id, info: UpdateCategory): Task[Unit]
 }
 
 final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -33,10 +33,10 @@ final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsSer
   override def grouped(wallet: Wallet.Id): Task[List[Grouped[Category]]] =
     groupsService.group(wallet, Group.Type.Categories, list(wallet))
 
-  override def update(wallet: Wallet.Id, id: Category.Id, info: UpdateCategory): Task[Category] = for {
+  override def update(wallet: Wallet.Id, id: Category.Id, info: UpdateCategory): Task[Unit] = for {
     // TODO check category is in wallet. check update result
     _ <- run(update(id, info))
-  } yield Category(id, info.group, info.name, info.icon, info.tags, info.idx)
+  } yield ()
 
   // queries
   private inline def insert(category: Category) = quote(Tables.Categories.insertValue(lift(category)))

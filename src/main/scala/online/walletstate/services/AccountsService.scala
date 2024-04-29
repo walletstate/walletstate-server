@@ -12,7 +12,7 @@ trait AccountsService {
   def list(wallet: Wallet.Id): Task[List[Account]]
   def list(wallet: Wallet.Id, group: Group.Id): Task[List[Account]]
   def grouped(wallet: Wallet.Id): Task[List[Grouped[Account]]]
-  def update(wallet: Wallet.Id, id: Account.Id, info: UpdateAccount): Task[Account]
+  def update(wallet: Wallet.Id, id: Account.Id, info: UpdateAccount): Task[Unit]
 }
 
 final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -37,10 +37,10 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsServi
   def grouped(wallet: Wallet.Id): Task[List[Grouped[Account]]] =
     groupsService.group(wallet, Group.Type.Accounts, list(wallet))
 
-  override def update(wallet: Wallet.Id, id: Account.Id, info: UpdateAccount): Task[Account] = for {
+  override def update(wallet: Wallet.Id, id: Account.Id, info: UpdateAccount): Task[Unit] = for {
     // TODO check account is in wallet. check update result
     _ <- run(update(id, info))
-  } yield Account(id, info.group, info.name, info.idx, info.icon, info.tags)
+  } yield ()
 
   // queries
   private inline def insert(account: Account) = quote(query[Account].insertValue(lift(account)))
