@@ -73,8 +73,10 @@ object Record {
     def asString(`type`: Type): String = `type`.toString
   }
 
-  def make(d: RecordData): UIO[(Record, List[Transaction])] = for {
-    id <- Id.random
-    r = Record(id, d.`type`, d.category, d.datetime, d.description, d.tags, d.externalId, d.spentOn, d.generatedBy)
-  } yield (r, Transaction.make(id, d.from, d.to))
+  def make(data: RecordData): UIO[(Record, List[Transaction])] = Id.random.flatMap(make(_, data))
+  
+  def make(id: Record.Id, d: RecordData): UIO[(Record, List[Transaction])] = ZIO.succeed {
+    val r = Record(id, d.`type`, d.category, d.datetime, d.description, d.tags, d.externalId, d.spentOn, d.generatedBy)
+    (r, Transaction.make(id, d.from, d.to))
+  }
 }

@@ -4,7 +4,7 @@ import online.walletstate.http.api.{RecordsEndpoints, RecordsEndpoints$}
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models
 import online.walletstate.models.api.RecordData
-import online.walletstate.models.{Account, Page, Record}
+import online.walletstate.models.{Account, AppError, Page, Record}
 import online.walletstate.services.RecordsService
 import zio.*
 import zio.http.*
@@ -22,9 +22,17 @@ case class RecordsRoutes(auth: AuthMiddleware, recordsService: RecordsService) e
 
   private val getRoute = get.implementWithWalletCtx[(Record.Id, WalletContext)] {
     Handler.fromFunctionZIO((id, ctx) => recordsService.get(ctx.wallet, id))
+  } { case AppError.RecordNotExist => Right(AppError.RecordNotExist) }
+
+  private val updateRoute = update.implementWithWalletCtx[(Record.Id, RecordData, WalletContext)] {
+    Handler.fromFunctionZIO((id, data, ctx) => recordsService.update(ctx.wallet, id, data))
   }()
 
-  def routes = Routes(createRoute, listRoute, getRoute)
+  private val deleteRoute = delete.implementWithWalletCtx[(Record.Id, WalletContext)] {
+    Handler.fromFunctionZIO((id, ctx) => recordsService.delete(ctx.wallet, id))
+  }()
+
+  def routes = Routes(createRoute, listRoute, getRoute, updateRoute, deleteRoute)
 }
 
 object RecordsRoutes {

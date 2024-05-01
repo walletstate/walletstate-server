@@ -10,6 +10,8 @@ import zio.{Task, ZIO, ZLayer}
 trait RecordsService {
   def create(wallet: Wallet.Id, data: RecordData): Task[FullRecord]
   def get(wallet: Wallet.Id, id: Record.Id): Task[FullRecord]
+  def update(wallet: Wallet.Id, id: Record.Id, data: RecordData): Task[FullRecord]
+  def delete(wallet: Wallet.Id, id: Record.Id): Task[Unit]
   def list(wallet: Wallet.Id, account: Account.Id, pageToken: Option[Page.Token]): Task[Page[FullRecord]]
   def balance(wallet: Wallet.Id, account: Account.Id): Task[List[AssetBalance]]
 }
@@ -33,6 +35,21 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
     record       <- run(getRecord(id)).headOrError(RecordNotExist)
     transactions <- run(transactionsById(id))
   } yield record.toFull(transactions)
+
+  override def update(wallet: Wallet.Id, id: Record.Id, data: RecordData): Task[FullRecord] = for {
+    // TODO check record is for current wallet
+    updatedRecord <- Record.make(id, data)
+    (record, transactions) = updatedRecord
+    _ <- transaction(
+      run(transactionsById(id).delete) *> run(getRecord(id).delete) *>
+        run(insertRecord(record)) *> run(insertTransactions(transactions))
+    )
+  } yield record.toFull(transactions)
+
+  
+  override def delete(wallet: Wallet.Id, id: Record.Id): Task[Unit] =
+    // TODO check record is for current wallet and deletion result
+    transaction(run(transactionsById(id).delete) *> run(getRecord(id).delete)).map(_ => ())
 
   override def list(wallet: Wallet.Id, account: Account.Id, pageToken: Option[Page.Token]): Task[Page[FullRecord]] = {
     val records = pageToken match {
@@ -93,7 +110,7 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
       .leftJoin(Tables.Transactions)
       .on { case ((record, t1), t2) => record.id == t2.id && (t1.account != t2.account || t1.asset != t2.asset) }
       .filter { case ((record, t1), t2) => t1.account == lift(account) }
-      .distinctOn { case ((record, t1), t2) => (record.datetime, record.id) } //must be the same as sortBy
+      .distinctOn { case ((record, t1), t2) => (record.datetime, record.id) } // must be the same as sortBy
 
   private inline def insertTransactions(transactions: List[Transaction]) =
     quote(liftQuery(transactions).foreach(t => Tables.Transactions.insertValue(t)))

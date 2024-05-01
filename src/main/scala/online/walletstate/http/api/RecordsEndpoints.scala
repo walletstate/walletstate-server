@@ -28,17 +28,35 @@ trait RecordsEndpoints {
       .out[FullRecord]
       .outError[AppError.Unauthorized](Status.Unauthorized)
       .outError[AppError.RecordNotExist.type](Status.NotFound)
+    
+  val update =
+    Endpoint(Method.PUT / "api" / "records" / Record.Id.path)
+      .in[RecordData]
+      .out[FullRecord]
+      .outError[AppError.Unauthorized](Status.Unauthorized)
+      .outError[AppError.RecordNotExist.type](Status.NotFound)
+      .outError[AppError.BadRequest](Status.BadRequest)
+
+  val delete =
+    Endpoint(Method.DELETE / "api" / "records" / Record.Id.path)
+      .out[Unit](Status.NoContent)
+      .outError[AppError.Unauthorized](Status.Unauthorized)
+      .outError[AppError.RecordNotExist.type](Status.NotFound)
 
   val endpointsMap = Map(
     "create" -> create,
     "get"    -> get,
+    "update" -> update,
+    "delete" -> delete,
     "list"   -> list
   )
 
   val endpoints = Chunk(
     create,
 //    list, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-    get
+    get,
+    update,
+    delete
   )
 
 }
