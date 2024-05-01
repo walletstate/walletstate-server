@@ -353,14 +353,14 @@ GET localhost:8081/api/accounts
 GET localhost:8081/api/accounts/grouped
 
 
-### Get account transactions: Mono Black
-GET localhost:8081/api/accounts/{{monoBlackAccountId}}/transactions
+### Get account records: Mono Black
+GET localhost:8081/api/accounts/{{monoBlackAccountId}}/records
 
 ### Get account balance: Mono Black
 GET localhost:8081/api/accounts/{{monoBlackAccountId}}/balance
 
-### Get account transactions: Mono White
-GET localhost:8081/api/accounts/{{monoWhiteAccountId}}/transactions
+### Get account records: Mono White
+GET localhost:8081/api/accounts/{{monoWhiteAccountId}}/records
 
 ### Get account balance: Mono White
 GET localhost:8081/api/accounts/{{monoWhiteAccountId}}/balance
@@ -994,8 +994,8 @@ GET localhost:8081/api/exchange-rates?from={{uahAssetId}}&to={{usdAssetId}}
 
 
 
-### Create transaction: Salary income on Mono White account
-POST localhost:8081/api/transactions
+### Create record: Salary income on Mono White account
+POST localhost:8081/api/records
 Content-Type: application/json
 
 {
@@ -1012,11 +1012,11 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("salaryTransactionId", response.body[0].id);
+    client.global.set("salaryRecordId", response.body.id);
 %}
 
-### Create transaction: Transfer from mono white to mono black account
-POST localhost:8081/api/transactions
+### Create record: Transfer from mono white to mono black account
+POST localhost:8081/api/records
 Content-Type: application/json
 
 {
@@ -1038,11 +1038,11 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("transferTransactionId", response.body[0].id);
+    client.global.set("transferRecordId", response.body.id);
 %}
 
-### Create transaction: Transfer from mono white to usd dep
-POST localhost:8081/api/transactions
+### Create record: Transfer from mono white to usd dep
+POST localhost:8081/api/records
 Content-Type: application/json
 
 {
@@ -1064,11 +1064,11 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("openDepositTransactionId", response.body[0].id);
+    client.global.set("openDepositRecordId", response.body.id);
 %}
 
-### Create transaction: buy headphones
-POST localhost:8081/api/transactions
+### Create record: buy headphones
+POST localhost:8081/api/records
 Content-Type: application/json
 
 {
@@ -1085,11 +1085,11 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("headphonesTransactionId", response.body[0].id);
+    client.global.set("headphonesRecordId", response.body.id);
 %}
 
-### Create transaction: Exchange currencies
-POST localhost:8081/api/transactions
+### Create record: Exchange currencies
+POST localhost:8081/api/records
 Content-Type: application/json
 
 {
@@ -1111,12 +1111,12 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("exchangeTransactionId", response.body[0].id);
+    client.global.set("exchangeRecordId", response.body.id);
 %}
 
 
-### Get transactions: Mono white account
-GET localhost:8081/api/transactions?account={{monoWhiteAccountId}}
+### Get records: Mono white account
+GET localhost:8081/api/records?account={{monoWhiteAccountId}}
 
-### Get transactions: Mono black account
-GET localhost:8081/api/transactions?account={{monoBlackAccountId}}
+### Get records: Mono black account
+GET localhost:8081/api/records?account={{monoBlackAccountId}}

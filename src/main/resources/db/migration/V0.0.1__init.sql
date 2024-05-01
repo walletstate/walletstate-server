@@ -107,28 +107,34 @@ CREATE TABLE exchange_rates
     CONSTRAINT exchange_rates_to_fk FOREIGN KEY ("to") REFERENCES assets (id)
 );
 
-CREATE TYPE transaction_type AS ENUM ('Income', 'Spending', 'Transfer');
+CREATE TYPE record_type AS ENUM ('Income', 'Spending', 'Transfer');
 
-CREATE TABLE transactions
+CREATE TABLE records
 (
-    id           UUID                     NOT NULL DEFAULT uuid_generate_v4(),
-    account      UUID                     NOT NULL,
-    asset        UUID                     NOT NULL,
-    amount       DECIMAL(36, 18)          NOT NULL,
-    type         transaction_type         NOT NULL,
+    id           UUID                     NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    type         record_type              NOT NULL,
     category     UUID                     NOT NULL,
-    datetime     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    datetime     TIMESTAMP WITH TIME ZONE NOT NULL             DEFAULT NOW(),
     description  VARCHAR(255),
-    tags         VARCHAR(50)[]            NOT NULL DEFAULT '{}',
+    tags         VARCHAR(50)[]            NOT NULL             DEFAULT '{}',
     external_id  VARCHAR(255),
     spent_on     UUID,
     generated_by UUID,
+    CONSTRAINT records_category_fk FOREIGN KEY (category) REFERENCES categories (id),
+    CONSTRAINT records_spent_on_fk FOREIGN KEY (spent_on) REFERENCES assets (id),
+    CONSTRAINT records_generated_by_fk FOREIGN KEY (generated_by) REFERENCES assets (id)
+);
+
+CREATE TABLE transactions
+(
+    id      UUID            NOT NULL,
+    account UUID            NOT NULL,
+    asset   UUID            NOT NULL,
+    amount  DECIMAL(36, 18) NOT NULL,
     CONSTRAINT transactions_pk PRIMARY KEY (id, account, asset),
+    CONSTRAINT transactions_record_fk FOREIGN KEY (id) REFERENCES records (id),
     CONSTRAINT transactions_account_fk FOREIGN KEY (account) REFERENCES accounts (id),
-    CONSTRAINT transactions_asset_fk FOREIGN KEY (asset) REFERENCES assets (id),
-    CONSTRAINT transactions_category_fk FOREIGN KEY (category) REFERENCES categories (id),
-    CONSTRAINT transactions_spent_on_fk FOREIGN KEY (spent_on) REFERENCES assets (id),
-    CONSTRAINT transactions_generated_by_fk FOREIGN KEY (generated_by) REFERENCES assets (id)
+    CONSTRAINT transactions_asset_fk FOREIGN KEY (asset) REFERENCES assets (id)
 );
 
 -- Simple implementation to store icons in base64 encoded string.

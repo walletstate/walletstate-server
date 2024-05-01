@@ -2,7 +2,17 @@ package online.walletstate.db
 
 import io.getquill.jdbczio.Quill
 import io.getquill.{CompositeNamingStrategy3, NamingStrategy, PluralizedTableNames, PostgresEscape, SnakeCase}
-import online.walletstate.models.{Account, Asset, Category, ExchangeRate, Group, Transaction, Wallet, WalletUser}
+import online.walletstate.models.{
+  Account,
+  Asset,
+  Category,
+  ExchangeRate,
+  Group,
+  Transaction,
+  Wallet,
+  WalletUser,
+  Record
+}
 import zio.ZLayer
 import org.postgresql.util.PGobject
 
@@ -41,11 +51,11 @@ class WalletStateQuillContext(override val ds: DataSource)
   given assetTypeDecoder: Decoder[Asset.Type] =
     decoder(fromDbType(Asset.Type.fromString))
 
-  given transactionTypeEncoder: Encoder[Transaction.Type] =
-    encoder[Transaction.Type](Types.OTHER, toDbType("transaction_type", Transaction.Type.asString))
+  given transactionTypeEncoder: Encoder[Record.Type] =
+    encoder[Record.Type](Types.OTHER, toDbType("record_type", Record.Type.asString))
 
-  given transactionTypeDecoder: Decoder[Transaction.Type] =
-    decoder(fromDbType(Transaction.Type.fromString))
+  given transactionTypeDecoder: Decoder[Record.Type] =
+    decoder(fromDbType(Record.Type.fromString))
 
   object Tables {
     import io.getquill.*
@@ -57,6 +67,7 @@ class WalletStateQuillContext(override val ds: DataSource)
     inline def Categories: Quoted[EntityQuery[Category]]        = quote(querySchema[Category]("categories"))
     inline def Assets: Quoted[EntityQuery[Asset]]               = quote(query[Asset])
     inline def ExchangeRates: Quoted[EntityQuery[ExchangeRate]] = quote(query[ExchangeRate])
+    inline def Records: Quoted[EntityQuery[Record]]             = quote(query[Record])
     inline def Transactions: Quoted[EntityQuery[Transaction]]   = quote(query[Transaction])
 
   }

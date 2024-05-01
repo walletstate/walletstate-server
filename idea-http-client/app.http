@@ -234,8 +234,8 @@ GET localhost:8081/api/exchange-rates/{{exchangeRateId}}
 ### Get exchange rates for assets
 GET localhost:8081/api/exchange-rates?from={{fromAssetId}}&to={{toAssetId}}
 
-### Create transaction income
-POST localhost:8081/api/transactions
+### Create record income
+POST localhost:8081/api/records
 Content-Type: application/json
 
 {
@@ -252,11 +252,11 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("transactionId", response.body[0].id);
+    client.global.set("recordId", response.body.id);
 %}
 
-### Create transaction spending
-POST localhost:8081/api/transactions
+### Create record spending
+POST localhost:8081/api/records
 Content-Type: application/json
 
 {
@@ -273,11 +273,11 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("transactionId", response.body[0].id);
+    client.global.set("recordId", response.body.id);
 %}
 
-### Create transaction transfer (exchange)
-POST localhost:8081/api/transactions
+### Create record transfer (exchange)
+POST localhost:8081/api/records
 Content-Type: application/json
 
 {
@@ -299,12 +299,12 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("transactionId", response.body[0].id);
+    client.global.set("recordId", response.body.id);
 %}
 
 
-### Get transaction
-GET localhost:8081/api/transactions/{{transactionId}}
+### Get record
+GET localhost:8081/api/records/{{recordId}}
 
-### Get transactions
-GET localhost:8081/api/transactions?account={{account0Id}}
+### Get records
+GET localhost:8081/api/records?account={{account0Id}}
