@@ -63,11 +63,12 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsServi
     Tables.Accounts
       .filter(_.id == lift(id))
       .update(
-        _.group -> lift(info.group),
-        _.name  -> lift(info.name),
-        _.icon  -> lift(info.icon),
-        _.tags  -> lift(info.tags),
-        _.idx   -> lift(info.idx)
+        _.group        -> lift(info.group),
+        _.name         -> lift(info.name),
+        _.defaultAsset -> lift(info.defaultAsset),
+        _.icon         -> lift(info.icon),
+        _.tags         -> lift(info.tags),
+        _.idx          -> lift(info.idx)
       )
 }
 

@@ -49,7 +49,7 @@ object GenPlayground extends ZIOAppDefault {
 //        TSHttpService(serviceName, Chunk.from(methods))
 //    }
 
-    AngularLibraryBuilder.build(Chunk.from(httpServices), version = "0.0.4")
+    AngularLibraryBuilder.build(Chunk.from(httpServices), version = "0.0.5")
   }
 }
 
