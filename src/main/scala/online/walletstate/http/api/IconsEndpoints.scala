@@ -3,6 +3,7 @@ package online.walletstate.http.api
 import online.walletstate.models.api.CreateIcon
 import online.walletstate.models.{AppError, Icon}
 import zio.Chunk
+import zio.http.codec.QueryCodec
 import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
 
@@ -10,6 +11,7 @@ trait IconsEndpoints {
 
   val list =
     Endpoint(Method.GET / "api" / "icons")
+      .query(QueryCodec.query("tag").optional)
       .out[List[Icon.Id]]
       .outError[AppError.Unauthorized](Status.Unauthorized)
 
