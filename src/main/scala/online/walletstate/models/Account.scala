@@ -12,6 +12,7 @@ final case class Account(
     id: Account.Id,
     group: Group.Id,
     name: String,
+    defaultAsset: Option[Asset.Id],
     idx: Int,
     icon: Option[Icon.Id],
     tags: List[String]
@@ -26,12 +27,12 @@ object Account {
 
     val path: PathCodec[Id]   = zio.http.uuid("account-id").transform(Id(_))(_.id)
     val query: QueryCodec[Id] = QueryCodec.queryTo[UUID]("account").transform(Id(_))(_.id)
-    
-    given schema: Schema[Id]   = Schema[UUID].transform(Id(_), _.id)
+
+    given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
   def make(info: CreateAccount): UIO[Account] =
-    Id.random.map(Account(_, info.group, info.name, info.idx, info.icon, info.tags))
-  
-  given schema: Schema[Account]   = DeriveSchema.gen[Account]
+    Id.random.map(Account(_, info.group, info.name, info.defaultAsset, info.idx, info.icon, info.tags))
+
+  given schema: Schema[Account] = DeriveSchema.gen[Account]
 }

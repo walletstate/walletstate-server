@@ -97,7 +97,7 @@ object TSType {
       extends TSCustomType {
     val `type`: String = name
 
-    val visibleTypes: Chunk[TSType]   = Chunk(this)
+    val visibleTypes: Chunk[TSType]   = Chunk(this) ++ genType.visibleTypes
     val allNestedTypes: Chunk[TSType] = Chunk(this) ++ fields.flatMap(_.`type`.allNestedTypes)
 
     override def renderType: String = s"${`type`}<${genType.`type`}>"

@@ -75,8 +75,8 @@ object AppError {
   /////////// categories errors
   case object CategoryNotExist extends AppErrorWithMsg("")
 
-  /////////// transactions errors
-  case object TransactionNotExist extends AppErrorWithMsg("Transaction not found")
+  /////////// records errors
+  case object RecordNotExist extends AppErrorWithMsg("Transaction not found")
 
   case class InvalidTransactionInfo(msg: String) extends AppErrorWithMsg(msg)
 

@@ -13,7 +13,7 @@ import scala.reflect.ClassTag
 /** Workaround to provide auth context to Endpoint implementation
   */
 object EndpointOps {
-  
+
   extension [EPatIn, EIn, EErr: ClassTag, EOut](endpoint: Endpoint[EPatIn, EIn, EErr, EOut, _])
     def implementWithCtx[Ctx, HIn](
         ctxMiddleware: HandlerAspect[Any, Ctx]
@@ -23,7 +23,7 @@ object EndpointOps {
         errorMapper: PartialFunction[Any, EErr] = PartialFunction.empty
     )(using z: Zippable.Out[EIn, Ctx, HIn], trace: Trace): Route[Any, Any] = {
       endpoint.route -> ctxMiddleware -> Handler.fromFunctionZIO[(EPatIn, Ctx, Request)] { (_, ctx, req) =>
-        
+
         val response = for {
           input    <- endpoint.input.decodeRequest(req).absorb
           result   <- handler(z.zip(input, ctx))
@@ -40,7 +40,10 @@ object EndpointOps {
             case e: AppError.Unauthorized =>
               ZIO.succeed(AppError.UnauthorizedCodec.encodeResponse(e, req.outputMediaType))
           }
-          .catchAll { _ => ZIO.succeed(Response.internalServerError) }
+          .catchAll { e =>
+            ZIO.logError(s"Internal server error: ${e}") *>
+              AppError.InternalServerError.encode(Status.InternalServerError, req.outputMediaType)
+          }
       }
     }
 

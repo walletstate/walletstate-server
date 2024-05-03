@@ -19,7 +19,7 @@ final case class WalletStateServer(
     categories: CategoriesRoutes,
     assets: AssetsRoutes,
     exchangeRates: ExchangeRatesRoutes,
-    transactions: TransactionsRoutes,
+    records: RecordsRoutes,
     icons: IconsRoutes,
     migrations: Migrations
 ) {
@@ -28,7 +28,7 @@ final case class WalletStateServer(
     title = "WalletState.online API",
     version = "0.0.1",
     accounts.endpoints ++ assets.endpoints ++ categories.endpoints ++
-      exchangeRates.endpoints ++ groupsRoutes.endpoints ++ transactions.endpoints ++
+      exchangeRates.endpoints ++ groupsRoutes.endpoints ++ records.endpoints ++
       wallets.endpoints ++ icons.endpoints
   )
 
@@ -41,7 +41,7 @@ final case class WalletStateServer(
       categories.routes ++
       assets.routes ++
       exchangeRates.routes ++
-      transactions.routes ++
+      records.routes ++
       icons.routes ++
       SwaggerUI.routes(Endpoint(Method.GET / "api" / "docs").route.pathCodec, openAPISpec)
 

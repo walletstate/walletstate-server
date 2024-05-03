@@ -1,8 +1,7 @@
 package online.walletstate.http.api
 
-import online.walletstate.models.Transaction.Page
-import online.walletstate.models.api.{CreateAccount, Grouped, UpdateAccount}
-import online.walletstate.models.{Account, AppError, Asset, AssetBalance, Transaction}
+import online.walletstate.models.api.{CreateAccount, FullRecord, Grouped, UpdateAccount}
+import online.walletstate.models.{Account, AppError, AssetBalance, Page}
 import zio.Chunk
 import zio.http.codec.Doc
 import zio.http.endpoint.Endpoint
@@ -46,10 +45,10 @@ trait AccountsEndpoints {
       .outError[AppError.AccountNotExist](Status.NotFound)
       .??(Doc.h1("Update an account"))
 
-  val listTransactions =
-    Endpoint(Method.GET / "api" / "accounts" / Account.Id.path / "transactions")
-      .query[Option[Transaction.Page.Token]](Transaction.Page.Token.queryCodec.optional)
-      .out[Transaction.Page]
+  val listRecords =
+    Endpoint(Method.GET / "api" / "accounts" / Account.Id.path / "records")
+      .query[Option[Page.Token]](Page.Token.queryCodec.optional)
+      .out[Page[FullRecord]]
       .outError[AppError.Unauthorized](Status.Unauthorized)
       .outError[AppError.AccountNotExist](Status.NotFound)
       .outError[AppError.BadRequest](Status.BadRequest)
@@ -63,13 +62,13 @@ trait AccountsEndpoints {
       .??(Doc.h1("Get account balance"))
 
   val endpointsMap = Map(
-    "create"           -> create,
-    "get"              -> get,
-    "update"           -> update,
-    "list"             -> list,
-    "listGrouped"      -> listGrouped,
-    "listTransactions" -> listTransactions,
-    "getBalance"       -> getBalance
+    "create"      -> create,
+    "get"         -> get,
+    "update"      -> update,
+    "list"        -> list,
+    "listGrouped" -> listGrouped,
+    "listRecords" -> listRecords,
+    "getBalance"  -> getBalance
   )
 
   val endpoints = Chunk(
@@ -77,8 +76,8 @@ trait AccountsEndpoints {
     get,
     update,
     list,
-    //    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-    listTransactions,
+//    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
+//    listRecords, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
     getBalance
   )
 
