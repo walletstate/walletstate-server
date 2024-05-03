@@ -6,7 +6,7 @@ object Dependencies {
     val zio       = "2.0.21"
     val zioJson   = "0.6.2"
     val zioHttp   = "3.0.0-RC6"
-    val zioConfig = "4.0.0-RC16"
+    val zioConfig = "4.0.2"
     val jwt       = "9.2.0"
 
     val zioLogging = "2.1.16"
