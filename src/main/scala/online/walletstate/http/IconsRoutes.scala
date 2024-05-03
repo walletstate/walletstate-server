@@ -18,8 +18,8 @@ case class IconsRoutes(auth: AuthMiddleware, iconsService: IconsService) extends
     Handler.fromFunctionZIO((info, ctx) => iconsService.create(ctx.wallet, info).map(_.id))
   }()
 
-  private val listRoute = list.implementWithWalletCtx[WalletContext] {
-    Handler.fromFunctionZIO(ctx => iconsService.listIds(ctx.wallet))
+  private val listRoute = list.implementWithWalletCtx[(Option[String], WalletContext)] {
+    Handler.fromFunctionZIO((maybeTag, ctx) => iconsService.listIds(ctx.wallet, maybeTag))
   }()
 
   private val getIconHandler = Handler.fromFunctionZIO[(Icon.Id, WalletContext, Request)] { (id, ctx, req) =>

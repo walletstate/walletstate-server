@@ -8,7 +8,6 @@ import online.walletstate.http.api.{
   GroupsEndpoints,
   IconsEndpoints,
   RecordsEndpoints,
-  RecordsEndpoints$,
   WalletsEndpoints
 }
 import online.walletstate.models.Wallet
@@ -49,7 +48,7 @@ object GenPlayground extends ZIOAppDefault {
 //        TSHttpService(serviceName, Chunk.from(methods))
 //    }
 
-    AngularLibraryBuilder.build(Chunk.from(httpServices), version = "0.0.5")
+    AngularLibraryBuilder.build(Chunk.from(httpServices), version = "0.0.1-6")
   }
 }
 
