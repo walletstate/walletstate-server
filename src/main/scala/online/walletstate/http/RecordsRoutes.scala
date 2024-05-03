@@ -1,6 +1,6 @@
 package online.walletstate.http
 
-import online.walletstate.http.api.{RecordsEndpoints, RecordsEndpoints$}
+import online.walletstate.http.api.RecordsEndpoints
 import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
 import online.walletstate.models
 import online.walletstate.models.api.RecordData

@@ -5,8 +5,23 @@ services:
     image: postgres
     restart: always
     environment:
-      - "POSTGRES_USER=docker"
-      - "POSTGRES_PASSWORD=docker"
-      - "POSTGRES_DB=walletstate"
+      POSTGRES_USER: "docker"
+      POSTGRES_PASSWORD: "docker"
+      POSTGRES_DB: "walletstate"
     ports:
       - "5432:5432"
+
+  server:
+    image: ghcr.io/walletstate/walletstate-server:0.0.1-1-g99fae07
+    environment:
+      POSTGRES_HOST: "db"
+      POSTGRES_USER: "docker"
+      POSTGRES_PASSWORD: "docker"
+      POSTGRES_DB: "walletstate"
+
+  ui:
+    image: ghcr.io/walletstate/walletstate-ui:0.0.1
+    environment:
+      WALLETSTATE_SERVER: "http://server:8081"
+    ports:
+      - "8080:80"
