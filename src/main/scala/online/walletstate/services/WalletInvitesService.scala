@@ -2,6 +2,7 @@ package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.{AppError, WalletInvite}
+import online.walletstate.services.queries.WalletInvitesQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
 import zio.*
 
@@ -11,7 +12,9 @@ trait WalletInvitesService {
   def delete(id: WalletInvite.Id): Task[Unit]
 }
 
-case class WalletInvitesServiceLive(quill: WalletStateQuillContext) extends WalletInvitesService {
+case class WalletInvitesServiceLive(quill: WalletStateQuillContext)
+    extends WalletInvitesService
+    with WalletInvitesQuillQueries {
   import io.getquill.*
   import quill.*
 
@@ -23,11 +26,6 @@ case class WalletInvitesServiceLive(quill: WalletStateQuillContext) extends Wall
 
   override def delete(id: WalletInvite.Id): Task[Unit] =
     run(inviteById(id).delete).map(_ => ())
-
-  // queries
-  private inline def inviteById(id: WalletInvite.Id) = quote(query[WalletInvite].filter(_.id == lift(id)))
-  private inline def inviteByCode(code: String)      = quote(query[WalletInvite].filter(_.inviteCode == lift(code)))
-  private inline def insert(invite: WalletInvite)    = quote(query[WalletInvite].insertValue(lift(invite)))
 }
 
 object WalletInvitesServiceLive {

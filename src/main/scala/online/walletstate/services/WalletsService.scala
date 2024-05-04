@@ -2,6 +2,7 @@ package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.{AppError, User, Wallet, WalletInvite, WalletUser}
+import online.walletstate.services.queries.WalletsQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
 import zio.{Clock, Task, ZIO, ZLayer}
 
@@ -20,7 +21,8 @@ case class WalletsServiceLive(
     quill: WalletStateQuillContext,
     usersService: UsersService,
     invitesService: WalletInvitesService
-) extends WalletsService {
+) extends WalletsService
+    with WalletsQuillQueries {
 
   import io.getquill.*
   import quill.*
@@ -54,15 +56,6 @@ case class WalletsServiceLive(
   } yield wallet
 
   override def isUserInWallet(user: User.Id, wallet: Wallet.Id): Task[Boolean] = run(userExists(wallet, user))
-
-  // queries
-  private inline def insert(wallet: Wallet)    = Tables.Wallets.insertValue(lift(wallet))
-  private inline def walletById(id: Wallet.Id) = Tables.Wallets.filter(_.id == lift(id))
-
-  private inline def insertWalletUser(walletUser: WalletUser) = Tables.WalletUsers.insertValue(lift(walletUser))
-
-  private inline def userExists(wallet: Wallet.Id, user: User.Id) =
-    Tables.WalletUsers.filter(_.wallet == lift(wallet)).filter(_.user == lift(user)).nonEmpty
 }
 
 object WalletsServiceLive {

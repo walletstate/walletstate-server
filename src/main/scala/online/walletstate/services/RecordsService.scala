@@ -4,7 +4,8 @@ import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.AppError.RecordNotExist
 import online.walletstate.utils.ZIOExtensions.headOrError
 import online.walletstate.models.api.{FullRecord, RecordData, SingleTransactionRecord}
-import online.walletstate.models.{Record, Account, AssetBalance, Page, Transaction, Wallet}
+import online.walletstate.models.{Account, AssetBalance, Page, Record, Transaction, Wallet}
+import online.walletstate.services.queries.RecordsQuillQueries
 import zio.{Task, ZIO, ZLayer}
 
 trait RecordsService {
@@ -16,10 +17,9 @@ trait RecordsService {
   def balance(wallet: Wallet.Id, account: Account.Id): Task[List[AssetBalance]]
 }
 
-case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsService {
+case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsService with RecordsQuillQueries {
   import io.getquill.*
   import quill.{*, given}
-  import io.getquill.extras.ZonedDateTimeOps
 
   private inline val PageSize = 50 // TODO Move to configs
 
@@ -46,7 +46,6 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
     )
   } yield record.toFull(transactions)
 
-  
   override def delete(wallet: Wallet.Id, id: Record.Id): Task[Unit] =
     // TODO check record is for current wallet and deletion result
     transaction(run(transactionsById(id).delete) *> run(getRecord(id).delete)).map(_ => ())
@@ -76,54 +75,6 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
     }
   }
 
-  // queries utils
-  // TODO needs for `quote(transaction.id <= lift(id))`. Investigate more general options for AnyVal
-  implicit class RecordIdOrdered(val value: Record.Id) extends Ordered[Record.Id] {
-    override def compare(that: Record.Id): Index = value.id.compareTo(that.id)
-  }
-
-  extension (recordsQuery: Query[((Record, Transaction), Option[Transaction])]) {
-    inline def firstPage(pageSize: Int): Query[((Record, Transaction), Option[Transaction])] = quote {
-      recordsQuery
-        .sortBy { case ((r, _), _) => (r.datetime, r.id) }(Ord(Ord.desc, Ord.asc))
-        .take(pageSize)
-    }
-
-    inline def page(pageSize: Int, pageToken: Page.Token): Query[((Record, Transaction), Option[Transaction])] = quote {
-      recordsQuery
-        .filter { case ((r, _), _) =>
-          r.datetime < lift(pageToken.dt) || (r.datetime == lift(pageToken.dt) && r.id > lift(pageToken.id))
-        }
-        .sortBy { case ((r, _), _) => (r.datetime, r.id) }(Ord(Ord.desc, Ord.asc))
-        .take(pageSize)
-    }
-  }
-
-  // queries
-  private inline def insertRecord(record: Record) = Tables.Records.insertValue(lift(record))
-  private inline def getRecord(id: Record.Id)     = Tables.Records.filter(_.id == lift(id))
-
-  private inline def selectFullRecords(account: Account.Id): Query[((Record, Transaction), Option[Transaction])] =
-    Tables.Records
-      .join(Tables.Transactions)
-      .on(_.id == _.id)
-      .leftJoin(Tables.Transactions)
-      .on { case ((record, t1), t2) => record.id == t2.id && (t1.account != t2.account || t1.asset != t2.asset) }
-      .filter { case ((record, t1), t2) => t1.account == lift(account) }
-      .distinctOn { case ((record, t1), t2) => (record.datetime, record.id) } // must be the same as sortBy
-
-  private inline def insertTransactions(transactions: List[Transaction]) =
-    quote(liftQuery(transactions).foreach(t => Tables.Transactions.insertValue(t)))
-
-  private inline def transactionsById(id: Record.Id) = Tables.Transactions.filter(_.id == lift(id))
-
-  private inline def transactionsByAccount(account: Account.Id): Query[Transaction] =
-    Tables.Transactions.filter(_.account == lift(account))
-
-  private inline def balanceByAccount(account: Account.Id) =
-    Tables.Transactions
-      .filter(_.account == lift(account))
-      .groupByMap(_.asset)(t => AssetBalance(t.asset, sum(t.amount)))
 }
 
 object RecordsServiceLive {
