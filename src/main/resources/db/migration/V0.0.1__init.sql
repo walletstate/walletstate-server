@@ -127,6 +127,8 @@ CREATE TABLE records
     CONSTRAINT records_generated_by_fk FOREIGN KEY (generated_by) REFERENCES assets (id)
 );
 
+CREATE INDEX records_datetime_id_idx ON records (datetime, id);
+
 CREATE TABLE transactions
 (
     id      UUID            NOT NULL,
