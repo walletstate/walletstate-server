@@ -2,7 +2,8 @@ package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.api.{CreateAccount, Grouped, UpdateAccount}
-import online.walletstate.models.{Account, AppError, Group, User, Wallet}
+import online.walletstate.models.*
+import online.walletstate.services.queries.AccountsQuillQueries
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
@@ -16,7 +17,8 @@ trait AccountsService {
 }
 
 final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
-    extends AccountsService {
+    extends AccountsService
+    with AccountsQuillQueries {
   import io.getquill.*
   import quill.{*, given}
 
@@ -41,35 +43,6 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsServi
     // TODO check account is in wallet. check update result
     _ <- run(update(id, info))
   } yield ()
-
-  // queries
-  private inline def insert(account: Account) = quote(query[Account].insertValue(lift(account)))
-
-  private inline def accountsByWallet(wallet: Wallet.Id) = quote {
-    query[Account]
-      .join(query[Group])
-      .on(_.group == _.id)
-      .filter { case (_, group) => group.wallet == lift(wallet) }
-      .map { case (account, _) => account }
-  }
-
-  private inline def accountsByGroup(wallet: Wallet.Id, group: Group.Id) =
-    accountsByWallet(wallet).filter(_.group == lift(group))
-
-  private inline def accountsById(wallet: Wallet.Id, id: Account.Id) =
-    accountsByWallet(wallet).filter(_.id == lift(id))
-
-  private inline def update(id: Account.Id, info: UpdateAccount) =
-    Tables.Accounts
-      .filter(_.id == lift(id))
-      .update(
-        _.group        -> lift(info.group),
-        _.name         -> lift(info.name),
-        _.defaultAsset -> lift(info.defaultAsset),
-        _.icon         -> lift(info.icon),
-        _.tags         -> lift(info.tags),
-        _.idx          -> lift(info.idx)
-      )
 }
 
 object AccountsServiceLive {

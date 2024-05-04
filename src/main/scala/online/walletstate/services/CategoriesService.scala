@@ -3,6 +3,7 @@ package online.walletstate.services
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.api.{CreateCategory, Grouped, UpdateCategory}
 import online.walletstate.models.{AppError, Category, Group, User, Wallet}
+import online.walletstate.services.queries.CategoriesQuillQueries
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZLayer}
 
@@ -15,7 +16,8 @@ trait CategoriesService {
 }
 
 final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
-    extends CategoriesService {
+    extends CategoriesService
+    with CategoriesQuillQueries {
   import io.getquill.*
   import quill.{*, given}
 
@@ -37,29 +39,6 @@ final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsSer
     // TODO check category is in wallet. check update result
     _ <- run(update(id, info))
   } yield ()
-
-  // queries
-  private inline def insert(category: Category) = quote(Tables.Categories.insertValue(lift(category)))
-  private inline def categoriesByWallet(wallet: Wallet.Id) = quote {
-    Tables.Categories
-      .join(Tables.Groups)
-      .on(_.group == _.id)
-      .filter { case (_, group) => group.wallet == lift(wallet) }
-      .map { case (group, _) => group }
-  }
-  private inline def categoriesById(wallet: Wallet.Id, id: Category.Id) =
-    categoriesByWallet(wallet).filter(_.id == lift(id))
-
-  private inline def update(id: Category.Id, info: UpdateCategory) =
-    Tables.Categories
-      .filter(_.id == lift(id))
-      .update(
-        _.group -> lift(info.group),
-        _.name  -> lift(info.name),
-        _.icon  -> lift(info.icon),
-        _.tags  -> lift(info.tags),
-        _.idx   -> lift(info.idx)
-      )
 }
 
 object CategoriesServiceLive {

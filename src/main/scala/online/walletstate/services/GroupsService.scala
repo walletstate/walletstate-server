@@ -3,6 +3,7 @@ package online.walletstate.services
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.api.Grouped
 import online.walletstate.models.{AppError, Group, Groupable, User, Wallet}
+import online.walletstate.services.queries.GroupsQuillQueries
 import online.walletstate.utils.ZIOExtensions.getOrError
 import zio.{Task, ZIO, ZLayer}
 
@@ -15,7 +16,7 @@ trait GroupsService {
   def group[T <: Groupable](wallet: Wallet.Id, `type`: Group.Type, getItemsFn: Task[List[T]]): Task[List[Grouped[T]]]
 }
 
-final case class GroupsServiceLive(quill: WalletStateQuillContext) extends GroupsService {
+final case class GroupsServiceLive(quill: WalletStateQuillContext) extends GroupsService with GroupsQuillQueries {
   import io.getquill.*
   import quill.{*, given}
 
@@ -72,26 +73,6 @@ final case class GroupsServiceLive(quill: WalletStateQuillContext) extends Group
         )
       }
   }
-
-  // queries
-  private inline def insert(accountsGroup: Group) = quote(query[Group].insertValue(lift(accountsGroup)))
-    
-  private inline def groupsByWallet(wallet: Wallet.Id) = quote(query[Group].filter(_.wallet == lift(wallet)))
-
-  private inline def groupsByType(wallet: Wallet.Id, `type`: Group.Type) =
-    quote(groupsByWallet(wallet).filter(_.`type` == lift(`type`)))
-
-  private inline def groupsById(wallet: Wallet.Id, group: Group.Id) =
-    groupsByWallet(wallet).filter(_.id == lift(group))
-
-  private inline def updateQuery(
-      wallet: Wallet.Id,
-      group: Group.Id,
-      name: String,
-      idx: Int
-  ) = groupsById(wallet, group).update(_.name -> lift(name), _.idx -> lift(idx))
-
-  private inline def deleteQuery(wallet: Wallet.Id, group: Group.Id) = groupsById(wallet, group).delete
 }
 
 object GroupsServiceLive {

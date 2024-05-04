@@ -3,6 +3,7 @@ package online.walletstate.services
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.{AppError, Asset, ExchangeRate, Wallet}
 import online.walletstate.models.api.CreateExchangeRate
+import online.walletstate.services.queries.ExchangeRatesQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
 import zio.{Task, ZLayer}
 
@@ -12,7 +13,9 @@ trait ExchangeRatesService {
   def list(wallet: Wallet.Id, from: Asset.Id, to: Asset.Id): Task[List[ExchangeRate]]
 }
 
-case class ExchangeRatesServiceLive(quill: WalletStateQuillContext) extends ExchangeRatesService {
+case class ExchangeRatesServiceLive(quill: WalletStateQuillContext)
+    extends ExchangeRatesService
+    with ExchangeRatesQuillQueries {
   import io.getquill.*
   import quill.{*, given}
 
@@ -31,14 +34,6 @@ case class ExchangeRatesServiceLive(quill: WalletStateQuillContext) extends Exch
     // TODO: check `from` and `to` assets are in wallet
     rates <- run(ratesByAssets(from, to))
   } yield rates
-
-//  queries
-  private inline def insert(rate: ExchangeRate)    = quote(Tables.ExchangeRates.insertValue(lift(rate)))
-  private inline def rateById(id: ExchangeRate.Id) = quote(Tables.ExchangeRates.filter(_.id == lift(id)))
-  private inline def ratesByAssets(from: Asset.Id, to: Asset.Id) = quote(
-    Tables.ExchangeRates.filter(_.from == lift(from)).filter(_.to == lift(to))
-  )
-
 }
 
 object ExchangeRatesServiceLive {
