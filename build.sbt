@@ -15,7 +15,7 @@ enablePlugins(
 Compile / mainClass := Some("online.walletstate.Application")
 
 git.useGitDescribe := true
-git.baseVersion := "0.0.0"
+git.baseVersion    := "0.0.0"
 val tagRegexp    = "v([0-9]+\\.[0-9]+\\.[0-9]+)".r
 val commitRegexp = "v([0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-(.*)".r
 git.gitTagToVersionNumber := {
@@ -27,6 +27,7 @@ git.gitTagToVersionNumber := {
 
 dockerBaseImage    := "openjdk:20-jdk-slim" //todo investigate. JRE?
 dockerUpdateLatest := true
+dockerLabels       := Map("org.opencontainers.image.source" -> "https://github.com/walletstate/walletstate-server")
 
 Docker / dockerRepository := Some("ghcr.io/walletstate")
 Docker / packageName      := "walletstate-server"
