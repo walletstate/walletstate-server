@@ -1,6 +1,6 @@
 package online.walletstate.http.auth
 
-import online.walletstate.utils.AuthCookiesOps.getAuthCookies
+import online.walletstate.utils.AuthCookiesOps.{getAuthCookies, getBearerToken}
 import online.walletstate.utils.EndpointOps.implementWithCtx
 import online.walletstate.models.AppError
 import online.walletstate.services.TokenService
@@ -17,6 +17,7 @@ final case class AuthMiddleware(tokenService: TokenService) {
   def ctx[Ctx <: AuthContext: JsonDecoder: Tag]: HandlerAspect[Any, Ctx] =
     Middleware.customAuthProvidingZIO[Any, Ctx] { request =>
       request.headers.getAuthCookies
+        .orElse(request.headers.getBearerToken) // temporary implementation. TODO: implement feature for API tokens
         .fold(ZIO.fail(AppError.AuthTokenNotFound))(tokenStr => tokenService.decode(tokenStr))
         .map(token => Some(token))
         .mapError {
