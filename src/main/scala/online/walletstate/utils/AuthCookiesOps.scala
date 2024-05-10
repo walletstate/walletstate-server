@@ -13,6 +13,12 @@ object AuthCookiesOps {
     def getAuthCookies: Option[String] =
       headers.get(Header.Cookie).flatMap(_.value.find(_.name == AuthCookiesName).map(_.content))
 
+    def getBearerToken: Option[String] =
+      headers.get(Header.Authorization).flatMap {
+        case Header.Authorization.Bearer(token) => Some(token.value.mkString)
+        case _                                  => None
+      }
+
   extension (response: Response)
     def withAuthCookies(token: AuthToken): Response =
       response
