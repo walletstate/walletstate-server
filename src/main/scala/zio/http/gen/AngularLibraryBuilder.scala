@@ -23,7 +23,7 @@ object AngularLibraryBuilder {
     customTypes <- writeCustomTypes(libDir, services)
     _           <- writeServices(libDir, services)
     _           <- writePublicApi(libDir, customTypes, services)
-    _           <- Console.printLine("Source code generated. Building and  publishing ...")
+    _           <- Console.printLine(s"Source code generated. Building and  publishing version $version ...")
     _           <- buildLibrary(workspace)
     _           <- publishLibrary(workspace)
     _           <- Console.printLine("Done")

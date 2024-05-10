@@ -18,7 +18,7 @@ import zio.http.gen.annotations.genericField
 import zio.http.gen.parsers.EndpointParser
 import zio.http.gen.ts.TSHttpService
 import zio.schema.{DeriveSchema, Schema}
-import zio.{Chunk, ZIOAppDefault}
+import zio.{Chunk, ZIO, ZIOAppDefault}
 
 object GenPlayground extends ZIOAppDefault {
 
@@ -47,8 +47,11 @@ object GenPlayground extends ZIOAppDefault {
 //        val methods = endpoints.map((methodName, endpoint) => EndpointParser.parse(methodName, endpoint))
 //        TSHttpService(serviceName, Chunk.from(methods))
 //    }
-
-    AngularLibraryBuilder.build(Chunk.from(httpServices), version = "0.0.1-6")
+    for {
+      args    <- getArgs
+      version <- ZIO.fromOption(args.headOption)
+      _       <- AngularLibraryBuilder.build(Chunk.from(httpServices), version)
+    } yield ()
   }
 }
 

@@ -34,5 +34,16 @@ Docker / packageName      := "walletstate-server"
 Docker / version          := version.value
 dockerExposedPorts ++= Seq(8081)
 
+val generateAngularClient = taskKey[Unit]("Generate Angular Http client")
+
+generateAngularClient := Def.taskDyn {
+  val clientVersion = version.value
+  Def.task {
+    (Compile / runMain)
+      .toTask(s" zio.http.gen.GenPlayground $clientVersion")
+      .value
+  }
+}.value
+
 ThisProject / testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
 Test / fork := true //is needed for testcontainers
