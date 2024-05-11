@@ -26,7 +26,7 @@ git.gitTagToVersionNumber := {
 }
 
 dockerBaseImage    := "openjdk:20-jdk-slim" //todo investigate. JRE?
-dockerUpdateLatest := true
+dockerUpdateLatest := false
 dockerLabels       := Map("org.opencontainers.image.source" -> "https://github.com/walletstate/walletstate-server")
 
 Docker / dockerRepository := Some("ghcr.io/walletstate")
@@ -34,16 +34,37 @@ Docker / packageName      := "walletstate-server"
 Docker / version          := version.value
 dockerExposedPorts ++= Seq(8081)
 
-val generateAngularClient = taskKey[Unit]("Generate Angular Http client")
+import scala.sys.process.Process
 
+val createDockerBuildXConfig = taskKey[Unit]("Create docker buildx configuration if not exist")
+createDockerBuildXConfig := {
+  if (Process("docker buildx inspect multi-platform-builder").! == 1) {
+    Process("docker buildx create --use --name multi-platform-builder", baseDirectory.value).!
+  }
+}
+
+val dockerBuildImageWithBuildX = taskKey[Unit]("Build docker images with buildx")
+dockerBuildImageWithBuildX := {
+  dockerAliases.value.foreach { alias =>
+    Process(
+      s"docker buildx build --platform=linux/arm64,linux/amd64 --push -t $alias .",
+      baseDirectory.value / "target" / "docker" / "stage"
+    ).!
+  }
+}
+
+Docker / publish := Def.sequential(Docker / publishLocal, createDockerBuildXConfig, dockerBuildImageWithBuildX).value
+
+
+
+val generateAngularClient = taskKey[Unit]("Generate Angular Http client")
 generateAngularClient := Def.taskDyn {
-  val clientVersion = version.value
   Def.task {
-    (Compile / runMain)
-      .toTask(s" zio.http.gen.GenPlayground $clientVersion")
-      .value
+    (Compile / runMain).toTask(s" zio.http.gen.GenPlayground ${version.value}").value
   }
 }.value
+
+
 
 ThisProject / testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
 Test / fork := true //is needed for testcontainers
