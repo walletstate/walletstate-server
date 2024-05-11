@@ -59,8 +59,9 @@ Docker / publish := Def.sequential(Docker / publishLocal, createDockerBuildXConf
 
 val generateAngularClient = taskKey[Unit]("Generate Angular Http client")
 generateAngularClient := Def.taskDyn {
+  val clientVersion = version.value
   Def.task {
-    (Compile / runMain).toTask(s" zio.http.gen.GenPlayground ${version.value}").value
+    (Compile / runMain).toTask(s" zio.http.gen.GenPlayground $clientVersion").value
   }
 }.value
 
