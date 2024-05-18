@@ -6,12 +6,7 @@ trait RecordsQuillQueries extends QuillQueries {
   import quill.*
   import io.getquill.*
   import io.getquill.extras.ZonedDateTimeOps
-
-  // TODO needs for `quote(transaction.id <= lift(id))`. Investigate more general options for AnyVal
-  implicit class RecordIdOrdered(val value: Record.Id) extends Ordered[Record.Id] {
-    override def compare(that: Record.Id): Index = value.id.compareTo(that.id)
-  }
-
+  
   extension (recordsQuery: Query[((Record, Transaction), Option[Transaction])]) {
     inline def firstPage(pageSize: Int): Query[((Record, Transaction), Option[Transaction])] = quote {
       recordsQuery

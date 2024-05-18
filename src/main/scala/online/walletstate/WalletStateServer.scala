@@ -20,6 +20,7 @@ final case class WalletStateServer(
     assets: AssetsRoutes,
     exchangeRates: ExchangeRatesRoutes,
     records: RecordsRoutes,
+    analytics: AnalyticsRoutes,
     icons: IconsRoutes,
     migrations: Migrations
 ) {
@@ -29,7 +30,7 @@ final case class WalletStateServer(
     version = "0.0.1",
     accounts.endpoints ++ assets.endpoints ++ categories.endpoints ++
       exchangeRates.endpoints ++ groupsRoutes.endpoints ++ records.endpoints ++
-      wallets.endpoints ++ icons.endpoints
+      analytics.endpoints ++ wallets.endpoints ++ icons.endpoints
   )
 
   private val routes =
@@ -42,6 +43,7 @@ final case class WalletStateServer(
       assets.routes ++
       exchangeRates.routes ++
       records.routes ++
+      analytics.routes ++
       icons.routes ++
       SwaggerUI.routes(Endpoint(Method.GET / "api" / "docs").route.pathCodec, openAPISpec)
 
