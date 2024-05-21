@@ -1,10 +1,12 @@
 package online.walletstate.models
 
+import online.walletstate.models
 import zio.schema.{DeriveSchema, Schema}
 
 import java.time.ZonedDateTime
+import java.util.UUID
 
-final case class Analytics(filter: Analytics.Filter)
+final case class Analytics()
 
 object Analytics {
 
@@ -29,6 +31,35 @@ object Analytics {
 
   object Filter {
     given schema: Schema[Filter] = DeriveSchema.gen
+  }
+
+  // TODO To not allow server and DB overloading:
+  // - define and implement validation rules (like allow groupBy category only if categoryGroup or category is defined in filter)
+  // - limit the max number of groups, categories and accounts that can be created for wallet
+  final case class GroupRequest(filter: Analytics.Filter, groupBy: Analytics.GroupBy)
+  object GroupRequest {
+    given schema: Schema[GroupRequest] = DeriveSchema.gen
+  }
+
+  enum GroupBy {
+    case Category, CategoryGroup, Account, AccountGroup
+  }
+
+  // Keep group with UUID type for now.
+  // TODO investigate how to use generic (or union) type with zio-http-endpoint
+  // or refactor model
+  final case class GroupedResult private (group: UUID, assets: List[AssetAmount])
+
+  object GroupedResult {
+
+    // TODO investigate Value Class instantiation in this case and how to avoid it
+    def apply(group: Category.Id | Account.Id | Group.Id, assets: List[AssetAmount]): GroupedResult = group match {
+      case g: Category.Id => GroupedResult(g.id, assets)
+      case g: Account.Id  => GroupedResult(g.id, assets)
+      case g: Group.Id    => GroupedResult(g.id, assets)
+    }
+
+    given schema: Schema[GroupedResult] = DeriveSchema.gen
   }
 
   given schema: Schema[Analytics] = DeriveSchema.gen

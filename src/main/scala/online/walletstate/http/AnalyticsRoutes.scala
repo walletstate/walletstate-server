@@ -14,7 +14,15 @@ final case class AnalyticsRoutes(auth: AuthMiddleware, analyticsService: Analyti
     Handler.fromFunctionZIO((filter, page, ctx) => analyticsService.records(ctx.wallet, filter, page))
   }()
 
-  val routes = Routes(recordsRoute)
+  val aggregateRoute = aggregated.implementWithWalletCtx[(Analytics.Filter, WalletContext)] {
+    Handler.fromFunctionZIO((filter, ctx) => analyticsService.aggregate(ctx.wallet, filter))
+  }()
+
+  val groupRoute = grouped.implementWithWalletCtx[(Analytics.GroupRequest, WalletContext)] {
+    Handler.fromFunctionZIO((groupBy, ctx) => analyticsService.group(ctx.wallet, groupBy))
+  }()
+
+  val routes = Routes(recordsRoute, aggregateRoute, groupRoute)
 }
 
 object AnalyticsRoutes {

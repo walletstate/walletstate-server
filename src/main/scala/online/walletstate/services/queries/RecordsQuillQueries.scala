@@ -1,6 +1,6 @@
 package online.walletstate.services.queries
 
-import online.walletstate.models.{Account, AssetBalance, Page, Record, Transaction}
+import online.walletstate.models.{Account, AssetAmount, Page, Record, Transaction}
 
 trait RecordsQuillQueries extends QuillQueries {
   import quill.*
@@ -48,8 +48,8 @@ trait RecordsQuillQueries extends QuillQueries {
   protected inline def transactionsByAccount(account: Account.Id): Query[Transaction] =
     Tables.Transactions.filter(_.account == lift(account))
 
-  protected inline def balanceByAccount(account: Account.Id): Query[AssetBalance] =
+  protected inline def balanceByAccount(account: Account.Id): Query[AssetAmount] =
     Tables.Transactions
       .filter(_.account == lift(account))
-      .groupByMap(_.asset)(t => AssetBalance(t.asset, sum(t.amount)))
+      .groupByMap(_.asset)(t => AssetAmount(t.asset, sum(t.amount)))
 }
