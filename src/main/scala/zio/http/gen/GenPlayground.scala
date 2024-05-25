@@ -2,6 +2,7 @@ package zio.http.gen
 
 import online.walletstate.http.api.{
   AccountsEndpoints,
+  AnalyticsEndpoints,
   AssetsEndpoints,
   CategoriesEndpoints,
   ExchangeRatesEndpoints,
@@ -32,6 +33,7 @@ object GenPlayground extends ZIOAppDefault {
     "ExchangeRatesHttpClient" -> ExchangeRatesEndpoints.endpointsMap,
     "GroupsHttpClient"        -> GroupsEndpoints.endpointsMap,
     "RecordsHttpClient"       -> RecordsEndpoints.endpointsMap,
+    "AnalyticsHttpClient"     -> AnalyticsEndpoints.endpointsMap,
     "WalletsHttpClient"       -> WalletsEndpoints.endpointsMap,
     "IconsHttpClient"         -> IconsEndpoints.endpointsMap
   )

@@ -4,7 +4,7 @@ import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.AppError.RecordNotExist
 import online.walletstate.utils.ZIOExtensions.headOrError
 import online.walletstate.models.api.{FullRecord, RecordData, SingleTransactionRecord}
-import online.walletstate.models.{Account, AssetBalance, Page, Record, Transaction, Wallet}
+import online.walletstate.models.{Account, AssetAmount, Page, Record, Transaction, Wallet}
 import online.walletstate.services.queries.RecordsQuillQueries
 import zio.{Task, ZIO, ZLayer}
 
@@ -14,7 +14,7 @@ trait RecordsService {
   def update(wallet: Wallet.Id, id: Record.Id, data: RecordData): Task[FullRecord]
   def delete(wallet: Wallet.Id, id: Record.Id): Task[Unit]
   def list(wallet: Wallet.Id, account: Account.Id, pageToken: Option[Page.Token]): Task[Page[FullRecord]]
-  def balance(wallet: Wallet.Id, account: Account.Id): Task[List[AssetBalance]]
+  def balance(wallet: Wallet.Id, account: Account.Id): Task[List[AssetAmount]]
 }
 
 case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsService with RecordsQuillQueries {
@@ -61,7 +61,7 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
       .map(r => page(r, r.size < PageSize))
   }
 
-  override def balance(wallet: Wallet.Id, account: Account.Id): Task[List[AssetBalance]] = for {
+  override def balance(wallet: Wallet.Id, account: Account.Id): Task[List[AssetAmount]] = for {
     // TODO check account is for current wallet
     balances <- run(balanceByAccount(account))
   } yield balances

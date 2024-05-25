@@ -1,17 +1,12 @@
 package online.walletstate.services.queries
 
-import online.walletstate.models.{Account, AssetBalance, Page, Record, Transaction}
+import online.walletstate.models.{Account, AssetAmount, Page, Record, Transaction}
 
 trait RecordsQuillQueries extends QuillQueries {
   import quill.*
   import io.getquill.*
   import io.getquill.extras.ZonedDateTimeOps
-
-  // TODO needs for `quote(transaction.id <= lift(id))`. Investigate more general options for AnyVal
-  implicit class RecordIdOrdered(val value: Record.Id) extends Ordered[Record.Id] {
-    override def compare(that: Record.Id): Index = value.id.compareTo(that.id)
-  }
-
+  
   extension (recordsQuery: Query[((Record, Transaction), Option[Transaction])]) {
     inline def firstPage(pageSize: Int): Query[((Record, Transaction), Option[Transaction])] = quote {
       recordsQuery
@@ -53,8 +48,8 @@ trait RecordsQuillQueries extends QuillQueries {
   protected inline def transactionsByAccount(account: Account.Id): Query[Transaction] =
     Tables.Transactions.filter(_.account == lift(account))
 
-  protected inline def balanceByAccount(account: Account.Id): Query[AssetBalance] =
+  protected inline def balanceByAccount(account: Account.Id): Query[AssetAmount] =
     Tables.Transactions
       .filter(_.account == lift(account))
-      .groupByMap(_.asset)(t => AssetBalance(t.asset, sum(t.amount)))
+      .groupByMap(_.asset)(t => AssetAmount(t.asset, sum(t.amount)))
 }

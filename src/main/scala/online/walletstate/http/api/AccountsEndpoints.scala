@@ -1,7 +1,7 @@
 package online.walletstate.http.api
 
 import online.walletstate.models.api.{CreateAccount, FullRecord, Grouped, UpdateAccount}
-import online.walletstate.models.{Account, AppError, AssetBalance, Page}
+import online.walletstate.models.{Account, AppError, AssetAmount, Page}
 import zio.Chunk
 import zio.http.codec.Doc
 import zio.http.endpoint.Endpoint
@@ -56,7 +56,7 @@ trait AccountsEndpoints {
 
   val getBalance =
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path / "balance")
-      .out[List[AssetBalance]]
+      .out[List[AssetAmount]]
       .outError[AppError.Unauthorized](Status.Unauthorized)
       .outError[AppError.AccountNotExist](Status.NotFound)
       .??(Doc.h1("Get account balance"))
