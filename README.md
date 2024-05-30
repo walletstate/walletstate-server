@@ -11,6 +11,9 @@ State of your wallet online
 - Open the `localhost:8080` URL in your browser 
 - Use credentials `demo`:`demo` to log in as a demo user.
 
+> [!WARNING]  
+> To simplify development and not create a lot of database migration files, all versions until 0.1.0 may not be backward compatible and to use the next version, it might be necessary to drop the existing database.
+
 ## TODO list
 The current version of server has a very basic functionality needed to build some MVP version of a product and requires a lot of improvements. Some of them:
 - [ ] add validation of input data

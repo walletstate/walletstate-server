@@ -162,16 +162,32 @@ GET localhost:8081/api/categories/grouped
 ### Get category
 GET localhost:8081/api/categories/{{categoryId}}
 
+### Create "Main" assets group
+POST localhost:8081/api/groups
+Content-Type: application/json
+
+{
+  "type": "Assets",
+  "name": "Default assets group",
+  "idx": 1
+}
+
+> {%
+    client.global.set("assetsGroupId", response.body.id);
+%}
+
 ### Create asset
 POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{assetsGroupId}}",
   "type": "Fiat",
   "ticker": "USD",
   "name": "US Dollar",
   "icon": "",
   "tags": ["tag1"],
+  "idx": 1,
   "startDate": null,
   "endDate": null,
   "denominatedIn": null,
@@ -187,11 +203,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{assetsGroupId}}",
   "type": "Bond",
   "ticker": "UA10988712",
   "name": "ОВДП",
   "icon": "",
   "tags": ["tag1"],
+  "idx": 2,
   "startDate": "2023-01-15T14:10:20Z",
   "endDate": "2024-01-15T14:10:20Z",
   "denominatedIn": "{{fiatAssetId}}",

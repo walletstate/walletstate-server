@@ -23,6 +23,7 @@ object Analytics {
       accountGroups: Set[Group.Id] = Set.empty,
       accountTag: Option[String] = None, // allow filtering only by one tag for now
       assets: Set[Asset.Id] = Set.empty,
+      assetGroups: Set[Group.Id] = Set.empty,
       assetTypes: Set[Asset.Type] = Set.empty,
       assetTag: Option[String] = None, // allow filtering only by one tag for now
       spentOn: Set[Asset.Id] = Set.empty,

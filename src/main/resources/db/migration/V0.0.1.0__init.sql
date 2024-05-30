@@ -42,27 +42,7 @@ CREATE TABLE wallet_invites
     CONSTRAINT invites_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
-CREATE TYPE asset_type AS ENUM ('Fiat', 'Crypto', 'Deposit', 'Bond', 'Stock', 'Other');
-
-CREATE TABLE assets
-(
-    id             UUID          NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    wallet         UUID          NOT NULL,
-    type           asset_type    NOT NULL,
-    ticker         VARCHAR(25)   NOT NULL,
-    name           VARCHAR(255)  NOT NULL,
-    icon           CHAR(64),
-    tags           VARCHAR(50)[] NOT NULL             DEFAULT '{}',
-    start_date     TIMESTAMP WITH TIME ZONE           DEFAULT NULL,
-    end_date       TIMESTAMP WITH TIME ZONE           DEFAULT NULL,
-    denominated_in UUID                               DEFAULT NULL,
-    denomination   DECIMAL(36, 18)                    DEFAULT NULL,
-    CONSTRAINT assets_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
-    CONSTRAINT assets_denominated_in_fk FOREIGN KEY (denominated_in) REFERENCES assets (id),
-    CONSTRAINT assets_wallet_ticker_uq UNIQUE (wallet, ticker)
-);
-
-CREATE TYPE group_type AS ENUM ('Accounts', 'Categories');
+CREATE TYPE group_type AS ENUM ('Accounts', 'Categories', 'Assets');
 
 CREATE TABLE "groups"
 (
@@ -72,6 +52,28 @@ CREATE TABLE "groups"
     name   VARCHAR(255) NOT NULL,
     idx    INTEGER      NOT NULL             DEFAULT 0,
     CONSTRAINT groups_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id)
+);
+
+CREATE TYPE asset_type AS ENUM ('Fiat', 'Crypto', 'Deposit', 'Bond', 'Stock', 'Other');
+
+CREATE TABLE assets
+(
+    id              UUID          NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "group"         UUID          NOT NULL,
+    type            asset_type    NOT NULL,
+    ticker          VARCHAR(25)   NOT NULL,
+    name            VARCHAR(255)  NOT NULL,
+    icon            CHAR(64),
+    tags            VARCHAR(50)[] NOT NULL             DEFAULT '{}',
+    idx             INTEGER       NOT NULL             DEFAULT 0,
+    start_date      TIMESTAMP WITH TIME ZONE           DEFAULT NULL,
+    end_date        TIMESTAMP WITH TIME ZONE           DEFAULT NULL,
+    lock_duration   INTEGER                            DEFAULT NULL,
+    unlock_duration INTEGER                            DEFAULT NULL,
+    denominated_in  UUID                               DEFAULT NULL,
+    denomination    DECIMAL(36, 18)                    DEFAULT NULL,
+    CONSTRAINT assets_group_fk FOREIGN KEY ("group") REFERENCES groups (id),
+    CONSTRAINT assets_denominated_in_fk FOREIGN KEY (denominated_in) REFERENCES assets (id)
 );
 
 CREATE TABLE accounts

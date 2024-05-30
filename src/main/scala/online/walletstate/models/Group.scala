@@ -29,7 +29,7 @@ object Group {
   }
 
   enum Type {
-    case Accounts, Categories
+    case Accounts, Categories, Assets
   }
 
   object Type {

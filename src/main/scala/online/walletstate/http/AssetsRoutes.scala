@@ -19,6 +19,10 @@ final case class AssetsRoutes(auth: AuthMiddleware, assetsService: AssetsService
     Handler.fromFunctionZIO(ctx => assetsService.list(ctx.wallet))
   }()
 
+  private val listGroupedRoute = listGrouped.implementWithWalletCtx[WalletContext] {
+    Handler.fromFunctionZIO(ctx => assetsService.grouped(ctx.wallet))
+  }()
+
   private val getRoute = get.implementWithWalletCtx[(Asset.Id, WalletContext)] {
     Handler.fromFunctionZIO[(Asset.Id, WalletContext)]((id, ctx) => assetsService.get(ctx.wallet, id))
   }()
@@ -27,7 +31,7 @@ final case class AssetsRoutes(auth: AuthMiddleware, assetsService: AssetsService
     Handler.fromFunctionZIO((id, info, ctx) => assetsService.update(ctx.wallet, id, info))
   }()
 
-  val routes = Routes(createRoute, listRoute, getRoute, updateRoute)
+  val routes = Routes(createRoute, listGroupedRoute, listRoute, getRoute, updateRoute)
 }
 
 object AssetsRoutes {

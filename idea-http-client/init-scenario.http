@@ -772,6 +772,47 @@ GET localhost:8081/api/categories/grouped
 
 
 
+### Create "Main" assets group
+POST localhost:8081/api/groups
+Content-Type: application/json
+
+{
+  "type": "Assets",
+  "name": "Main",
+  "idx": 1
+}
+
+> {%
+    client.global.set("mainAssetsGroupId", response.body.id);
+%}
+
+### Create "Crypto" assets group
+POST localhost:8081/api/groups
+Content-Type: application/json
+
+{
+  "type": "Assets",
+  "name": "Crypto",
+  "idx": 2
+}
+
+> {%
+    client.global.set("cryptoAssetsGroupId", response.body.id);
+%}
+
+### Create "Others" assets group
+POST localhost:8081/api/groups
+Content-Type: application/json
+
+{
+  "type": "Assets",
+  "name": "Others",
+  "idx": 3
+}
+
+> {%
+    client.global.set("othersAssetsGroupId", response.body.id);
+%}
 
 
 ### Create UAH asset
@@ -779,11 +820,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{mainAssetsGroupId}}",
   "type": "Fiat",
   "ticker": "UAH",
   "name": "UA Hryvnia",
   "icon": null,
   "tags": [],
+  "idx": 1,
   "startDate": null,
   "endDate": null,
   "denominatedIn": null,
@@ -799,11 +842,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{mainAssetsGroupId}}",
   "type": "Fiat",
   "ticker": "USD",
   "name": "US Dollar",
   "icon": null,
   "tags": [],
+  "idx": 2,
   "startDate": null,
   "endDate": null,
   "denominatedIn": null,
@@ -819,11 +864,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{mainAssetsGroupId}}",
   "type": "Fiat",
   "ticker": "EUR",
   "name": "Euro",
   "icon": null,
   "tags": [],
+  "idx": 3,
   "startDate": null,
   "endDate": null,
   "denominatedIn": null,
@@ -841,11 +888,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{cryptoAssetsGroupId}}",
   "type": "Crypto",
   "ticker": "BTC",
   "name": "Bitcoin",
   "icon": null,
   "tags": [],
+  "idx": 1,
   "startDate": null,
   "endDate": null,
   "denominatedIn": null,
@@ -861,11 +910,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{cryptoAssetsGroupId}}",
   "type": "Crypto",
   "ticker": "ETH",
   "name": "Ethereum",
   "icon": null,
   "tags": [],
+  "idx": 2,
   "startDate": null,
   "endDate": null,
   "denominatedIn": null,
@@ -881,11 +932,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{cryptoAssetsGroupId}}",
   "type": "Crypto",
   "ticker": "USDT",
   "name": "Teaser USD",
   "icon": null,
   "tags": [],
+  "idx": 3,
   "startDate": null,
   "endDate": null,
   "denominatedIn": null,
@@ -901,11 +954,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{cryptoAssetsGroupId}}",
   "type": "Crypto",
   "ticker": "SOL",
   "name": "Solana",
   "icon": null,
   "tags": [],
+  "idx": 4,
   "startDate": null,
   "endDate": null,
   "denominatedIn": null,
@@ -923,11 +978,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{othersAssetsGroupId}}",
   "type": "Bond",
   "ticker": "UA10988712",
   "name": "ОВДП",
   "icon": null,
   "tags": [],
+  "idx": 1,
   "startDate": "2023-01-15T14:10:20Z",
   "endDate": "2025-01-15T14:10:20Z",
   "denominatedIn": "{{uahAssetId}}",
@@ -943,11 +1000,13 @@ POST localhost:8081/api/assets
 Content-Type: application/json
 
 {
+  "group": "{{othersAssetsGroupId}}",
   "type": "Deposit",
   "ticker": "DEPMono1",
   "name": "Mono deposit",
   "icon": null,
   "tags": [],
+  "idx": 2,
   "startDate": "2024-01-10T14:10:20Z",
   "endDate": "2024-04-10T14:10:20Z",
   "denominatedIn": "{{usdAssetId}}",
@@ -961,6 +1020,9 @@ Content-Type: application/json
 
 ### Get assets
 GET localhost:8081/api/assets
+
+### Get grouped assets
+GET localhost:8081/api/assets/grouped
 
 
 
