@@ -1,19 +1,26 @@
 package online.walletstate.db
 
 import io.getquill.jdbczio.Quill
-import io.getquill.{CompositeNamingStrategy3, NamingStrategy, PluralizedTableNames, PostgresEscape, SnakeCase}
+import io.getquill.{
+  CompositeNamingStrategy3,
+  MappedEncoding,
+  NamingStrategy,
+  PluralizedTableNames,
+  PostgresEscape,
+  SnakeCase
+}
 import online.walletstate.models.{
   Account,
   Asset,
   Category,
   ExchangeRate,
   Group,
+  Record,
   Transaction,
   Wallet,
-  WalletUser,
-  Record
+  WalletUser
 }
-import zio.ZLayer
+import zio.{Duration, ZLayer}
 import org.postgresql.util.PGobject
 
 import java.sql.Types
@@ -56,6 +63,9 @@ class WalletStateQuillContext(override val ds: DataSource)
 
   given transactionTypeDecoder: Decoder[Record.Type] =
     decoder(fromDbType(Record.Type.fromString))
+
+  given durationEncoder: MappedEncoding[Duration, Long] = MappedEncoding[Duration, Long](_.toSeconds)
+  given durationDecoder: MappedEncoding[Long, Duration] = MappedEncoding[Long, Duration](Duration.fromSeconds)
 
   object Tables {
     import io.getquill.*

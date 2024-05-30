@@ -1,7 +1,7 @@
 package online.walletstate.http.api
 
 import online.walletstate.models.{AppError, Asset}
-import online.walletstate.models.api.{CreateAsset, UpdateAsset}
+import online.walletstate.models.api.{CreateAsset, Grouped, UpdateAsset}
 import zio.Chunk
 import zio.http.{Method, Status}
 import zio.http.endpoint.Endpoint
@@ -14,6 +14,11 @@ trait AssetsEndpoints {
       .out[Asset](Status.Created)
       .outError[AppError.Unauthorized](Status.Unauthorized)
       .outError[AppError.BadRequest](Status.BadRequest)
+
+  val listGrouped =
+    Endpoint(Method.GET / "api" / "assets" / "grouped")
+      .out[List[Grouped[Asset]]]
+      .outError[AppError.Unauthorized](Status.Unauthorized)
 
   val list =
     Endpoint(Method.GET / "api" / "assets")
@@ -35,13 +40,20 @@ trait AssetsEndpoints {
       .outError[AppError.BadRequest](Status.BadRequest)
 
   val endpointsMap = Map(
-    "create" -> create,
-    "get"    -> get,
-    "update" -> update,
-    "list"   -> list
+    "create"      -> create,
+    "get"         -> get,
+    "update"      -> update,
+    "list"        -> list,
+    "listGrouped" -> listGrouped
   )
 
-  val endpoints = endpointsMap.values
+  val endpoints = Chunk(
+    create,
+    get,
+    update,
+//    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
+    list
+  )
 }
 
 object AssetsEndpoints extends AssetsEndpoints

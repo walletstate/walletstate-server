@@ -11,17 +11,20 @@ import scala.util.Try
 
 final case class Asset(
     id: Asset.Id,
-    wallet: Wallet.Id,
+    group: Group.Id,
     `type`: Asset.Type,
     ticker: String,
     name: String,
     icon: Option[Icon.Id],
     tags: List[String],
+    idx: Int,
     startDate: Option[ZonedDateTime],
     endDate: Option[ZonedDateTime],
+    lockDuration: Option[Duration],
+    unlockDuration: Option[Duration],
     denominatedIn: Option[Asset.Id],
     denomination: Option[BigDecimal]
-)
+) extends Groupable
 
 object Asset {
   final case class Id(id: UUID) extends AnyVal
@@ -31,7 +34,7 @@ object Asset {
 
     def from(id: String): Task[Id] = ZIO.attempt(UUID.fromString(id)).map(Id(_))
 
-    val path: PathCodec[Id] = zio.http.uuid("asset-id").transform(Id(_))(_.id)
+    val path: PathCodec[Id]                 = zio.http.uuid("asset-id").transform(Id(_))(_.id)
     def query(name: String): QueryCodec[Id] = QueryCodec.queryTo[UUID](name).transform(Id(_))(_.id)
 
     given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
@@ -52,14 +55,17 @@ object Asset {
     Id.random.map(
       Asset(
         _,
-        wallet,
+        info.group,
         info.`type`,
         info.ticker,
         info.name,
         info.icon,
         info.tags,
+        info.idx,
         info.startDate,
         info.endDate,
+        info.lockDuration,
+        info.unlockDuration,
         info.denominatedIn,
         info.denomination
       )
