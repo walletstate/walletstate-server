@@ -25,7 +25,7 @@ trait AnalyticsQuillQueries extends QuillQueries {
 
   protected def aggregateRecords(wallet: Wallet.Id, filter: Analytics.Filter) =
     filteredRecordRows(wallet, filter).groupByAsset
-  
+
   protected def groupByCategory(wallet: Wallet.Id, filter: Analytics.Filter) =
     filteredRecordRows(wallet, filter).groupByCategoryAndAsset
 
@@ -85,6 +85,7 @@ trait AnalyticsQuillQueries extends QuillQueries {
         .filterIf(f.accountGroups.nonEmpty)  (row => quote(liftQuery(f.accountGroups).contains(row.account.group)))
         .filterIf(f.accountTag.nonEmpty)     (row => quote(row.account.tags.contains(lift(f.accountTag.get))))
         .filterIf(f.assets.nonEmpty)         (row => quote(liftQuery(f.assets).contains(row.transaction.asset)))
+        .filterIf(f.assetGroups.nonEmpty)    (row => quote(liftQuery(f.assetGroups).contains(row.asset.group)))
         .filterIf(f.assetTypes.nonEmpty)     (row => quote(liftQuery(f.assetTypes).contains(row.asset.`type`)))
         .filterIf(f.assetTag.nonEmpty)       (row => quote(row.asset.tags.contains(lift(f.assetTag.get))))
         .filterIf(f.spentOn.nonEmpty)        (row => quote(liftQuery(f.spentOn).contains(row.record.spentOn)))
