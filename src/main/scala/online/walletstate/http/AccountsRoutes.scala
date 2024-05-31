@@ -29,7 +29,7 @@ case class AccountsRoutes(
 
   private val getRoute = get.implementWithWalletCtx[(Account.Id, WalletContext)] {
     Handler.fromFunctionZIO((id, ctx) => accountsService.get(ctx.wallet, id))
-  } { case e: AppError.AccountNotExist => Right(e) }
+  }()
 
   private val updateRoute = update.implementWithWalletCtx[(Account.Id, UpdateAccount, WalletContext)] {
     Handler.fromFunctionZIO((id, info, ctx) => accountsService.update(ctx.wallet, id, info))

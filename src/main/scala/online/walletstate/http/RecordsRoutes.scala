@@ -22,7 +22,7 @@ case class RecordsRoutes(auth: AuthMiddleware, recordsService: RecordsService) e
 
   private val getRoute = get.implementWithWalletCtx[(Record.Id, WalletContext)] {
     Handler.fromFunctionZIO((id, ctx) => recordsService.get(ctx.wallet, id))
-  } { case AppError.RecordNotExist => Right(AppError.RecordNotExist) }
+  }()
 
   private val updateRoute = update.implementWithWalletCtx[(Record.Id, RecordData, WalletContext)] {
     Handler.fromFunctionZIO((id, data, ctx) => recordsService.update(ctx.wallet, id, data))

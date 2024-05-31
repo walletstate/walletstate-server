@@ -51,7 +51,7 @@ final case class WalletStateServer(
 
   def start = for {
     _ <- migrations.migrate
-    p <- Server.install(app.toHttpApp)
+    p <- Server.install(app)
     _ <- ZIO.logInfo(s"Server started on port $p")
     _ <- ZIO.never
   } yield ()

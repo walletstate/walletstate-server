@@ -25,10 +25,7 @@ final case class WalletsRoutes(auth: AuthMiddleware, walletsService: WalletsServ
 
   private val joinRoute = join.implementWithUserCtx[(JoinWallet, UserContext)] {
     Handler.fromFunctionZIO((joinInfo, ctx) => walletsService.joinWallet(ctx.user, joinInfo.inviteCode))
-  } {
-    case e: AppError.WalletInviteNotExist.type => Left(Right(e))
-    case e: AppError.WalletInviteExpired.type  => Right(e)
-  }
+  }()
 
   val routes = Routes(createRoute, getCurrentRoute, createInviteRoute, joinRoute)
 }
