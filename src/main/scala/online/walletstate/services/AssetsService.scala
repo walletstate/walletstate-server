@@ -1,18 +1,21 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
+import online.walletstate.models.*
+import online.walletstate.models.AppError.AssetNotExist
+import online.walletstate.models.AuthContext.WalletContext
 import online.walletstate.models.api.{CreateAsset, Grouped, UpdateAsset}
-import online.walletstate.models.{AppError, Asset, Group, User, Wallet}
 import online.walletstate.services.queries.AssetsQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
-import zio.{Task, ZLayer}
+import online.walletstate.{WalletIO, WalletUIO}
+import zio.{ZIO, ZLayer}
 
 trait AssetsService {
-  def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAsset): Task[Asset]
-  def get(wallet: Wallet.Id, id: Asset.Id): Task[Asset]
-  def list(wallet: Wallet.Id): Task[List[Asset]]
-  def grouped(wallet: Wallet.Id): Task[List[Grouped[Asset]]]
-  def update(wallet: Wallet.Id, id: Asset.Id, info: UpdateAsset): Task[Unit]
+  def create(info: CreateAsset): WalletUIO[Asset]
+  def get(id: Asset.Id): WalletIO[AssetNotExist, Asset]
+  def list: WalletUIO[List[Asset]]
+  def grouped: WalletUIO[List[Grouped[Asset]]]
+  def update(id: Asset.Id, info: UpdateAsset): WalletUIO[Unit]
 }
 
 final case class AssetsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -21,22 +24,28 @@ final case class AssetsServiceLive(quill: WalletStateQuillContext, groupsService
   import io.getquill.*
   import quill.{*, given}
 
-  override def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAsset): Task[Asset] = for {
-    asset <- Asset.make(wallet, info)
-    _     <- run(insert(asset))
+  override def create(info: CreateAsset): WalletUIO[Asset] = for {
+    ctx   <- ZIO.service[WalletContext]
+    asset <- Asset.make(ctx.wallet, info)
+    _     <- run(insert(asset)).orDie
   } yield asset
 
-  override def get(wallet: Wallet.Id, id: Asset.Id): Task[Asset] =
-    run(assetsById(wallet, id)).headOrError(AppError.AssetNotExist)
+  override def get(id: Asset.Id): WalletIO[AssetNotExist, Asset] = for {
+    ctx   <- ZIO.service[WalletContext]
+    asset <- run(assetsById(ctx.wallet, id)).orDie.headOrError(AssetNotExist())
+  } yield asset
 
-  override def list(wallet: Wallet.Id): Task[List[Asset]] = run(assetsByWallet(wallet))
+  override def list: WalletUIO[List[Asset]] = for {
+    ctx    <- ZIO.service[WalletContext]
+    assets <- run(assetsByWallet(ctx.wallet)).orDie
+  } yield assets
 
-  override def grouped(wallet: Wallet.Id): Task[List[Grouped[Asset]]] =
-    groupsService.group(wallet, Group.Type.Assets, list(wallet))
+  override def grouped: WalletUIO[List[Grouped[Asset]]] =
+    groupsService.group(Group.Type.Assets, list)
 
-  override def update(wallet: Wallet.Id, id: Asset.Id, info: UpdateAsset): Task[Unit] =
-    run(updateQuery(id, info)).map(_ => ()) // TODO check asset is in wallet; check result and return error if not found
-
+  override def update(id: Asset.Id, info: UpdateAsset): WalletUIO[Unit] =
+    // TODO check asset is in wallet; check result and return error if not found
+    run(updateQuery(id, info)).orDie.map(_ => ())
 }
 
 object AssetsServiceLive {

@@ -1,16 +1,14 @@
 package online.walletstate.http.auth
 
+import online.walletstate.models.{AppError, AuthContext}
 import online.walletstate.utils.AuthCookiesOps.{getAuthCookies, getBearerToken}
-import online.walletstate.utils.EndpointOps.implementWithCtx
-import online.walletstate.models.AppError
+import online.walletstate.models.AppError.Unauthorized
+import online.walletstate.models.AuthContext.{UserContext, WalletContext}
 import online.walletstate.services.TokenService
 import online.walletstate.utils.RequestOps.outputMediaType
 import zio.*
 import zio.http.*
-import zio.http.endpoint.Endpoint
 import zio.json.*
-
-import scala.reflect.ClassTag
 
 final case class AuthMiddleware(tokenService: TokenService) {
 
@@ -18,10 +16,10 @@ final case class AuthMiddleware(tokenService: TokenService) {
     Middleware.customAuthProvidingZIO[Any, Ctx] { request =>
       request.headers.getAuthCookies
         .orElse(request.headers.getBearerToken) // temporary implementation. TODO: implement feature for API tokens
-        .fold(ZIO.fail(AppError.AuthTokenNotFound))(tokenStr => tokenService.decode(tokenStr))
+        .fold(ZIO.fail(Unauthorized.authTokenNotFound))(tokenStr => tokenService.decode(tokenStr))
         .map(token => Some(token))
         .mapError {
-          case e: AppError.Unauthorized =>
+          case e: Unauthorized =>
             AppError.UnauthorizedCodec.encodeResponse(e, request.outputMediaType)
           case e =>
             AppError.InternalServerErrorCodec.encodeResponse(AppError.InternalServerError, request.outputMediaType)
@@ -30,22 +28,6 @@ final case class AuthMiddleware(tokenService: TokenService) {
 
   val userCtx   = ctx[UserContext]
   val walletCtx = ctx[WalletContext]
-
-  extension [EPatIn, EIn, EErr: ClassTag, EOut](endpoint: Endpoint[EPatIn, EIn, EErr, EOut, _])
-    def implementWithWalletCtx[HIn](
-        handler: Handler[Any, Any, HIn, EOut]
-    )(
-        errorMapper: PartialFunction[Any, EErr] = PartialFunction.empty
-    )(using z: Zippable.Out[EIn, WalletContext, HIn], trace: Trace): Route[Any, Any] =
-      endpoint.implementWithCtx[WalletContext, HIn](walletCtx)(handler)(errorMapper)
-
-    def implementWithUserCtx[HIn](
-        handler: Handler[Any, Any, HIn, EOut]
-    )(
-        errorMapper: PartialFunction[Any, EErr] = PartialFunction.empty
-    )(using z: Zippable.Out[EIn, UserContext, HIn], trace: Trace): Route[Any, Any] =
-      endpoint.implementWithCtx[UserContext, HIn](userCtx)(handler)(errorMapper)
-
 }
 
 object AuthMiddleware {

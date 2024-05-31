@@ -1,37 +1,33 @@
 package online.walletstate.http
 
-import online.walletstate.http.api.CategoriesEndpoints
-import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
-import online.walletstate.models.Category
-import online.walletstate.models.api.{CreateCategory, UpdateCategory}
+import online.walletstate.http.endpoints.CategoriesEndpoints
 import online.walletstate.services.CategoriesService
 import zio.*
 import zio.http.*
 
-case class CategoriesRoutes(auth: AuthMiddleware, categoriesService: CategoriesService) extends CategoriesEndpoints {
-  import auth.implementWithWalletCtx
+case class CategoriesRoutes(categoriesService: CategoriesService) extends WalletStateRoutes with CategoriesEndpoints {
 
-  private val createRoute = create.implementWithWalletCtx[(CreateCategory, WalletContext)] {
-    Handler.fromFunctionZIO((info, ctx) => categoriesService.create(ctx.wallet, ctx.user, info))
-  }()
+  private val createRoute = create.implement {
+    Handler.fromFunctionZIO(info => categoriesService.create(info))
+  }
 
-  private val listRoute = list.implementWithWalletCtx[WalletContext] {
-    Handler.fromFunctionZIO(ctx => categoriesService.list(ctx.wallet))
-  }()
+  private val listRoute = list.implement {
+    Handler.fromFunctionZIO(_ => categoriesService.list)
+  }
 
-  private val listGroupedRoute = listGrouped.implementWithWalletCtx[WalletContext] {
-    Handler.fromFunctionZIO(ctx => categoriesService.grouped(ctx.wallet))
-  }()
+  private val listGroupedRoute = listGrouped.implement {
+    Handler.fromFunctionZIO(_ => categoriesService.grouped)
+  }
 
-  private val getRoute = get.implementWithWalletCtx[(Category.Id, WalletContext)] {
-    Handler.fromFunctionZIO((id, ctx) => categoriesService.get(ctx.wallet, id))
-  }()
+  private val getRoute = get.implement {
+    Handler.fromFunctionZIO(id => categoriesService.get(id))
+  }
 
-  private val updateRoute = update.implementWithWalletCtx[(Category.Id, UpdateCategory, WalletContext)] {
-    Handler.fromFunctionZIO((id, info, ctx) => categoriesService.update(ctx.wallet, id, info))
-  }()
+  private val updateRoute = update.implement {
+    Handler.fromFunctionZIO((id, info) => categoriesService.update(id, info))
+  }
 
-  val routes = Routes(createRoute, listRoute, listGroupedRoute, getRoute, updateRoute)
+  override val walletRoutes = Routes(createRoute, listRoute, listGroupedRoute, getRoute, updateRoute)
 }
 
 object CategoriesRoutes {

@@ -2,19 +2,20 @@ package online.walletstate
 
 import online.walletstate.db.Migrations
 import online.walletstate.http.*
+import online.walletstate.http.auth.AuthMiddleware
+import online.walletstate.http.endpoints.WalletStateEndpoints
 import online.walletstate.models.AppError
-import online.walletstate.utils.RequestOps
 import zio.*
 import zio.http.*
-import zio.http.codec.HttpCodecError
 import zio.http.endpoint.Endpoint
 import zio.http.endpoint.openapi.{OpenAPIGen, SwaggerUI}
 
 final case class WalletStateServer(
+    authMiddleware: AuthMiddleware,
     health: HealthRoutes,
     auth: AuthRoutes,
     wallets: WalletsRoutes,
-    groupsRoutes: GroupsRoutes,
+    groups: GroupsRoutes,
     accounts: AccountsRoutes,
     categories: CategoriesRoutes,
     assets: AssetsRoutes,
@@ -25,31 +26,31 @@ final case class WalletStateServer(
     migrations: Migrations
 ) {
 
+  private val routesClasses: Chunk[WalletStateRoutes with WalletStateEndpoints] =
+    Chunk(health, auth, wallets, groups, accounts, categories, assets, exchangeRates, records, analytics, icons)
+
+  private val endpoints =
+    routesClasses
+      .flatMap(_.endpoints)
+      .map(_.outError[AppError.Unauthorized](Status.Unauthorized))
+
   private val openAPISpec = OpenAPIGen.fromEndpoints(
     title = "WalletState.online API",
     version = "0.0.1",
-    accounts.endpoints ++ assets.endpoints ++ categories.endpoints ++
-      exchangeRates.endpoints ++ groupsRoutes.endpoints ++ records.endpoints ++
-      analytics.endpoints ++ wallets.endpoints ++ icons.endpoints
+    endpoints = endpoints
   )
 
-  private val routes =
-    health.routes ++
-      auth.routes ++
-      wallets.routes ++
-      groupsRoutes.routes ++
-      accounts.routes ++
-      categories.routes ++
-      assets.routes ++
-      exchangeRates.routes ++
-      records.routes ++
-      analytics.routes ++
-      icons.routes ++
-      SwaggerUI.routes(Endpoint(Method.GET / "api" / "docs").route.pathCodec, openAPISpec)
+  private val swaggerRoutes = SwaggerUI.routes(Endpoint(Method.GET / "api" / "docs").route.pathCodec, openAPISpec)
 
-  def app = routes.handleError(e => Response.error(Status.InternalServerError)) @@ Middleware.requestLogging()
+  private val noCtxRoutes  = routesClasses.map(_.noCtxRoutes).fold(Routes.empty)(_ ++ _)
+  private val userRoutes   = routesClasses.map(_.userRoutes).fold(Routes.empty)(_ ++ _) @@ authMiddleware.userCtx
+  private val walletRoutes = routesClasses.map(_.walletRoutes).fold(Routes.empty)(_ ++ _) @@ authMiddleware.walletCtx
 
-  def start = for {
+  private val routes = noCtxRoutes ++ userRoutes ++ walletRoutes ++ swaggerRoutes
+
+  private val app = routes.handleError(e => Response.error(Status.InternalServerError)) @@ Middleware.requestLogging()
+
+  val start = for {
     _ <- migrations.migrate
     p <- Server.install(app)
     _ <- ZIO.logInfo(s"Server started on port $p")

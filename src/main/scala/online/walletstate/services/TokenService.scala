@@ -2,12 +2,13 @@ package online.walletstate.services
 
 import online.walletstate.config.AuthConfig
 import online.walletstate.config.AuthConfig.config
-import online.walletstate.models.AppError.{InvalidAuthContext, InvalidAuthToken}
+import online.walletstate.models.AppError.Unauthorized
 import online.walletstate.models.{AppError, AuthToken}
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
 import zio.*
 import zio.json.*
 
+//TODO add separate errors for token service
 trait TokenService {
 
   def encode[A: JsonEncoder](content: A): Task[AuthToken]
@@ -28,7 +29,7 @@ case class StatelessTokenService(authConfig: AuthConfig) extends TokenService {
 
   private val algorithm = JwtAlgorithm.HS512
   private val secret    = authConfig.secret
-
+  
   override def encode[A: JsonEncoder](content: A): Task[AuthToken] = for {
     clock <- Clock.javaClock
     claim <- ZIO.attempt(JwtClaim(content.toJson).issuedNow(clock).expiresIn(authConfig.tokenTTL.toSeconds)(clock))
@@ -38,8 +39,8 @@ case class StatelessTokenService(authConfig: AuthConfig) extends TokenService {
   override def decode[A: JsonDecoder: Tag](token: String): IO[AppError, A] = {
     for {
       clock  <- Clock.javaClock
-      claims <- ZIO.fromTry(decodeJwt(token, clock)).mapError(e => InvalidAuthToken(e.getMessage))
-      data   <- ZIO.fromEither(claims.content.fromJson[A]).mapError(_ => InvalidAuthContext(Tag[A].tag.shortName))
+      claims <- ZIO.fromTry(decodeJwt(token, clock)).mapError(e => Unauthorized.invalidAuthToken(e.getMessage))
+      data   <- ZIO.fromEither(claims.content.fromJson[A]).mapError(_ => Unauthorized.invalidAuthContext(Tag[A].tag.shortName))
     } yield data
   }
 

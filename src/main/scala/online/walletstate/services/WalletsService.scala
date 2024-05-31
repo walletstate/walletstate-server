@@ -1,20 +1,26 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
-import online.walletstate.models.{AppError, User, Wallet, WalletInvite, WalletUser}
+import online.walletstate.models.AppError.{UserNotExist, WalletInviteExpired, WalletInviteNotExist, WalletNotExist}
+import online.walletstate.models.AuthContext.{UserContext, WalletContext}
+import online.walletstate.models.*
 import online.walletstate.services.queries.WalletsQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
-import zio.{Clock, Task, ZIO, ZLayer}
+import online.walletstate.{UserIO, WalletIO}
+import zio.{Clock, UIO, ZIO, ZLayer}
 
 import java.sql.SQLException
 import scala.util.Random
 
 trait WalletsService {
-  def create(userId: User.Id, name: String): Task[Wallet]
-  def get(id: Wallet.Id): Task[Wallet]
-  def createInvite(userId: User.Id, wallet: Wallet.Id): Task[WalletInvite]
-  def joinWallet(userId: User.Id, inviteCode: String): Task[Wallet]
-  def isUserInWallet(user: User.Id, wallet: Wallet.Id): Task[Boolean]
+  type JoinWalletError = UserNotExist | WalletInviteNotExist | WalletInviteExpired | WalletNotExist
+
+  def create(name: String): UserIO[UserNotExist, Wallet]
+  def get(wallet: Wallet.Id): UserIO[WalletNotExist, Wallet]
+  def get: WalletIO[WalletNotExist, Wallet]
+  def createInvite: WalletIO[WalletNotExist, WalletInvite]
+  def joinWallet(inviteCode: String): UserIO[JoinWalletError, Wallet]
+  def isUserInWallet(user: User.Id, wallet: Wallet.Id): UIO[Boolean]
 }
 
 case class WalletsServiceLive(
@@ -27,39 +33,47 @@ case class WalletsServiceLive(
   import io.getquill.*
   import quill.*
 
-  override def create(userId: User.Id, name: String): Task[Wallet] = for {
-    user   <- usersService.get(userId)
+  override def create(name: String): UserIO[UserNotExist, Wallet] = for {
+    ctx    <- ZIO.service[UserContext]
+    user   <- usersService.get(ctx.user)
     wallet <- Wallet.make(name, user.id)
-    _      <- transaction(run(insert(wallet)) *> run(insertWalletUser(WalletUser(wallet.id, userId))))
+    _      <- transaction(run(insert(wallet)) *> run(insertWalletUser(WalletUser(wallet.id, ctx.user)))).orDie
   } yield wallet
 
-  override def get(id: Wallet.Id): Task[Wallet] = run(walletById(id)).headOrError(AppError.WalletNotExist)
+  override def get(wallet: Wallet.Id): UserIO[WalletNotExist, Wallet] =
+    run(walletById(wallet)).orDie.headOrError(WalletNotExist())
+
+  override def get: WalletIO[WalletNotExist, Wallet] = for {
+    ctx    <- ZIO.service[WalletContext]
+    wallet <- run(walletById(ctx.wallet)).orDie.headOrError(WalletNotExist())
+  } yield wallet
 
   // TODO make expiration configurable and move to invites service
-  override def createInvite(user: User.Id, wallet: Wallet.Id): Task[WalletInvite] = for {
-    hasAccess <- isUserInWallet(user, wallet)
-    _         <- ZIO.cond(hasAccess, (), AppError.WalletNotExist)
+  override def createInvite: WalletIO[WalletNotExist, WalletInvite] = for {
+    ctx       <- ZIO.service[WalletContext]
+    hasAccess <- isUserInWallet(ctx.user, ctx.wallet)
+    _         <- ZIO.cond(hasAccess, (), WalletNotExist())
     now       <- Clock.instant
-    code      <- ZIO.attempt(Random.alphanumeric.take(12).mkString.toUpperCase)
-    invite    <- WalletInvite.make(wallet, code, user, now.plusSeconds(3600))
+    code      <- ZIO.succeed(Random.alphanumeric.take(12).mkString.toUpperCase)
+    invite    <- WalletInvite.make(ctx.wallet, code, ctx.user, now.plusSeconds(3600))
     _         <- invitesService.save(invite)
   } yield invite
 
-  override def joinWallet(userId: User.Id, inviteCode: String): Task[Wallet] = for {
-    user   <- usersService.get(userId)
+  override def joinWallet(inviteCode: String): UserIO[JoinWalletError, Wallet] = for {
+    ctx    <- ZIO.service[UserContext]
+    user   <- usersService.get(ctx.user)
     invite <- invitesService.get(inviteCode)
     now    <- Clock.instant
-    _      <- if (invite.validTo.isBefore(now)) ZIO.fail(AppError.WalletInviteExpired) else ZIO.unit
+    _      <- if (invite.validTo.isBefore(now)) ZIO.fail(WalletInviteExpired()) else ZIO.unit
     wallet <- get(invite.wallet)
-    _      <- run(insertWalletUser(WalletUser(wallet.id, userId)))
+    _      <- run(insertWalletUser(WalletUser(wallet.id, ctx.user))).orDie
     _      <- invitesService.delete(invite.id)
   } yield wallet
 
-  override def isUserInWallet(user: User.Id, wallet: Wallet.Id): Task[Boolean] = run(userExists(wallet, user))
+  override def isUserInWallet(user: User.Id, wallet: Wallet.Id): UIO[Boolean] =
+    run(userExists(wallet, user)).orDie
 }
 
 object WalletsServiceLive {
-  val layer =
-    ZLayer.fromFunction(WalletsServiceLive.apply _)
-
+  val layer = ZLayer.fromFunction(WalletsServiceLive.apply _)
 }

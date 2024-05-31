@@ -1,18 +1,21 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
+import online.walletstate.models.AppError.CategoryNotExist
+import online.walletstate.models.AuthContext.WalletContext
 import online.walletstate.models.api.{CreateCategory, Grouped, UpdateCategory}
-import online.walletstate.models.{AppError, Category, Group, User, Wallet}
+import online.walletstate.models.{AppError, Category, Group}
 import online.walletstate.services.queries.CategoriesQuillQueries
-import online.walletstate.utils.ZIOExtensions.getOrError
-import zio.{Task, ZLayer}
+import online.walletstate.utils.ZIOExtensions.headOrError
+import online.walletstate.{WalletIO, WalletUIO}
+import zio.{ZIO, ZLayer}
 
 trait CategoriesService {
-  def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateCategory): Task[Category]
-  def get(wallet: Wallet.Id, id: Category.Id): Task[Category]
-  def list(wallet: Wallet.Id): Task[List[Category]]
-  def grouped(wallet: Wallet.Id): Task[List[Grouped[Category]]]
-  def update(wallet: Wallet.Id, id: Category.Id, info: UpdateCategory): Task[Unit]
+  def create(info: CreateCategory): WalletUIO[Category]
+  def get(id: Category.Id): WalletIO[CategoryNotExist, Category]
+  def list: WalletUIO[List[Category]]
+  def grouped: WalletUIO[List[Grouped[Category]]]
+  def update(id: Category.Id, info: UpdateCategory): WalletUIO[Unit]
 }
 
 final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -21,23 +24,27 @@ final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsSer
   import io.getquill.*
   import quill.{*, given}
 
-  override def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateCategory): Task[Category] = for {
+  override def create(info: CreateCategory): WalletUIO[Category] = for {
     category <- Category.make(info) // todo: check group exists
-    _        <- run(insert(category))
+    _        <- run(insert(category)).orDie
   } yield category
 
-  override def get(wallet: Wallet.Id, id: Category.Id): Task[Category] =
-    run(categoriesById(wallet, id)).map(_.headOption).getOrError(AppError.CategoryNotExist)
+  override def get(id: Category.Id): WalletIO[CategoryNotExist, Category] = for {
+    ctx      <- ZIO.service[WalletContext]
+    category <- run(categoriesById(ctx.wallet, id)).orDie.headOrError(CategoryNotExist())
+  } yield category
 
-  override def list(wallet: Wallet.Id): Task[List[Category]] =
-    run(categoriesByWallet(wallet))
+  override def list: WalletUIO[List[Category]] = for {
+    ctx        <- ZIO.service[WalletContext]
+    categories <- run(categoriesByWallet(ctx.wallet)).orDie
+  } yield categories
 
-  override def grouped(wallet: Wallet.Id): Task[List[Grouped[Category]]] =
-    groupsService.group(wallet, Group.Type.Categories, list(wallet))
+  override def grouped: WalletUIO[List[Grouped[Category]]] =
+    groupsService.group(Group.Type.Categories, list)
 
-  override def update(wallet: Wallet.Id, id: Category.Id, info: UpdateCategory): Task[Unit] = for {
+  override def update(id: Category.Id, info: UpdateCategory): WalletUIO[Unit] = for {
     // TODO check category is in wallet. check update result
-    _ <- run(update(id, info))
+    _ <- run(updateQuery(id, info)).orDie
   } yield ()
 }
 

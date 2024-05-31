@@ -1,6 +1,6 @@
 package zio.http.gen
 
-import online.walletstate.http.api.{
+import online.walletstate.http.endpoints.{
   AccountsEndpoints,
   AnalyticsEndpoints,
   AssetsEndpoints,

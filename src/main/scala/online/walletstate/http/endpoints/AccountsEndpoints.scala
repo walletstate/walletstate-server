@@ -1,4 +1,4 @@
-package online.walletstate.http.api
+package online.walletstate.http.endpoints
 
 import online.walletstate.models.api.{CreateAccount, FullRecord, Grouped, UpdateAccount}
 import online.walletstate.models.{Account, AppError, AssetAmount, Page}
@@ -8,32 +8,27 @@ import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
 import zio.schema.Schema
 
-trait AccountsEndpoints {
+trait AccountsEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "accounts")
       .in[CreateAccount]
       .out[Account](Status.Created)
-      .outError[AppError.Unauthorized](Status.Unauthorized)
-      .outError[AppError.BadRequest](Status.BadRequest)
       .??(Doc.h1("Create new account"))
 
   val list =
     Endpoint(Method.GET / "api" / "accounts")
       .out[List[Account]]
-      .outError[AppError.Unauthorized](Status.Unauthorized)
       .??(Doc.h1("Get accounts list"))
 
   val listGrouped =
     Endpoint(Method.GET / "api" / "accounts" / "grouped")
       .out[List[Grouped[Account]]]
-      .outError[AppError.Unauthorized](Status.Unauthorized)
       .??(Doc.h1("Get grouped accounts list"))
 
   val get =
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path)
       .out[Account]
-      .outError[AppError.Unauthorized](Status.Unauthorized)
       .outError[AppError.AccountNotExist](Status.NotFound)
       .??(Doc.h1("Get an account"))
 
@@ -41,27 +36,20 @@ trait AccountsEndpoints {
     Endpoint(Method.PUT / "api" / "accounts" / Account.Id.path)
       .in[UpdateAccount]
       .out[Unit](Status.NoContent)
-      .outError[AppError.Unauthorized](Status.Unauthorized)
-      .outError[AppError.AccountNotExist](Status.NotFound)
       .??(Doc.h1("Update an account"))
 
   val listRecords =
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path / "records")
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
       .out[Page[FullRecord]]
-      .outError[AppError.Unauthorized](Status.Unauthorized)
-      .outError[AppError.AccountNotExist](Status.NotFound)
-      .outError[AppError.BadRequest](Status.BadRequest)
       .??(Doc.h1("Load transactions list for account"))
 
   val getBalance =
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path / "balance")
       .out[List[AssetAmount]]
-      .outError[AppError.Unauthorized](Status.Unauthorized)
-      .outError[AppError.AccountNotExist](Status.NotFound)
       .??(Doc.h1("Get account balance"))
 
-  val endpointsMap = Map(
+  override val endpointsMap = Map(
     "create"      -> create,
     "get"         -> get,
     "update"      -> update,
@@ -71,7 +59,7 @@ trait AccountsEndpoints {
     "getBalance"  -> getBalance
   )
 
-  val endpoints = Chunk(
+  override val endpoints = Chunk(
     create,
     get,
     update,

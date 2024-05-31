@@ -25,7 +25,7 @@ trait AccountsQuillQueries extends QuillQueries {
   protected inline def accountsById(wallet: Wallet.Id, id: Account.Id): Query[Account] =
     accountsByWallet(wallet).filter(_.id == lift(id))
 
-  protected inline def update(id: Account.Id, info: UpdateAccount): Update[Account] =
+  protected inline def updateQuery(id: Account.Id, info: UpdateAccount): Update[Account] =
     Tables.Accounts
       .filter(_.id == lift(id))
       .update(

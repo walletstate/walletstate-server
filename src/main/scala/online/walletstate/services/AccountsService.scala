@@ -1,19 +1,22 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
-import online.walletstate.models.api.{CreateAccount, Grouped, UpdateAccount}
 import online.walletstate.models.*
+import online.walletstate.models.AppError.AccountNotExist
+import online.walletstate.models.AuthContext.WalletContext
+import online.walletstate.models.api.{CreateAccount, Grouped, UpdateAccount}
 import online.walletstate.services.queries.AccountsQuillQueries
-import online.walletstate.utils.ZIOExtensions.getOrError
-import zio.{Task, ZLayer}
+import online.walletstate.utils.ZIOExtensions.headOrError
+import online.walletstate.{WalletIO, WalletUIO}
+import zio.{ZIO, ZLayer}
 
 trait AccountsService {
-  def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAccount): Task[Account]
-  def get(wallet: Wallet.Id, id: Account.Id): Task[Account]
-  def list(wallet: Wallet.Id): Task[List[Account]]
-  def list(wallet: Wallet.Id, group: Group.Id): Task[List[Account]]
-  def grouped(wallet: Wallet.Id): Task[List[Grouped[Account]]]
-  def update(wallet: Wallet.Id, id: Account.Id, info: UpdateAccount): Task[Unit]
+  def create(info: CreateAccount): WalletUIO[Account]
+  def get(id: Account.Id): WalletIO[AccountNotExist, Account]
+  def list: WalletUIO[List[Account]]
+  def list(group: Group.Id): WalletUIO[List[Account]]
+  def grouped: WalletUIO[List[Grouped[Account]]]
+  def update(id: Account.Id, info: UpdateAccount): WalletUIO[Unit]
 }
 
 final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -22,26 +25,34 @@ final case class AccountsServiceLive(quill: WalletStateQuillContext, groupsServi
   import io.getquill.*
   import quill.{*, given}
 
-  override def create(wallet: Wallet.Id, createdBy: User.Id, info: CreateAccount): Task[Account] = for {
+  override def create(info: CreateAccount): WalletUIO[Account] = for {
     account <- Account.make(info) // TODO check group has correct type and group is in current wallet
-    _       <- run(insert(account))
+    _       <- run(insert(account)).orDie
   } yield account
 
-  override def get(wallet: Wallet.Id, id: Account.Id): Task[Account] =
-    run(accountsById(wallet, id)).map(_.headOption).getOrError(AppError.AccountNotExist())
+  override def get(id: Account.Id): WalletIO[AccountNotExist, Account] = for {
+    ctx     <- ZIO.service[WalletContext]
+    account <- run(accountsById(ctx.wallet, id)).orDie.headOrError(AccountNotExist())
+  } yield account
 
-  override def list(wallet: Wallet.Id): Task[List[Account]] =
-    run(accountsByWallet(wallet))
+  override def list: WalletUIO[List[Account]] = for {
+    ctx      <- ZIO.service[WalletContext]
+    accounts <- run(accountsByWallet(ctx.wallet)).orDie
+  } yield accounts
 
-  override def list(wallet: Wallet.Id, group: Group.Id): Task[List[Account]] =
-    run(accountsByGroup(wallet, group))
+  override def list(group: Group.Id): WalletUIO[List[Account]] = for {
+    ctx      <- ZIO.service[WalletContext]
+    accounts <- run(accountsByGroup(ctx.wallet, group)).orDie
+  } yield accounts
 
-  def grouped(wallet: Wallet.Id): Task[List[Grouped[Account]]] =
-    groupsService.group(wallet, Group.Type.Accounts, list(wallet))
+  def grouped: WalletUIO[List[Grouped[Account]]] = for {
+//    ctx     <- ZIO.service[WalletContext]
+    grouped <- groupsService.group(Group.Type.Accounts, list)
+  } yield grouped
 
-  override def update(wallet: Wallet.Id, id: Account.Id, info: UpdateAccount): Task[Unit] = for {
+  override def update(id: Account.Id, info: UpdateAccount): WalletUIO[Unit] = for {
     // TODO check account is in wallet. check update result
-    _ <- run(update(id, info))
+    _ <- run(updateQuery(id, info)).orDie
   } yield ()
 }
 
