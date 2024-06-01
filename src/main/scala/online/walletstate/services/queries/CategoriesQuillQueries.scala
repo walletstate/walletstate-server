@@ -21,7 +21,7 @@ trait CategoriesQuillQueries extends QuillQueries {
   protected inline def categoriesById(wallet: Wallet.Id, id: Category.Id): Query[Category] =
     categoriesByWallet(wallet).filter(_.id == lift(id))
 
-  protected inline def update(id: Category.Id, info: UpdateCategory): Update[Category] =
+  protected inline def updateQuery(id: Category.Id, info: UpdateCategory): Update[Category] =
     Tables.Categories
       .filter(_.id == lift(id))
       .update(

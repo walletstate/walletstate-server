@@ -1,30 +1,27 @@
 package online.walletstate.http
 
-import online.walletstate.http.api.IconsEndpoints
-import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
+import online.walletstate.http.endpoints.IconsEndpoints
 import online.walletstate.models.{AppError, Icon}
-import online.walletstate.models.api.CreateIcon
 import online.walletstate.services.IconsService
 import online.walletstate.utils.RequestOps.outputMediaType
-import zio.{Chunk, Task, ZIO, ZLayer}
 import zio.http.*
+import zio.{Chunk, Task, ZIO, ZLayer}
 
 import java.util.Base64
 
-case class IconsRoutes(auth: AuthMiddleware, iconsService: IconsService) extends IconsEndpoints {
-  import auth.implementWithWalletCtx
+case class IconsRoutes(iconsService: IconsService) extends WalletStateRoutes with IconsEndpoints {
 
-  private val createRoute = create.implementWithWalletCtx[(CreateIcon, WalletContext)] {
-    Handler.fromFunctionZIO((info, ctx) => iconsService.create(ctx.wallet, info).map(_.id))
-  }()
+  private val createRoute = create.implement {
+    Handler.fromFunctionZIO(info => iconsService.create(info).map(_.id))
+  }
 
-  private val listRoute = list.implementWithWalletCtx[(Option[String], WalletContext)] {
-    Handler.fromFunctionZIO((maybeTag, ctx) => iconsService.listIds(ctx.wallet, maybeTag))
-  }()
+  private val listRoute = list.implement {
+    Handler.fromFunctionZIO(maybeTag => iconsService.listIds(maybeTag))
+  }
 
-  private val getIconHandler = Handler.fromFunctionZIO[(Icon.Id, WalletContext, Request)] { (id, ctx, req) =>
-    iconsService.get(ctx.wallet, id).flatMap(iconToResponse).catchAll {
-      case e: AppError.IconNotFount => e.encode(Status.NotFound, req.outputMediaType)
+  private val getIconHandler = Handler.fromFunctionZIO[(Icon.Id, Request)] { (id, req) =>
+    iconsService.get(id).flatMap(iconToResponse).catchAll {
+      case e: AppError.IconNotExist => e.encode(Status.NotFound, req.outputMediaType)
       case _ => AppError.InternalServerError.encode(Status.InternalServerError, req.outputMediaType)
     }
   }
@@ -41,10 +38,10 @@ case class IconsRoutes(auth: AuthMiddleware, iconsService: IconsService) extends
     }
   }
 
-  val routes = Routes(
+  override val walletRoutes = Routes(
     createRoute,
     listRoute,
-    Method.GET / "api" / "icons" / Icon.Id.path -> auth.walletCtx -> getIconHandler
+    Method.GET / "api" / "icons" / Icon.Id.path -> getIconHandler
   )
 
 }

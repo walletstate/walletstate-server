@@ -3,9 +3,9 @@ import sbt.*
 object Dependencies {
 
   object Versions {
-    val zio       = "2.0.21"
+    val zio       = "2.1.1"
     val zioJson   = "0.6.2"
-    val zioHttp   = "3.0.0-RC6"
+    val zioHttp   = "3.0.0-RC8"
     val zioConfig = "4.0.2"
     val jwt       = "9.2.0"
 

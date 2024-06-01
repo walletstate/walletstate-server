@@ -1,25 +1,21 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
-import online.walletstate.models
 import online.walletstate.models.Analytics.GroupBy
+import online.walletstate.models.AuthContext.WalletContext
 import online.walletstate.models.api.SingleTransactionRecord
-import online.walletstate.models.{Account, Analytics, AssetAmount, Category, Group, Page, Record, Transaction, Wallet}
+import online.walletstate.models.{Account, Analytics, AssetAmount, Category, Group, Page, Record, Transaction}
 import online.walletstate.services.queries.AnalyticsQuillQueries
-import zio.{Task, ZIO, ZLayer}
+import online.walletstate.{WalletUIO, models}
+import zio.{URIO, ZIO, ZLayer}
 
 import java.sql.SQLException
 
 trait AnalyticsService {
 
-  def records(
-      wallet: Wallet.Id,
-      filter: Analytics.Filter,
-      page: Option[Page.Token]
-  ): Task[Page[SingleTransactionRecord]]
-
-  def aggregate(wallet: Wallet.Id, filter: Analytics.Filter): Task[List[AssetAmount]]
-  def group(wallet: Wallet.Id, groupBy: Analytics.GroupRequest): Task[List[Analytics.GroupedResult]]
+  def records(filter: Analytics.Filter, page: Option[Page.Token]): WalletUIO[Page[SingleTransactionRecord]]
+  def aggregate(filter: Analytics.Filter): WalletUIO[List[AssetAmount]]
+  def group(groupBy: Analytics.GroupRequest): WalletUIO[List[Analytics.GroupedResult]]
 }
 
 final case class AnalyticsServiceLive(quill: WalletStateQuillContext)
@@ -30,36 +26,35 @@ final case class AnalyticsServiceLive(quill: WalletStateQuillContext)
 
   private val PageSize = 50 // TODO Move to config
 
-  override def records(
-      wallet: Wallet.Id,
-      filter: Analytics.Filter,
-      page: Option[Page.Token]
-  ): Task[Page[SingleTransactionRecord]] = {
-    val query = selectRecords(wallet, filter, page, PageSize)
-    translate(query).debug("[Analytics] Records query") *> // Remove
-      run(query).map { (rows: List[(models.Record, Transaction)]) =>
-        buildPage(rows.map((record, transaction) => record.toSingleTransaction(transaction.data)))
+  override def records(filter: Analytics.Filter, page: Option[Page.Token]): WalletUIO[Page[SingleTransactionRecord]] =
+    ZIO.serviceWithZIO[WalletContext] { ctx =>
+      val query = selectRecords(ctx.wallet, filter, page, PageSize)
+      translate(query).orDie.debug("[Analytics] Records query") *> // Remove
+        run(query).orDie.map { (rows: List[(models.Record, Transaction)]) =>
+          buildPage(rows.map((record, transaction) => record.toSingleTransaction(transaction.data)))
+        }
+    }
+
+  override def aggregate(filter: Analytics.Filter): WalletUIO[List[AssetAmount]] =
+    ZIO.serviceWithZIO[WalletContext] { ctx =>
+      val query = aggregateRecords(ctx.wallet, filter)
+      translate(query).orDie.debug("[Analytics] Aggregate query ") *>
+        run(query).orDie
+    }
+
+  override def group(groupBy: Analytics.GroupRequest): WalletUIO[List[Analytics.GroupedResult]] =
+    ZIO.serviceWithZIO[WalletContext] { ctx =>
+      val retrieveData = groupBy.groupBy match {
+        case GroupBy.Category      => run(groupByCategory(ctx.wallet, groupBy.filter))
+        case GroupBy.CategoryGroup => run(groupByCategoryGroup(ctx.wallet, groupBy.filter))
+        case GroupBy.Account       => run(groupByAccount(ctx.wallet, groupBy.filter))
+        case GroupBy.AccountGroup  => run(groupByAccountGroup(ctx.wallet, groupBy.filter))
       }
-  }
 
-  override def aggregate(wallet: Wallet.Id, filter: Analytics.Filter): Task[List[AssetAmount]] = {
-    val query = aggregateRecords(wallet, filter)
-    translate(query).debug("[Analytics] Aggregate query ") *>
-      run(query)
-  }
-
-  override def group(wallet: Wallet.Id, groupBy: Analytics.GroupRequest): Task[List[Analytics.GroupedResult]] = {
-    val retrieveData = groupBy.groupBy match {
-      case GroupBy.Category        => run(groupByCategory(wallet, groupBy.filter))
-      case GroupBy.CategoryGroup => run(groupByCategoryGroup(wallet, groupBy.filter))
-      case GroupBy.Account         => run(groupByAccount(wallet, groupBy.filter))
-      case GroupBy.AccountGroup   => run(groupByAccountGroup(wallet, groupBy.filter))
+      retrieveData.orDie.map { (list: List[(Category.Id | Account.Id | Group.Id, AssetAmount)]) =>
+        list.groupBy(_._1).map((group, data) => Analytics.GroupedResult(group, data.map(_._2))).toList
+      }
     }
-
-    retrieveData.map { (list: List[(Category.Id | Account.Id | Group.Id, AssetAmount)]) =>
-      list.groupBy(_._1).map((group, data) => Analytics.GroupedResult(group, data.map(_._2))).toList
-    }
-  }
 
   private def buildPage(records: List[SingleTransactionRecord]): Page[SingleTransactionRecord] = {
     if (records.length < PageSize) Page(records, None)

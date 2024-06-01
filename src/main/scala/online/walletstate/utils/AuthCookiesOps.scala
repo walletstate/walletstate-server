@@ -32,7 +32,7 @@ object AuthCookiesOps {
     Cookie.Response(
       name = AuthCookiesName,
       content = content,
-      path = Some(Root),
+      path = Some(Path.root),
       isHttpOnly = true,
       maxAge = Some(expireIn)
     )

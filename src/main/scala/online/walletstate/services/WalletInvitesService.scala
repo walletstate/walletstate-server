@@ -1,15 +1,17 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
+import online.walletstate.models.AppError.WalletInviteNotExist
 import online.walletstate.models.{AppError, WalletInvite}
 import online.walletstate.services.queries.WalletInvitesQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
+import online.walletstate.{UserIO, UserUIO, WalletUIO}
 import zio.*
 
 trait WalletInvitesService {
-  def save(invite: WalletInvite): Task[WalletInvite]
-  def get(code: String): Task[WalletInvite]
-  def delete(id: WalletInvite.Id): Task[Unit]
+  def save(invite: WalletInvite): WalletUIO[WalletInvite]
+  def get(code: String): UserIO[WalletInviteNotExist, WalletInvite]
+  def delete(id: WalletInvite.Id): UserUIO[Unit]
 }
 
 case class WalletInvitesServiceLive(quill: WalletStateQuillContext)
@@ -18,14 +20,14 @@ case class WalletInvitesServiceLive(quill: WalletStateQuillContext)
   import io.getquill.*
   import quill.*
 
-  override def save(invite: WalletInvite): Task[WalletInvite] =
-    run(insert(invite)).map(_ => invite)
+  override def save(invite: WalletInvite): WalletUIO[WalletInvite] =
+    run(insert(invite)).orDie.map(_ => invite)
 
-  override def get(code: String): Task[WalletInvite] =
-    run(inviteByCode(code)).headOrError(AppError.WalletInviteNotExist)
+  override def get(code: String): UserIO[WalletInviteNotExist, WalletInvite] =
+    run(inviteByCode(code)).orDie.headOrError(WalletInviteNotExist())
 
-  override def delete(id: WalletInvite.Id): Task[Unit] =
-    run(inviteById(id).delete).map(_ => ())
+  override def delete(id: WalletInvite.Id): UserUIO[Unit] =
+    run(inviteById(id).delete).orDie.map(_ => ())
 }
 
 object WalletInvitesServiceLive {

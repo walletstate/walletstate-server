@@ -1,31 +1,27 @@
 package online.walletstate.http
 
-import online.walletstate.http.api.ExchangeRatesEndpoints
-import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
-import online.walletstate.models.api.CreateExchangeRate
-import online.walletstate.models.{Asset, ExchangeRate}
+import online.walletstate.http.endpoints.ExchangeRatesEndpoints
 import online.walletstate.services.ExchangeRatesService
 import zio.*
 import zio.http.*
 
-final case class ExchangeRatesRoutes(auth: AuthMiddleware, exchangeRatesService: ExchangeRatesService)
-    extends ExchangeRatesEndpoints {
-  import auth.implementWithWalletCtx
-  
-  private val createRoute = create.implementWithWalletCtx[(CreateExchangeRate, WalletContext)] {
-    Handler.fromFunctionZIO((info, ctx) => exchangeRatesService.create(ctx.wallet, info))
-  }()
+final case class ExchangeRatesRoutes(exchangeRatesService: ExchangeRatesService)
+    extends WalletStateRoutes
+    with ExchangeRatesEndpoints {
 
-  private val listRoute = list.implementWithWalletCtx[(Asset.Id, Asset.Id, WalletContext)]{
-    Handler.fromFunctionZIO((from, to, ctx) => exchangeRatesService.list(ctx.wallet, from, to))
-  }()
-  
-  private val getRoute = get.implementWithWalletCtx[(ExchangeRate.Id, WalletContext)]{
-    Handler.fromFunctionZIO((id, ctx) => exchangeRatesService.get(ctx.wallet, id))
-  }()
-  
+  private val createRoute = create.implement {
+    Handler.fromFunctionZIO(info => exchangeRatesService.create(info))
+  }
 
-  val routes = Routes(createRoute, listRoute, getRoute)
+  private val listRoute = list.implement {
+    Handler.fromFunctionZIO((from, to) => exchangeRatesService.list(from, to))
+  }
+
+  private val getRoute = get.implement {
+    Handler.fromFunctionZIO(id => exchangeRatesService.get(id))
+  }
+
+  override val walletRoutes = Routes(createRoute, listRoute, getRoute)
 }
 
 object ExchangeRatesRoutes {

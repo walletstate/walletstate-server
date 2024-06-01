@@ -1,43 +1,37 @@
-package online.walletstate.http.api
+package online.walletstate.http.endpoints
 
-import online.walletstate.models.{AppError, Category}
 import online.walletstate.models.api.{CreateCategory, Grouped, UpdateCategory}
+import online.walletstate.models.{AppError, Category}
 import zio.Chunk
-import zio.http.{Method, Status}
 import zio.http.endpoint.Endpoint
+import zio.http.{Method, Status}
 
-trait CategoriesEndpoints {
+trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "categories")
       .in[CreateCategory]
       .out[Category](Status.Created)
-      .outError[AppError.Unauthorized](Status.Unauthorized)
-      .outError[AppError.BadRequest](Status.BadRequest)
 
   val list =
     Endpoint(Method.GET / "api" / "categories")
       .out[List[Category]]
-      .outError[AppError.Unauthorized](Status.Unauthorized)
 
   val listGrouped =
     Endpoint(Method.GET / "api" / "categories" / "grouped")
       .out[List[Grouped[Category]]]
-      .outError[AppError.Unauthorized](Status.Unauthorized)
 
   val get =
     Endpoint(Method.GET / "api" / "categories" / Category.Id.path)
       .out[Category]
-      .outError[AppError.Unauthorized](Status.Unauthorized)
+      .outError[AppError.CategoryNotExist](Status.NotFound)
 
   val update =
     Endpoint(Method.PUT / "api" / "categories" / Category.Id.path)
       .in[UpdateCategory]
       .out[Unit](Status.NoContent)
-      .outError[AppError.BadRequest](Status.BadRequest)
-      .outError[AppError.Unauthorized](Status.Unauthorized)
 
-  val endpointsMap = Map(
+  override val endpointsMap = Map(
     "create"      -> create,
     "get"         -> get,
     "update"      -> update,
@@ -45,7 +39,7 @@ trait CategoriesEndpoints {
     "listGrouped" -> listGrouped
   )
 
-  val endpoints = Chunk(
+  override val endpoints = Chunk(
     create,
     get,
     update,

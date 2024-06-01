@@ -71,7 +71,7 @@ object EndpointParser {
   private def parseBody(atomCodecs: Chunk[(HttpCodec.Atom[_, _], Chunk[Metadata[_]])]): Option[TSField] = {
     atomCodecs
       .collect { case (HttpCodec.Content(codec, name, index), meta) =>
-        SchemaParser.parse(codec.schema)
+        SchemaParser.parse(codec.defaultSchema)
       }
       .map(t => TSField.bodyParam(t))
       .headOption
@@ -92,7 +92,7 @@ object EndpointParser {
   private def parseOutputType(atomCodecs: Chunk[(HttpCodec.Atom[_, _], Chunk[Metadata[_]])]): TSType = {
     atomCodecs
       .collect { case (HttpCodec.Content(codec, name, index), meta) =>
-        SchemaParser.parse(codec.schema)
+        SchemaParser.parse(codec.defaultSchema)
       }
       .headOption
       .getOrElse(TSType.TSNull)

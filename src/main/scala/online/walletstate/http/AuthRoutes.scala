@@ -1,12 +1,12 @@
 package online.walletstate.http
 
-import online.walletstate.http.auth.{AuthContext, AuthMiddleware, UserContext, WalletContext}
-import online.walletstate.models.{AppError, Wallet}
-import online.walletstate.utils.RequestOps.{as, outputMediaType}
-import online.walletstate.utils.AuthCookiesOps.clearAuthCookies
-import online.walletstate.services.{AuthService, IdentityProviderService, TokenService, UsersService, WalletsService}
-import online.walletstate.utils.AuthCookiesOps.withAuthCookies
+import online.walletstate.http.endpoints.WalletStateEndpoints
+import online.walletstate.models.AuthContext.{UserContext, WalletContext}
 import online.walletstate.models.api.LoginInfo
+import online.walletstate.models.{AppError, AuthContext, Wallet}
+import online.walletstate.services.{AuthService, IdentityProviderService, TokenService, WalletsService}
+import online.walletstate.utils.AuthCookiesOps.{clearAuthCookies, withAuthCookies}
+import online.walletstate.utils.RequestOps.{as, outputMediaType}
 import zio.*
 import zio.http.*
 import zio.json.*
@@ -15,9 +15,9 @@ final case class AuthRoutes(
     authService: AuthService,
     identityProviderService: IdentityProviderService,
     walletsService: WalletsService,
-    tokenService: TokenService,
-    auth: AuthMiddleware
-) {
+    tokenService: TokenService
+) extends WalletStateRoutes
+    with WalletStateEndpoints {
 
   val getLoginPageHandler = Handler.fromFunctionZIO { _ =>
     identityProviderService.loginUrl.map(url => Response.seeOther(url))
@@ -31,8 +31,8 @@ final case class AuthRoutes(
     } yield Response.json(user.toJson).withAuthCookies(token)
 
     res.catchAll {
-      case e: AppError.ParseRequestError       => e.encode(Status.BadRequest, req.outputMediaType)
-      case e: AppError.InvalidCredentials.type => e.encode(Status.Forbidden, req.outputMediaType)
+      case e: AppError.ParseRequestError  => e.encode(Status.BadRequest, req.outputMediaType)
+      case e: AppError.InvalidCredentials => e.encode(Status.Forbidden, req.outputMediaType)
       case _ => AppError.InternalServerError.encode(Status.InternalServerError, req.outputMediaType)
     }
   }
@@ -41,9 +41,10 @@ final case class AuthRoutes(
 
   val callbackHandler = handler { (req: Request) => Response.notImplemented("For future SSO") }
 
-  val changeCurrenWalletHandler = Handler.fromFunctionZIO[(Wallet.Id, UserContext, Request)] { (walletId, ctx, req) =>
+  val changeCurrenWalletHandler = Handler.fromFunctionZIO[(Wallet.Id, Request)] { (walletId, req) =>
     val rs = for {
-      wallet   <- authService.updateCurrentUserWallet(ctx.user, walletId)
+      ctx      <- ZIO.service[UserContext]
+      wallet   <- authService.updateCurrentUserWallet(walletId)
       newToken <- tokenService.encode(WalletContext(ctx.user, wallet.id))
     } yield Response.json(wallet.toJson).withAuthCookies(newToken)
 
@@ -51,16 +52,19 @@ final case class AuthRoutes(
       case e: AppError.UserIsNotInWallet => e.encode(Status.Forbidden, req.outputMediaType)
       case _ => AppError.InternalServerError.encode(Status.InternalServerError, req.outputMediaType)
     }
+
   }
 
-  def routes = Routes(
-    Method.GET / "auth" / "login"                    -> getLoginPageHandler,
-    Method.POST / "auth" / "login"                   -> loginHandler,
-    Method.POST / "auth" / "logout"                  -> logoutHandler,
-    Method.GET / "auth" / "callback"                 -> callbackHandler,
-    Method.POST / "auth" / "wallet" / Wallet.Id.path -> auth.userCtx -> changeCurrenWalletHandler
+  override val noCtxRoutes = Routes(
+    Method.GET / "auth" / "login"    -> getLoginPageHandler,
+    Method.POST / "auth" / "login"   -> loginHandler,
+    Method.POST / "auth" / "logout"  -> logoutHandler,
+    Method.GET / "auth" / "callback" -> callbackHandler
   )
 
+  override val userRoutes: Routes[UserContext, _] = Routes(
+    Method.POST / "auth" / "wallet" / Wallet.Id.path -> changeCurrenWalletHandler
+  )
 }
 
 object AuthRoutes {

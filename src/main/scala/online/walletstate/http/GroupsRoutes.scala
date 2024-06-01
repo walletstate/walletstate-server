@@ -1,41 +1,33 @@
 package online.walletstate.http
 
-import online.walletstate.http.api.GroupsEndpoints
-import online.walletstate.http.auth.{AuthMiddleware, WalletContext}
-import online.walletstate.models.Group
-import online.walletstate.models.api.{CreateGroup, UpdateGroup}
+import online.walletstate.http.endpoints.GroupsEndpoints
 import online.walletstate.services.GroupsService
 import zio.*
 import zio.http.*
 
-case class GroupsRoutes(auth: AuthMiddleware, groupsService: GroupsService) extends GroupsEndpoints {
-  import auth.implementWithWalletCtx
+case class GroupsRoutes(groupsService: GroupsService) extends WalletStateRoutes with GroupsEndpoints {
 
-  private val createRoute = create.implementWithWalletCtx[(CreateGroup, WalletContext)] {
-    Handler.fromFunctionZIO((groupInfo, ctx) =>
-      groupsService.create(ctx.wallet, groupInfo.`type`, groupInfo.name, groupInfo.idx, ctx.user)
-    )
-  }()
+  private val createRoute = create.implement {
+    Handler.fromFunctionZIO(groupInfo => groupsService.create(groupInfo.`type`, groupInfo.name, groupInfo.idx))
+  }
 
-  private val listRoute = list.implementWithWalletCtx[(Group.Type, WalletContext)] {
-    Handler.fromFunctionZIO((`type`, ctx) => groupsService.list(ctx.wallet, `type`))
-  }()
+  private val listRoute = list.implement {
+    Handler.fromFunctionZIO(`type` => groupsService.list(`type`))
+  }
 
-  private val getRoute = get.implementWithWalletCtx[(Group.Id, WalletContext)] {
-    Handler.fromFunctionZIO((id, ctx) => groupsService.get(ctx.wallet, id))
-  }()
+  private val getRoute = get.implement {
+    Handler.fromFunctionZIO(id => groupsService.get(id))
+  }
 
-  private val updateRoute = update.implementWithWalletCtx[(Group.Id, UpdateGroup, WalletContext)] {
-    Handler.fromFunctionZIO((id, updateInfo, ctx) =>
-      groupsService.update(ctx.wallet, id, updateInfo.name, updateInfo.idx)
-    )
-  }()
+  private val updateRoute = update.implement {
+    Handler.fromFunctionZIO((id, updateInfo) => groupsService.update(id, updateInfo.name, updateInfo.idx))
+  }
 
-  private val deleteRoute = delete.implementWithWalletCtx[(Group.Id, WalletContext)] {
-    Handler.fromFunctionZIO((id, ctx) => groupsService.delete(ctx.wallet, id))
-  }()
+  private val deleteRoute = delete.implement {
+    Handler.fromFunctionZIO(id => groupsService.delete(id))
+  }
 
-  val routes = Routes(createRoute, listRoute, getRoute, updateRoute, deleteRoute)
+  override val walletRoutes = Routes(createRoute, listRoute, getRoute, updateRoute, deleteRoute)
 }
 
 object GroupsRoutes {

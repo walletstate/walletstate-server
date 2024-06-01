@@ -1,28 +1,25 @@
-package online.walletstate.http.api
+package online.walletstate.http.endpoints
 
 import online.walletstate.models.api.CreateIcon
 import online.walletstate.models.{AppError, Icon}
-import zio.Chunk
 import zio.http.codec.QueryCodec
 import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
 
-trait IconsEndpoints {
+trait IconsEndpoints extends WalletStateEndpoints {
 
   val list =
     Endpoint(Method.GET / "api" / "icons")
       .query(QueryCodec.query("tag").optional)
       .out[List[Icon.Id]]
-      .outError[AppError.Unauthorized](Status.Unauthorized)
 
   val create =
     Endpoint(Method.POST / "api" / "icons")
       .in[CreateIcon]
       .out[Icon.Id](Status.Created)
-      .outError[AppError.Unauthorized](Status.Unauthorized)
+      .outError[AppError.InvalidIconId](Status.BadRequest)
 
-  val endpointsMap = Map("list" -> list, "create" -> create)
-  val endpoints    = endpointsMap.values
+  override val endpointsMap = Map("list" -> list, "create" -> create)
 }
 
 object IconsEndpoints extends IconsEndpoints

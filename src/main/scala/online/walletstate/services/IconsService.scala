@@ -1,37 +1,45 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
+import online.walletstate.models.AppError.{IconNotExist, InvalidIconId}
+import online.walletstate.models.AuthContext.WalletContext
 import online.walletstate.models.api.CreateIcon
-import online.walletstate.models.{AppError, Icon, Wallet}
+import online.walletstate.models.{AppError, Icon}
 import online.walletstate.services.queries.IconsQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
-import zio.{Task, ZLayer}
+import online.walletstate.{WalletIO, WalletUIO}
+import zio.{ZIO, ZLayer}
 
 trait IconsService {
-  def create(wallet: Wallet.Id, data: CreateIcon): Task[Icon]
-  def get(wallet: Wallet.Id, id: Icon.Id): Task[Icon]
-  def listIds(wallet: Wallet.Id, tag: Option[String]): Task[List[Icon.Id]]
+  def create(data: CreateIcon): WalletIO[InvalidIconId, Icon]
+  def get(id: Icon.Id): WalletIO[IconNotExist, Icon]
+  def listIds(tag: Option[String]): WalletUIO[List[Icon.Id]]
 }
 
 final case class IconsServiceDBLive(quill: WalletStateQuillContext) extends IconsService with IconsQuillQueries {
   import io.getquill.*
   import quill.{*, given}
 
-  override def create(wallet: Wallet.Id, data: CreateIcon): Task[Icon] = for {
-    icon           <- Icon.make(wallet, data.contentType, data.content, data.tags)
-    maybeExistTags <- run(selectForCurrent(wallet, icon.id).map(_.tags))
+  override def create(data: CreateIcon): WalletIO[InvalidIconId, Icon] = for {
+    ctx            <- ZIO.service[WalletContext]
+    icon           <- Icon.make(ctx.wallet, data.contentType, data.content, data.tags)
+    maybeExistTags <- run(selectForCurrent(ctx.wallet, icon.id).map(_.tags)).orDie
     iconWithUpdatedTags = icon.copy(tags = (icon.tags ::: maybeExistTags.flatten).distinct)
-    _ <- transaction(run(selectForCurrent(wallet, icon.id).delete) *> run(insert(iconWithUpdatedTags)))
+    _ <- transaction(run(selectForCurrent(ctx.wallet, icon.id).delete) *> run(insert(iconWithUpdatedTags))).orDie
   } yield icon
 
-  override def get(wallet: Wallet.Id, id: Icon.Id): Task[Icon] = for {
-    icon <- run(selectForCurrentOrDefault(wallet, id)).headOrError(AppError.IconNotFount(id))
+  override def get(id: Icon.Id): WalletIO[IconNotExist, Icon] = for {
+    ctx  <- ZIO.service[WalletContext]
+    icon <- run(selectForCurrentOrDefault(ctx.wallet, id)).orDie.headOrError(IconNotExist(id))
   } yield icon
 
-  override def listIds(wallet: Wallet.Id, maybeTag: Option[String]): Task[List[Icon.Id]] = maybeTag match {
-    case Some(tag) => run(selectIdsWithTag(wallet, tag)) // list icons with tag from current wallet and general
-    case None      => run(selectIds(wallet))             // list wallet only icons
-  }
+  override def listIds(maybeTag: Option[String]): WalletUIO[List[Icon.Id]] =
+    ZIO.serviceWithZIO[WalletContext] { ctx =>
+      maybeTag match {
+        case Some(tag) => run(selectIdsWithTag(ctx.wallet, tag)).orDie // icons with tag from current wallet and general
+        case None      => run(selectIds(ctx.wallet)).orDie             // list wallet only icons
+      }
+    }
 
 }
 
