@@ -1,6 +1,5 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.api.{FullRecord, RecordData}
 import online.walletstate.models.{Account, AppError, Page, Record}
 import zio.Chunk
 import zio.http.endpoint.Endpoint
@@ -10,24 +9,24 @@ trait RecordsEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "records")
-      .in[RecordData]
-      .out[FullRecord](Status.Created)
+      .in[Record.Data]
+      .out[Record.Full](Status.Created)
 
   val list =
     Endpoint(Method.GET / "api" / "records")
       .query[Account.Id](Account.Id.query)
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
-      .out[Page[FullRecord]]
+      .out[Page[Record.Full]]
 
   val get =
     Endpoint(Method.GET / "api" / "records" / Record.Id.path)
-      .out[FullRecord]
+      .out[Record.Full]
       .outError[AppError.RecordNotExist](Status.NotFound)
 
   val update =
     Endpoint(Method.PUT / "api" / "records" / Record.Id.path)
-      .in[RecordData]
-      .out[FullRecord]
+      .in[Record.Data]
+      .out[Record.Full]
 
   val delete =
     Endpoint(Method.DELETE / "api" / "records" / Record.Id.path)

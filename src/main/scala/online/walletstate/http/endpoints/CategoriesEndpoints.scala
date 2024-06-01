@@ -1,7 +1,6 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.api.{CreateCategory, Grouped, UpdateCategory}
-import online.walletstate.models.{AppError, Category}
+import online.walletstate.models.{AppError, Category, Grouped}
 import zio.Chunk
 import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
@@ -10,7 +9,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "categories")
-      .in[CreateCategory]
+      .in[Category.Data]
       .out[Category](Status.Created)
 
   val list =
@@ -28,7 +27,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val update =
     Endpoint(Method.PUT / "api" / "categories" / Category.Id.path)
-      .in[UpdateCategory]
+      .in[Category.Data]
       .out[Unit](Status.NoContent)
 
   override val endpointsMap = Map(

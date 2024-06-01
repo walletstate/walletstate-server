@@ -1,10 +1,9 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
-import online.walletstate.models.*
 import online.walletstate.models.AppError.GroupNotExist
 import online.walletstate.models.AuthContext.WalletContext
-import online.walletstate.models.api.Grouped
+import online.walletstate.models.*
 import online.walletstate.services.queries.GroupsQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
 import online.walletstate.{WalletIO, WalletUIO}

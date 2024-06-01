@@ -1,7 +1,6 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.api.{CreateAsset, Grouped, UpdateAsset}
-import online.walletstate.models.{AppError, Asset}
+import online.walletstate.models.{AppError, Asset, Grouped}
 import zio.Chunk
 import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
@@ -10,7 +9,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "assets")
-      .in[CreateAsset]
+      .in[Asset.Data]
       .out[Asset](Status.Created)
 
   val listGrouped =
@@ -28,7 +27,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val update =
     Endpoint(Method.PUT / "api" / "assets" / Asset.Id.path)
-      .in[UpdateAsset]
+      .in[Asset.Data]
       .out[Unit](Status.NoContent)
 
   override val endpointsMap = Map(

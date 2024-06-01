@@ -1,7 +1,6 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.api.{CreateAccount, FullRecord, Grouped, UpdateAccount}
-import online.walletstate.models.{Account, AppError, AssetAmount, Page}
+import online.walletstate.models.{Account, AppError, AssetAmount, Grouped, Page, Record}
 import zio.Chunk
 import zio.http.codec.Doc
 import zio.http.endpoint.Endpoint
@@ -12,7 +11,7 @@ trait AccountsEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "accounts")
-      .in[CreateAccount]
+      .in[Account.Data]
       .out[Account](Status.Created)
       .??(Doc.h1("Create new account"))
 
@@ -34,14 +33,14 @@ trait AccountsEndpoints extends WalletStateEndpoints {
 
   val update =
     Endpoint(Method.PUT / "api" / "accounts" / Account.Id.path)
-      .in[UpdateAccount]
+      .in[Account.Data]
       .out[Unit](Status.NoContent)
       .??(Doc.h1("Update an account"))
 
   val listRecords =
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path / "records")
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
-      .out[Page[FullRecord]]
+      .out[Page[Record.Full]]
       .??(Doc.h1("Load transactions list for account"))
 
   val getBalance =

@@ -3,19 +3,18 @@ package online.walletstate.services
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.AppError.CategoryNotExist
 import online.walletstate.models.AuthContext.WalletContext
-import online.walletstate.models.api.{CreateCategory, Grouped, UpdateCategory}
-import online.walletstate.models.{AppError, Category, Group}
+import online.walletstate.models.{AppError, Category, Group, Grouped}
 import online.walletstate.services.queries.CategoriesQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
 import online.walletstate.{WalletIO, WalletUIO}
 import zio.{ZIO, ZLayer}
 
 trait CategoriesService {
-  def create(info: CreateCategory): WalletUIO[Category]
+  def create(info: Category.Data): WalletUIO[Category]
   def get(id: Category.Id): WalletIO[CategoryNotExist, Category]
   def list: WalletUIO[List[Category]]
   def grouped: WalletUIO[List[Grouped[Category]]]
-  def update(id: Category.Id, info: UpdateCategory): WalletUIO[Unit]
+  def update(id: Category.Id, info: Category.Data): WalletUIO[Unit]
 }
 
 final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -24,7 +23,7 @@ final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsSer
   import io.getquill.*
   import quill.{*, given}
 
-  override def create(info: CreateCategory): WalletUIO[Category] = for {
+  override def create(info: Category.Data): WalletUIO[Category] = for {
     category <- Category.make(info) // todo: check group exists
     _        <- run(insert(category)).orDie
   } yield category
@@ -42,7 +41,7 @@ final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsSer
   override def grouped: WalletUIO[List[Grouped[Category]]] =
     groupsService.group(Group.Type.Categories, list)
 
-  override def update(id: Category.Id, info: UpdateCategory): WalletUIO[Unit] = for {
+  override def update(id: Category.Id, info: Category.Data): WalletUIO[Unit] = for {
     // TODO check category is in wallet. check update result
     _ <- run(updateQuery(id, info)).orDie
   } yield ()

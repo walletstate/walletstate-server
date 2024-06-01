@@ -1,6 +1,5 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.api.{CreateGroup, UpdateGroup}
 import online.walletstate.models.{AppError, Group}
 import zio.http.codec.{Doc, QueryCodec}
 import zio.http.endpoint.Endpoint
@@ -10,7 +9,7 @@ trait GroupsEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "groups")
-      .in[CreateGroup]
+      .in[Group.CreateData]
       .out[Group](Status.Created)
 
   val list =
@@ -25,7 +24,7 @@ trait GroupsEndpoints extends WalletStateEndpoints {
 
   val update =
     Endpoint(Method.PUT / "api" / "groups" / Group.Id.path)
-      .in[UpdateGroup](Doc.h1("Test doc"))
+      .in[Group.UpdateData](Doc.h1("Test doc"))
       .out[Unit](Status.NoContent)
 
   val delete =

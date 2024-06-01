@@ -3,12 +3,12 @@ package online.walletstate.models
 import online.walletstate.models.AppError.InvalidIconId
 import zio.{Chunk, IO, Task, ZIO}
 import zio.http.codec.PathCodec
-import zio.schema.{DeriveSchema, Schema}
+import zio.schema.{derived, Schema}
 
 import java.security.MessageDigest
 import java.util.HexFormat
 
-final case class Icon(wallet: Option[Wallet.Id], id: Icon.Id, contentType: String, content: String, tags: List[String])
+final case class Icon(wallet: Option[Wallet.Id], id: Icon.Id, contentType: String, content: String, tags: List[String]) derives Schema
 
 object Icon {
 
@@ -32,5 +32,7 @@ object Icon {
       iconId        <- ZIO.fromEither(Id.make(contentHash)).mapError(e => InvalidIconId(e))
     } yield Icon(Some(wallet), iconId, contentType, content, tags)
 
-  given schema: Schema[Icon] = DeriveSchema.gen[Icon]
+
+
+  final case class Data(contentType: String, content: String, tags: List[String] = List.empty) derives Schema
 }

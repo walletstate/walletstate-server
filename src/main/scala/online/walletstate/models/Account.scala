@@ -1,9 +1,8 @@
 package online.walletstate.models
 
 import online.walletstate.models
-import online.walletstate.models.api.CreateAccount
 import zio.http.codec.{PathCodec, QueryCodec}
-import zio.schema.{DeriveSchema, Schema}
+import zio.schema.{derived, Schema}
 import zio.{Chunk, Random, Task, UIO, ZIO}
 
 import java.util.UUID
@@ -17,6 +16,7 @@ final case class Account(
     icon: Option[Icon.Id],
     tags: List[String]
 ) extends Groupable
+    derives Schema
 
 object Account {
   final case class Id(id: UUID) extends AnyVal
@@ -31,8 +31,16 @@ object Account {
     given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
-  def make(info: CreateAccount): UIO[Account] =
-    Id.random.map(Account(_, info.group, info.name, info.defaultAsset, info.idx, info.icon, info.tags))
+  def make(data: Data): UIO[Account] =
+    Id.random.map(Account(_, data.group, data.name, data.defaultAsset, data.idx, data.icon, data.tags))
 
-  given schema: Schema[Account] = DeriveSchema.gen[Account]
+  final case class Data(
+      group: Group.Id,
+      name: String,
+      defaultAsset: Option[Asset.Id],
+      idx: Int,
+      icon: Option[Icon.Id],
+      tags: List[String]
+  ) derives Schema
+  
 }

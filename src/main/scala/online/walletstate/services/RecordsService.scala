@@ -2,7 +2,6 @@ package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.AppError.RecordNotExist
-import online.walletstate.models.api.{FullRecord, RecordData}
 import online.walletstate.models.{Account, AssetAmount, Page, Record, Transaction}
 import online.walletstate.services.queries.RecordsQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
@@ -10,11 +9,11 @@ import online.walletstate.{WalletIO, WalletUIO}
 import zio.{ZIO, ZLayer}
 
 trait RecordsService {
-  def create(data: RecordData): WalletUIO[FullRecord]
-  def get(id: Record.Id): WalletIO[RecordNotExist, FullRecord]
-  def update(id: Record.Id, data: RecordData): WalletUIO[FullRecord]
+  def create(data: Record.Data): WalletUIO[Record.Full]
+  def get(id: Record.Id): WalletIO[RecordNotExist, Record.Full]
+  def update(id: Record.Id, data: Record.Data): WalletUIO[Record.Full]
   def delete(id: Record.Id): WalletUIO[Unit]
-  def list(account: Account.Id, pageToken: Option[Page.Token]): WalletUIO[Page[FullRecord]]
+  def list(account: Account.Id, pageToken: Option[Page.Token]): WalletUIO[Page[Record.Full]]
   def balance(account: Account.Id): WalletUIO[List[AssetAmount]]
 }
 
@@ -24,20 +23,20 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
 
   private inline val PageSize = 50 // TODO Move to configs
 
-  override def create(data: RecordData): WalletUIO[FullRecord] = for {
+  override def create(data: Record.Data): WalletUIO[Record.Full] = for {
     // TODO check record is for current wallet
     recordWithTransactions <- Record.make(data)
     (record, transactions) = recordWithTransactions
     _ <- transaction(run(insertRecord(record)) *> run(insertTransactions(transactions))).orDie
   } yield record.toFull(transactions)
 
-  override def get(id: Record.Id): WalletIO[RecordNotExist, FullRecord] = for {
+  override def get(id: Record.Id): WalletIO[RecordNotExist, Record.Full] = for {
     // TODO check record is for current wallet
     record       <- run(getRecord(id)).orDie.headOrError(RecordNotExist())
     transactions <- run(transactionsById(id)).orDie
   } yield record.toFull(transactions)
 
-  override def update(id: Record.Id, data: RecordData): WalletUIO[FullRecord] = for {
+  override def update(id: Record.Id, data: Record.Data): WalletUIO[Record.Full] = for {
     // TODO check record is for current wallet
     updatedRecord <- Record.make(id, data)
     (record, transactions) = updatedRecord
@@ -51,7 +50,7 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
     // TODO check record is for current wallet and deletion result
     transaction(run(transactionsById(id).delete) *> run(getRecord(id).delete)).orDie.map(_ => ())
 
-  override def list(account: Account.Id, pageToken: Option[Page.Token]): WalletUIO[Page[FullRecord]] = {
+  override def list(account: Account.Id, pageToken: Option[Page.Token]): WalletUIO[Page[Record.Full]] = {
     val records = pageToken match {
       case Some(value) => run(selectFullRecords(account).page(PageSize, value)).orDie
       case None        => run(selectFullRecords(account).firstPage(PageSize)).orDie
@@ -67,7 +66,7 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
     balances <- run(balanceByAccount(account)).orDie
   } yield balances
 
-  private def page(records: List[FullRecord], isLastPage: Boolean): Page[FullRecord] = {
+  private def page(records: List[Record.Full], isLastPage: Boolean): Page[Record.Full] = {
     if (isLastPage) Page(records, None)
     else {
       val lastRecord = records.lastOption

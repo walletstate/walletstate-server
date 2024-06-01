@@ -1,7 +1,6 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.api.SingleTransactionRecord
-import online.walletstate.models.{Analytics, AssetAmount, Page}
+import online.walletstate.models.{Analytics, AssetAmount, Page, Record}
 import zio.Chunk
 import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
@@ -12,7 +11,7 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
     Endpoint(Method.POST / "api" / "analytics" / "records")
       .in[Analytics.Filter]
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
-      .out[Page[SingleTransactionRecord]](Status.Ok)
+      .out[Page[Record.SingleTransaction]](Status.Ok)
 
   val aggregated =
       Endpoint(Method.POST / "api" / "analytics" / "aggregated")

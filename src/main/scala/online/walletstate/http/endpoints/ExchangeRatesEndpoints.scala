@@ -1,6 +1,5 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.api.CreateExchangeRate
 import online.walletstate.models.{AppError, Asset, ExchangeRate}
 import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
@@ -9,7 +8,7 @@ trait ExchangeRatesEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "exchange-rates")
-      .in[CreateExchangeRate]
+      .in[ExchangeRate.Data]
       .out[ExchangeRate](Status.Created)
 
   val list =

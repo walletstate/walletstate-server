@@ -1,7 +1,6 @@
 package online.walletstate.http.endpoints
 
 import online.walletstate.models.AppError.{UserNotExist, WalletInviteExpired, WalletInviteNotExist, WalletNotExist}
-import online.walletstate.models.api.{CreateWallet, JoinWallet}
 import online.walletstate.models.{AppError, Wallet, WalletInvite}
 import zio.http.codec.{Doc, HttpCodec}
 import zio.http.endpoint.Endpoint
@@ -12,7 +11,7 @@ trait WalletsEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "wallets")
-      .in[CreateWallet]
+      .in[Wallet.Data]
       .out[Wallet](Status.Created)
       .outError[UserNotExist](Status.NotFound, Doc.p("Something strange. User not found"))
 
@@ -28,7 +27,7 @@ trait WalletsEndpoints extends WalletStateEndpoints {
 
   val join =
     Endpoint(Method.POST / "api" / "wallets" / "join")
-      .in[JoinWallet]
+      .in[Wallet.Join]
       .out[Wallet]
       .outErrors[UserNotExist | WalletInviteNotExist | WalletInviteExpired | WalletNotExist](
         HttpCodec.error[UserNotExist](Status.NotFound) ?? Doc.p("Something strange. User not found"),

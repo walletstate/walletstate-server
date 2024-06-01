@@ -2,7 +2,7 @@ package online.walletstate.models
 
 import online.walletstate.models
 import zio.http.codec.PathCodec
-import zio.schema.{DeriveSchema, Schema}
+import zio.schema.{derived, Schema}
 import zio.{Random, Task, UIO, ZIO}
 
 import java.util.UUID
@@ -14,7 +14,7 @@ final case class Group(
     `type`: Group.Type,
     name: String,
     idx: Int
-)
+) derives Schema
 
 object Group {
   final case class Id(id: UUID) extends AnyVal
@@ -42,5 +42,9 @@ object Group {
   def make(wallet: Wallet.Id, `type`: Type, name: String, idx: Int): UIO[Group] =
     Id.random.map(Group(_, wallet, `type`, name, idx))
 
-  given schema: Schema[Group]   = DeriveSchema.gen[Group]
+  final case class CreateData(name: String, `type`: Group.Type, idx: Int) derives Schema
+
+  final case class UpdateData(name: String, idx: Int) derives Schema
+
+
 }

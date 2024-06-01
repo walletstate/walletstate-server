@@ -3,7 +3,6 @@ package online.walletstate.services
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.Analytics.GroupBy
 import online.walletstate.models.AuthContext.WalletContext
-import online.walletstate.models.api.SingleTransactionRecord
 import online.walletstate.models.{Account, Analytics, AssetAmount, Category, Group, Page, Record, Transaction}
 import online.walletstate.services.queries.AnalyticsQuillQueries
 import online.walletstate.{WalletUIO, models}
@@ -13,7 +12,7 @@ import java.sql.SQLException
 
 trait AnalyticsService {
 
-  def records(filter: Analytics.Filter, page: Option[Page.Token]): WalletUIO[Page[SingleTransactionRecord]]
+  def records(filter: Analytics.Filter, page: Option[Page.Token]): WalletUIO[Page[Record.SingleTransaction]]
   def aggregate(filter: Analytics.Filter): WalletUIO[List[AssetAmount]]
   def group(groupBy: Analytics.GroupRequest): WalletUIO[List[Analytics.GroupedResult]]
 }
@@ -26,7 +25,7 @@ final case class AnalyticsServiceLive(quill: WalletStateQuillContext)
 
   private val PageSize = 50 // TODO Move to config
 
-  override def records(filter: Analytics.Filter, page: Option[Page.Token]): WalletUIO[Page[SingleTransactionRecord]] =
+  override def records(filter: Analytics.Filter, page: Option[Page.Token]): WalletUIO[Page[Record.SingleTransaction]] =
     ZIO.serviceWithZIO[WalletContext] { ctx =>
       val query = selectRecords(ctx.wallet, filter, page, PageSize)
       translate(query).orDie.debug("[Analytics] Records query") *> // Remove
@@ -56,7 +55,7 @@ final case class AnalyticsServiceLive(quill: WalletStateQuillContext)
       }
     }
 
-  private def buildPage(records: List[SingleTransactionRecord]): Page[SingleTransactionRecord] = {
+  private def buildPage(records: List[Record.SingleTransaction]): Page[Record.SingleTransaction] = {
     if (records.length < PageSize) Page(records, None)
     else {
       val lastTwoRecords    = records.takeRight(2)

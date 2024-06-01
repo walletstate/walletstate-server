@@ -1,6 +1,5 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.api.CreateIcon
 import online.walletstate.models.{AppError, Icon}
 import zio.http.codec.QueryCodec
 import zio.http.endpoint.Endpoint
@@ -15,7 +14,7 @@ trait IconsEndpoints extends WalletStateEndpoints {
 
   val create =
     Endpoint(Method.POST / "api" / "icons")
-      .in[CreateIcon]
+      .in[Icon.Data]
       .out[Icon.Id](Status.Created)
       .outError[AppError.InvalidIconId](Status.BadRequest)
 

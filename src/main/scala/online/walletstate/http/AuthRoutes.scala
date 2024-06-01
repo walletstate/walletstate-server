@@ -2,8 +2,7 @@ package online.walletstate.http
 
 import online.walletstate.http.endpoints.WalletStateEndpoints
 import online.walletstate.models.AuthContext.{UserContext, WalletContext}
-import online.walletstate.models.api.LoginInfo
-import online.walletstate.models.{AppError, AuthContext, Wallet}
+import online.walletstate.models.{AppError, AuthContext, User, Wallet}
 import online.walletstate.services.{AuthService, IdentityProviderService, TokenService, WalletsService}
 import online.walletstate.utils.AuthCookiesOps.{clearAuthCookies, withAuthCookies}
 import online.walletstate.utils.RequestOps.{as, outputMediaType}
@@ -25,7 +24,7 @@ final case class AuthRoutes(
 
   val loginHandler = Handler.fromFunctionZIO[Request] { req =>
     val res = for {
-      creds <- req.as[LoginInfo]
+      creds <- req.as[User.LoginInfo]
       user  <- authService.getOrCreateUser(creds)
       token <- tokenService.encode(AuthContext.of(user.id, user.wallet))
     } yield Response.json(user.toJson).withAuthCookies(token)
