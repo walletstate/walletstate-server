@@ -2,7 +2,7 @@ package online.walletstate.models
 
 import zio.http.codec.PathCodec
 import zio.{UIO, ZIO}
-import zio.json.JsonCodec
+import zio.json.{DeriveJsonCodec, JsonCodec}
 import zio.schema.{DeriveSchema, Schema}
 
 final case class User(id: User.Id, username: String, wallet: Option[Wallet.Id] = None)
@@ -21,4 +21,10 @@ object User {
 
   given schema: Schema[User]   = DeriveSchema.gen[User]
   given codec: JsonCodec[User] = zio.schema.codec.JsonCodec.jsonCodec(schema)
+
+  final case class LoginInfo(username: String, password: String)
+
+  object LoginInfo {
+    given codec: JsonCodec[LoginInfo] = DeriveJsonCodec.gen[LoginInfo]
+  }
 }

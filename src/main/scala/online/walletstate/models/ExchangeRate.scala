@@ -1,8 +1,7 @@
 package online.walletstate.models
 
-import online.walletstate.models.api.CreateExchangeRate
 import zio.http.codec.PathCodec
-import zio.schema.{DeriveSchema, Schema}
+import zio.schema.{derived, Schema}
 import zio.{Random, Task, UIO, ZIO}
 
 import java.time.ZonedDateTime
@@ -14,7 +13,7 @@ final case class ExchangeRate(
     to: Asset.Id,
     rate: BigDecimal,
     datetime: ZonedDateTime
-)
+) derives Schema
 
 object ExchangeRate {
   final case class Id(id: UUID) extends AnyVal
@@ -29,8 +28,8 @@ object ExchangeRate {
     given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
-  def make(wallet: Wallet.Id, info: CreateExchangeRate): UIO[ExchangeRate] =
+  def make(wallet: Wallet.Id, info: Data): UIO[ExchangeRate] =
     Id.random.map(ExchangeRate(_, info.from, info.to, info.rate, info.datetime))
-  
-  given schema: Schema[ExchangeRate] = DeriveSchema.gen[ExchangeRate]
+
+  final case class Data(from: Asset.Id, to: Asset.Id, rate: BigDecimal, datetime: ZonedDateTime) derives Schema
 }

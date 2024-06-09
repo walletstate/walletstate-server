@@ -3,13 +3,12 @@ package online.walletstate.services
 import online.walletstate.UserIO
 import online.walletstate.models.AppError.{InvalidCredentials, UserIsNotInWallet, WalletNotExist}
 import online.walletstate.models.AuthContext.UserContext
-import online.walletstate.models.api.LoginInfo
 import online.walletstate.models.{AppError, User, Wallet}
 import zio.{IO, ZIO, ZLayer}
 
 trait AuthService {
 
-  def getOrCreateUser(loginInfo: LoginInfo): IO[InvalidCredentials, User]
+  def getOrCreateUser(loginInfo: User.LoginInfo): IO[InvalidCredentials, User]
 
   def updateCurrentUserWallet(wallet: Wallet.Id): UserIO[UserIsNotInWallet | WalletNotExist, Wallet]
 
@@ -21,7 +20,7 @@ final case class AuthServiceLive(
     walletsService: WalletsService
 ) extends AuthService {
 
-  override def getOrCreateUser(loginInfo: LoginInfo): IO[InvalidCredentials, User] = for {
+  override def getOrCreateUser(loginInfo: User.LoginInfo): IO[InvalidCredentials, User] = for {
     userId <- identityProviderService.authenticate(loginInfo)
     user   <- usersService.get(userId).catchAll(e => usersService.create(User(userId, loginInfo.username)))
   } yield user

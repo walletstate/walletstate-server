@@ -1,4 +1,4 @@
-package online.walletstate.models.api
+package online.walletstate.models
 
 import online.walletstate.models.{Group, Groupable}
 import zio.Chunk
@@ -13,6 +13,6 @@ final case class Grouped[T <: Groupable](
 )
 
 object Grouped {
-  
-  given schema[T <: Groupable: Schema]: Schema[Grouped[T]]      = DeriveSchema.gen[Grouped[T]]
+
+  given schema[T <: Groupable: Schema]: Schema[Grouped[T]] = DeriveSchema.gen[Grouped[T]]
 }

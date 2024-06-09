@@ -1,7 +1,6 @@
 package online.walletstate.services.queries
 
 import online.walletstate.models.{Asset, Wallet}
-import online.walletstate.models.api.UpdateAsset
 
 trait AssetsQuillQueries extends QuillQueries {
   import quill.*
@@ -20,7 +19,7 @@ trait AssetsQuillQueries extends QuillQueries {
   protected inline def assetsById(wallet: Wallet.Id, id: Asset.Id) =
     assetsByWallet(wallet).filter(_.id == lift(id))
 
-  protected inline def updateQuery(asset: Asset.Id, info: UpdateAsset) =
+  protected inline def updateQuery(asset: Asset.Id, info: Asset.Data) =
     Tables.Assets
       .filter(_.id == lift(asset))
       .update(

@@ -1,9 +1,8 @@
 package online.walletstate.models
 
-import online.walletstate.models.api.{FullRecord, RecordData, SingleTransactionRecord, TransactionData}
 import zio.http.codec.PathCodec
 import zio.json.JsonCodec
-import zio.schema.Schema
+import zio.schema.{derived, Schema}
 import zio.{Random, UIO, ZIO}
 
 import java.time.ZonedDateTime
@@ -22,20 +21,20 @@ final case class Record(
     generatedBy: Option[Asset.Id]
 ) {
 
-  def toFull(from: Option[TransactionData], to: Option[TransactionData]): FullRecord =
-    FullRecord(id, `type`, from, to, category, datetime, description, tags, externalId, spentOn, generatedBy)
+  def toFull(from: Option[Transaction.Data], to: Option[Transaction.Data]): Record.Full =
+    Record.Full(id, `type`, from, to, category, datetime, description, tags, externalId, spentOn, generatedBy)
 
-  def toFull(transactions: List[Transaction]): FullRecord =
+  def toFull(transactions: List[Transaction]): Record.Full =
     toFull(transactions.find(_.isFrom).map(_.data), transactions.find(_.isTo).map(_.data))
 
-  def toFull(t1: Transaction, t2: Option[Transaction]): FullRecord = {
+  def toFull(t1: Transaction, t2: Option[Transaction]): Record.Full = {
     val from = if (t1.isFrom) Some(t1) else t2.filter(_.isFrom)
     val to   = if (t1.isTo) Some(t1) else t2.filter(_.isTo)
     toFull(from.map(_.data), to.map(_.data))
   }
 
-  def toSingleTransaction(transaction: TransactionData): SingleTransactionRecord =
-    SingleTransactionRecord(
+  def toSingleTransaction(transaction: Transaction.Data): Record.SingleTransaction =
+    Record.SingleTransaction(
       id,
       `type`,
       transaction,
@@ -47,7 +46,6 @@ final case class Record(
       spentOn,
       generatedBy
     )
-
 }
 
 object Record {
@@ -73,10 +71,50 @@ object Record {
     def asString(`type`: Type): String = `type`.toString
   }
 
-  def make(data: RecordData): UIO[(Record, List[Transaction])] = Id.random.flatMap(make(_, data))
-  
-  def make(id: Record.Id, d: RecordData): UIO[(Record, List[Transaction])] = ZIO.succeed {
+  def make(data: Data): UIO[(Record, List[Transaction])] = Id.random.flatMap(make(_, data))
+
+  def make(id: Record.Id, d: Data): UIO[(Record, List[Transaction])] = ZIO.succeed {
     val r = Record(id, d.`type`, d.category, d.datetime, d.description, d.tags, d.externalId, d.spentOn, d.generatedBy)
     (r, Transaction.make(id, d.from, d.to))
   }
+
+  final case class Data(
+      `type`: Record.Type,
+      from: Option[Transaction.Data],
+      to: Option[Transaction.Data],
+      category: Category.Id,
+      datetime: ZonedDateTime,
+      description: Option[String],
+      tags: List[String],
+      externalId: Option[String],
+      spentOn: Option[Asset.Id],
+      generatedBy: Option[Asset.Id]
+  ) derives Schema
+
+  final case class SingleTransaction(
+      id: Record.Id,
+      `type`: Record.Type,
+      transaction: Transaction.Data,
+      category: Category.Id,
+      datetime: ZonedDateTime,
+      description: Option[String],
+      tags: List[String],
+      externalId: Option[String],
+      spentOn: Option[Asset.Id],
+      generatedBy: Option[Asset.Id]
+  ) derives Schema
+
+  final case class Full(
+      id: Record.Id,
+      `type`: Record.Type,
+      from: Option[Transaction.Data],
+      to: Option[Transaction.Data],
+      category: Category.Id,
+      datetime: ZonedDateTime,
+      description: Option[String],
+      tags: List[String],
+      externalId: Option[String],
+      spentOn: Option[Asset.Id],
+      generatedBy: Option[Asset.Id]
+  ) derives Schema
 }

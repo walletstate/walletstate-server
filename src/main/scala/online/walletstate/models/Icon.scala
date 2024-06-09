@@ -1,14 +1,14 @@
 package online.walletstate.models
 
 import online.walletstate.models.AppError.InvalidIconId
-import zio.{Chunk, IO, Task, ZIO}
+import zio.{Chunk, IO, Task, UIO, ZIO}
 import zio.http.codec.PathCodec
-import zio.schema.{DeriveSchema, Schema}
+import zio.schema.{Schema, derived}
 
 import java.security.MessageDigest
 import java.util.HexFormat
 
-final case class Icon(wallet: Option[Wallet.Id], id: Icon.Id, contentType: String, content: String, tags: List[String])
+final case class Icon(wallet: Option[Wallet.Id], id: Icon.Id, contentType: String, content: String, tags: List[String]) derives Schema
 
 object Icon {
 
@@ -25,12 +25,14 @@ object Icon {
     given schema: Schema[Id] = Schema[String].transformOrFail(make, id => Right(id.id))
   }
 
-  def make(wallet: Wallet.Id, contentType: String, content: String, tags: List[String] = List.empty): IO[InvalidIconId, Icon] =
+  def make(wallet: Wallet.Id, contentType: String, content: String, tags: List[String] = List.empty): UIO[Icon] =
     for {
       contentDigest <- ZIO.succeed(MessageDigest.getInstance("SHA-256").digest(content.getBytes("UTF-8")))
       contentHash   <- ZIO.succeed(HexFormat.of().formatHex(contentDigest))
-      iconId        <- ZIO.fromEither(Id.make(contentHash)).mapError(e => InvalidIconId(e))
+      iconId        <- ZIO.fromEither(Id.make(contentHash)).mapError(e => InvalidIconId(e)).orDie
     } yield Icon(Some(wallet), iconId, contentType, content, tags)
 
-  given schema: Schema[Icon] = DeriveSchema.gen[Icon]
+
+
+  final case class Data(contentType: String, content: String, tags: List[String] = List.empty) derives Schema
 }

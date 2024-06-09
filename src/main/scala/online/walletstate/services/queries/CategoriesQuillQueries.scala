@@ -1,7 +1,6 @@
 package online.walletstate.services.queries
 
 import online.walletstate.models.{Category, Wallet}
-import online.walletstate.models.api.UpdateCategory
 
 trait CategoriesQuillQueries extends QuillQueries {
   import quill.*
@@ -21,7 +20,7 @@ trait CategoriesQuillQueries extends QuillQueries {
   protected inline def categoriesById(wallet: Wallet.Id, id: Category.Id): Query[Category] =
     categoriesByWallet(wallet).filter(_.id == lift(id))
 
-  protected inline def updateQuery(id: Category.Id, info: UpdateCategory): Update[Category] =
+  protected inline def updateQuery(id: Category.Id, info: Category.Data): Update[Category] =
     Tables.Categories
       .filter(_.id == lift(id))
       .update(

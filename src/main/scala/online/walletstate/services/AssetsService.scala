@@ -1,21 +1,20 @@
 package online.walletstate.services
 
 import online.walletstate.db.WalletStateQuillContext
-import online.walletstate.models.*
 import online.walletstate.models.AppError.AssetNotExist
 import online.walletstate.models.AuthContext.WalletContext
-import online.walletstate.models.api.{CreateAsset, Grouped, UpdateAsset}
+import online.walletstate.models.*
 import online.walletstate.services.queries.AssetsQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
 import online.walletstate.{WalletIO, WalletUIO}
 import zio.{ZIO, ZLayer}
 
 trait AssetsService {
-  def create(info: CreateAsset): WalletUIO[Asset]
+  def create(data: Asset.Data): WalletUIO[Asset]
   def get(id: Asset.Id): WalletIO[AssetNotExist, Asset]
   def list: WalletUIO[List[Asset]]
   def grouped: WalletUIO[List[Grouped[Asset]]]
-  def update(id: Asset.Id, info: UpdateAsset): WalletUIO[Unit]
+  def update(id: Asset.Id, info: Asset.Data): WalletUIO[Unit]
 }
 
 final case class AssetsServiceLive(quill: WalletStateQuillContext, groupsService: GroupsService)
@@ -24,9 +23,9 @@ final case class AssetsServiceLive(quill: WalletStateQuillContext, groupsService
   import io.getquill.*
   import quill.{*, given}
 
-  override def create(info: CreateAsset): WalletUIO[Asset] = for {
+  override def create(info: Asset.Data): WalletUIO[Asset] = for {
     ctx   <- ZIO.service[WalletContext]
-    asset <- Asset.make(ctx.wallet, info)
+    asset <- Asset.make(info)
     _     <- run(insert(asset)).orDie
   } yield asset
 
@@ -43,7 +42,7 @@ final case class AssetsServiceLive(quill: WalletStateQuillContext, groupsService
   override def grouped: WalletUIO[List[Grouped[Asset]]] =
     groupsService.group(Group.Type.Assets, list)
 
-  override def update(id: Asset.Id, info: UpdateAsset): WalletUIO[Unit] =
+  override def update(id: Asset.Id, info: Asset.Data): WalletUIO[Unit] =
     // TODO check asset is in wallet; check result and return error if not found
     run(updateQuery(id, info)).orDie.map(_ => ())
 }

@@ -1,9 +1,8 @@
 package online.walletstate.models
 
-import online.walletstate.models.api.CreateAsset
 import zio.*
 import zio.http.codec.{PathCodec, QueryCodec}
-import zio.schema.{DeriveSchema, Schema}
+import zio.schema.{derived, Schema}
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -24,7 +23,7 @@ final case class Asset(
     unlockDuration: Option[Duration],
     denominatedIn: Option[Asset.Id],
     denomination: Option[BigDecimal]
-) extends Groupable
+) extends Groupable derives Schema
 
 object Asset {
   final case class Id(id: UUID) extends AnyVal
@@ -51,25 +50,39 @@ object Asset {
     def asString(`type`: Type): String = `type`.toString
   }
 
-  def make(wallet: Wallet.Id, info: CreateAsset): UIO[Asset] =
+  def make(data: Data): UIO[Asset] =
     Id.random.map(
       Asset(
         _,
-        info.group,
-        info.`type`,
-        info.ticker,
-        info.name,
-        info.icon,
-        info.tags,
-        info.idx,
-        info.startDate,
-        info.endDate,
-        info.lockDuration,
-        info.unlockDuration,
-        info.denominatedIn,
-        info.denomination
+        data.group,
+        data.`type`,
+        data.ticker,
+        data.name,
+        data.icon,
+        data.tags,
+        data.idx,
+        data.startDate,
+        data.endDate,
+        data.lockDuration,
+        data.unlockDuration,
+        data.denominatedIn,
+        data.denomination
       )
     )
 
-  given schema: Schema[Asset] = DeriveSchema.gen[Asset]
+  final case class Data(
+      group: Group.Id,
+      `type`: Asset.Type,
+      ticker: String,
+      name: String,
+      icon: Option[Icon.Id],
+      tags: List[String],
+      idx: Int,
+      startDate: Option[ZonedDateTime],
+      endDate: Option[ZonedDateTime],
+      lockDuration: Option[Duration],
+      unlockDuration: Option[Duration],
+      denominatedIn: Option[Asset.Id],
+      denomination: Option[BigDecimal]
+  ) derives Schema
 }

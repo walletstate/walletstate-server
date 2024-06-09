@@ -1,7 +1,6 @@
 package online.walletstate.services.queries
 
 import online.walletstate.models.{Account, Group, Wallet}
-import online.walletstate.models.api.UpdateAccount
 
 trait AccountsQuillQueries extends QuillQueries {
   import quill.*
@@ -25,7 +24,7 @@ trait AccountsQuillQueries extends QuillQueries {
   protected inline def accountsById(wallet: Wallet.Id, id: Account.Id): Query[Account] =
     accountsByWallet(wallet).filter(_.id == lift(id))
 
-  protected inline def updateQuery(id: Account.Id, info: UpdateAccount): Update[Account] =
+  protected inline def updateQuery(id: Account.Id, info: Account.Data): Update[Account] =
     Tables.Accounts
       .filter(_.id == lift(id))
       .update(

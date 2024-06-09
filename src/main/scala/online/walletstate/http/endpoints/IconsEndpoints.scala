@@ -1,7 +1,6 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.api.CreateIcon
-import online.walletstate.models.{AppError, Icon}
+import online.walletstate.models.{HttpError, Icon}
 import zio.http.codec.QueryCodec
 import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
@@ -12,12 +11,13 @@ trait IconsEndpoints extends WalletStateEndpoints {
     Endpoint(Method.GET / "api" / "icons")
       .query(QueryCodec.query("tag").optional)
       .out[List[Icon.Id]]
+      .withBadRequestCodec
 
   val create =
     Endpoint(Method.POST / "api" / "icons")
-      .in[CreateIcon]
+      .in[Icon.Data]
       .out[Icon.Id](Status.Created)
-      .outError[AppError.InvalidIconId](Status.BadRequest)
+      .withBadRequestCodec
 
   override val endpointsMap = Map("list" -> list, "create" -> create)
 }

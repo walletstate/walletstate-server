@@ -1,8 +1,7 @@
 package online.walletstate.models
 
-import online.walletstate.models.api.CreateCategory
 import zio.http.codec.PathCodec
-import zio.schema.{DeriveSchema, Schema}
+import zio.schema.{derived, Schema}
 import zio.{Chunk, Random, Task, UIO, ZIO}
 
 import java.util.UUID
@@ -15,6 +14,7 @@ final case class Category(
     tags: List[String],
     idx: Int
 ) extends Groupable
+    derives Schema
 
 object Category {
   final case class Id(id: UUID) extends AnyVal
@@ -24,12 +24,18 @@ object Category {
     def from(id: String): Task[Id] = ZIO.attempt(UUID.fromString(id)).map(Id(_))
 
     val path: PathCodec[Id] = zio.http.uuid("category-id").transform(Id(_))(_.id)
-    
-    given schema: Schema[Id]   = Schema[UUID].transform(Id(_), _.id)
+
+    given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
-  def make(info: CreateCategory): UIO[Category] =
+  def make(info: Data): UIO[Category] =
     Id.random.map(Category(_, info.group, info.name, info.icon, info.tags, info.idx))
-  
-  given schema: Schema[Category]   = DeriveSchema.gen[Category]
+
+  final case class Data(
+      group: Group.Id,
+      name: String,
+      icon: Option[Icon.Id],
+      tags: List[String],
+      idx: Int
+  ) derives Schema
 }
