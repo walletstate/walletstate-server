@@ -26,17 +26,32 @@ trait AnalyticsQuillQueries extends QuillQueries {
   protected def aggregateRecords(wallet: Wallet.Id, filter: Analytics.Filter) =
     filteredRecordRows(wallet, filter).groupByAsset
 
+  protected def aggregateRecordsFinal(wallet: Wallet.Id, filter: Analytics.Filter) =
+    filteredRecordRows(wallet, filter).groupByFinalAsset
+
   protected def groupByCategory(wallet: Wallet.Id, filter: Analytics.Filter) =
     filteredRecordRows(wallet, filter).groupByCategoryAndAsset
+
+  protected def groupByCategoryFinal(wallet: Wallet.Id, filter: Analytics.Filter) =
+    filteredRecordRows(wallet, filter).groupByCategoryAndFinalAsset
 
   protected def groupByCategoryGroup(wallet: Wallet.Id, filter: Analytics.Filter) =
     filteredRecordRows(wallet, filter).groupByCategoryGroupAndAsset
 
+  protected def groupByCategoryGroupFinal(wallet: Wallet.Id, filter: Analytics.Filter) =
+    filteredRecordRows(wallet, filter).groupByCategoryGroupAndFinalAsset
+
   protected def groupByAccount(wallet: Wallet.Id, filter: Analytics.Filter) =
     filteredRecordRows(wallet, filter).groupByAccountAndAsset
 
+  protected def groupByAccountFinal(wallet: Wallet.Id, filter: Analytics.Filter) =
+    filteredRecordRows(wallet, filter).groupByAccountAndFinalAsset
+
   protected def groupByAccountGroup(wallet: Wallet.Id, filter: Analytics.Filter) =
     filteredRecordRows(wallet, filter).groupByAccountGroupAndAsset
+
+  protected def groupByAccountGroupFinal(wallet: Wallet.Id, filter: Analytics.Filter) =
+    filteredRecordRows(wallet, filter).groupByAccountGroupAndFinalAsset
 
   private def filteredRecordRows(wallet: Wallet.Id, filter: Analytics.Filter, applyEnd: Boolean = true) =
     quote(joinedRecord).dynamic // TODO Investigate SQL injections for dynamic queries
@@ -69,6 +84,14 @@ trait AnalyticsQuillQueries extends QuillQueries {
   ////////////////////////////////////////////////
   private inline def sumAmount(query: Query[RecordRow]) =
     quote(query.map(_.transaction.amount).sum.getOrElse(lift(BigDecimal(0))))
+
+  private inline def sumFinalAmount(query: Query[RecordRow]) = quote(
+      query
+        .map(row => row.asset.denomination.getOrElse(lift(BigDecimal(1))) * row.transaction.amount)
+        .sum
+        .getOrElse(lift(BigDecimal(0)))
+    )
+
 
   extension (recordsQuery: DynamicQuery[RecordRow]) {
     // format: off
@@ -111,25 +134,50 @@ trait AnalyticsQuillQueries extends QuillQueries {
         .groupBy(_.transaction.asset)
         .map(grouped => AssetAmount(grouped._1, sumAmount(grouped._2)))
 
+    private def groupByFinalAsset =
+      recordsQuery
+        .groupBy(row => row.asset.denominatedIn.getOrElse(row.asset.id))
+        .map(grouped => AssetAmount(grouped._1, sumFinalAmount(grouped._2)))
+
     private def groupByCategoryAndAsset =
       recordsQuery
         .groupBy(row => (row.record.category, row.transaction.asset))
         .map(grouped => (grouped._1._1, AssetAmount(grouped._1._2, sumAmount(grouped._2))))
+
+    private def groupByCategoryAndFinalAsset =
+      recordsQuery
+        .groupBy(row => (row.record.category, row.asset.denominatedIn.getOrElse(row.asset.id)))
+        .map(grouped => (grouped._1._1, AssetAmount(grouped._1._2, sumFinalAmount(grouped._2))))
 
     private def groupByCategoryGroupAndAsset =
       recordsQuery
         .groupBy(row => (row.category.group, row.transaction.asset))
         .map(grouped => (grouped._1._1, AssetAmount(grouped._1._2, sumAmount(grouped._2))))
 
+    private def groupByCategoryGroupAndFinalAsset =
+      recordsQuery
+        .groupBy(row => (row.category.group, row.asset.denominatedIn.getOrElse(row.asset.id)))
+        .map(grouped => (grouped._1._1, AssetAmount(grouped._1._2, sumFinalAmount(grouped._2))))
+
     private def groupByAccountAndAsset =
       recordsQuery
         .groupBy(row => (row.transaction.account, row.transaction.asset))
         .map(grouped => (grouped._1._1, AssetAmount(grouped._1._2, sumAmount(grouped._2))))
 
+    private def groupByAccountAndFinalAsset =
+      recordsQuery
+        .groupBy(row => (row.transaction.account, row.asset.denominatedIn.getOrElse(row.asset.id)))
+        .map(grouped => (grouped._1._1, AssetAmount(grouped._1._2, sumFinalAmount(grouped._2))))
+
     private def groupByAccountGroupAndAsset =
       recordsQuery
         .groupBy(row => (row.account.group, row.transaction.asset))
         .map(grouped => (grouped._1._1, AssetAmount(grouped._1._2, sumAmount(grouped._2))))
+
+    private def groupByAccountGroupAndFinalAsset =
+      recordsQuery
+        .groupBy(row => (row.account.group, row.asset.denominatedIn.getOrElse(row.asset.id)))
+        .map(grouped => (grouped._1._1, AssetAmount(grouped._1._2, sumFinalAmount(grouped._2))))
 
   }
 
