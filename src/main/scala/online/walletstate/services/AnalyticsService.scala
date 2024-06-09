@@ -6,14 +6,14 @@ import online.walletstate.models.AuthContext.WalletContext
 import online.walletstate.models.{Account, Analytics, AssetAmount, Category, Group, Page, Record, Transaction}
 import online.walletstate.services.queries.AnalyticsQuillQueries
 import online.walletstate.{WalletUIO, models}
-import zio.{URIO, ZIO, ZLayer}
+import zio.{ZIO, ZLayer}
 
 import java.sql.SQLException
 
 trait AnalyticsService {
 
   def records(filter: Analytics.Filter, page: Option[Page.Token]): WalletUIO[Page[Record.SingleTransaction]]
-  def aggregate(filter: Analytics.Filter): WalletUIO[List[AssetAmount]]
+  def aggregate(request: Analytics.AggregateRequest): WalletUIO[List[AssetAmount]]
   def group(groupBy: Analytics.GroupRequest): WalletUIO[List[Analytics.GroupedResult]]
 }
 
@@ -34,9 +34,12 @@ final case class AnalyticsServiceLive(quill: WalletStateQuillContext)
         }
     }
 
-  override def aggregate(filter: Analytics.Filter): WalletUIO[List[AssetAmount]] =
+  override def aggregate(request: Analytics.AggregateRequest): WalletUIO[List[AssetAmount]] =
     ZIO.serviceWithZIO[WalletContext] { ctx =>
-      val query = aggregateRecords(ctx.wallet, filter)
+      val query =
+        if (request.byFinalAsset) aggregateRecordsFinal(ctx.wallet, request.filter)
+        else aggregateRecords(ctx.wallet, request.filter)
+
       translate(query).orDie.debug("[Analytics] Aggregate query ") *>
         run(query).orDie
     }
@@ -44,10 +47,14 @@ final case class AnalyticsServiceLive(quill: WalletStateQuillContext)
   override def group(groupBy: Analytics.GroupRequest): WalletUIO[List[Analytics.GroupedResult]] =
     ZIO.serviceWithZIO[WalletContext] { ctx =>
       val retrieveData = groupBy.groupBy match {
-        case GroupBy.Category      => run(groupByCategory(ctx.wallet, groupBy.filter))
-        case GroupBy.CategoryGroup => run(groupByCategoryGroup(ctx.wallet, groupBy.filter))
-        case GroupBy.Account       => run(groupByAccount(ctx.wallet, groupBy.filter))
-        case GroupBy.AccountGroup  => run(groupByAccountGroup(ctx.wallet, groupBy.filter))
+        case GroupBy.Category if groupBy.byFinalAsset      => run(groupByCategoryFinal(ctx.wallet, groupBy.filter))
+        case GroupBy.Category                              => run(groupByCategory(ctx.wallet, groupBy.filter))
+        case GroupBy.CategoryGroup if groupBy.byFinalAsset => run(groupByCategoryGroupFinal(ctx.wallet, groupBy.filter))
+        case GroupBy.CategoryGroup                         => run(groupByCategoryGroup(ctx.wallet, groupBy.filter))
+        case GroupBy.Account if groupBy.byFinalAsset       => run(groupByAccountFinal(ctx.wallet, groupBy.filter))
+        case GroupBy.Account                               => run(groupByAccount(ctx.wallet, groupBy.filter))
+        case GroupBy.AccountGroup if groupBy.byFinalAsset  => run(groupByAccountGroupFinal(ctx.wallet, groupBy.filter))
+        case GroupBy.AccountGroup                          => run(groupByAccountGroup(ctx.wallet, groupBy.filter))
       }
 
       retrieveData.orDie.map { (list: List[(Category.Id | Account.Id | Group.Id, AssetAmount)]) =>

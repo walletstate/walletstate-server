@@ -16,7 +16,7 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
 
   val aggregated =
       Endpoint(Method.POST / "api" / "analytics" / "aggregated")
-        .in[Analytics.Filter]
+        .in[Analytics.AggregateRequest]
         .out[List[AssetAmount]](Status.Ok)
         .withBadRequestCodec
 
