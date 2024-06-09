@@ -1,7 +1,7 @@
 package online.walletstate.http
 
 import online.walletstate.http.endpoints.IconsEndpoints
-import online.walletstate.models.{AppError, Icon}
+import online.walletstate.models.{AppError, HttpError, Icon}
 import online.walletstate.services.IconsService
 import online.walletstate.utils.RequestOps.outputMediaType
 import zio.http.*
@@ -21,8 +21,8 @@ case class IconsRoutes(iconsService: IconsService) extends WalletStateRoutes wit
 
   private val getIconHandler = Handler.fromFunctionZIO[(Icon.Id, Request)] { (id, req) =>
     iconsService.get(id).flatMap(iconToResponse).catchAll {
-      case e: AppError.IconNotExist => e.encode(Status.NotFound, req.outputMediaType)
-      case _ => AppError.InternalServerError.encode(Status.InternalServerError, req.outputMediaType)
+      case e: AppError.IconNotExist => HttpError.NotFound(e).encodeZIO(req.outputMediaType)
+      case _                        => HttpError.InternalServerError.default.encodeZIO(req.outputMediaType)
     }
   }
 

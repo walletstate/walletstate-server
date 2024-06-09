@@ -25,7 +25,7 @@ object Group {
 
     val path: PathCodec[Id] = zio.http.uuid("group-id").transform(Id(_))(_.id)
 
-    given schema: Schema[Id]   = Schema[UUID].transform(Id(_), _.id)
+    given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
   enum Type {
@@ -34,7 +34,9 @@ object Group {
 
   object Type {
     def fromString(typeStr: String): Either[String, Type] =
-      Try(Type.valueOf(typeStr)).toEither.left.map(_ => s"$typeStr is not a group type")
+      Try(Type.valueOf(typeStr)).toEither.left.map(_ =>
+        s"`$typeStr` is not a valid group type. Valid types: ${Type.values.mkString(", ")}"
+      )
 
     def asString(`type`: Type): String = `type`.toString
   }
@@ -45,6 +47,5 @@ object Group {
   final case class CreateData(name: String, `type`: Group.Type, idx: Int) derives Schema
 
   final case class UpdateData(name: String, idx: Int) derives Schema
-
 
 }

@@ -10,7 +10,7 @@ import online.walletstate.{WalletIO, WalletUIO}
 import zio.{ZIO, ZLayer}
 
 trait IconsService {
-  def create(data: Icon.Data): WalletIO[InvalidIconId, Icon]
+  def create(data: Icon.Data): WalletUIO[Icon]
   def get(id: Icon.Id): WalletIO[IconNotExist, Icon]
   def listIds(tag: Option[String]): WalletUIO[List[Icon.Id]]
 }
@@ -19,7 +19,7 @@ final case class IconsServiceDBLive(quill: WalletStateQuillContext) extends Icon
   import io.getquill.*
   import quill.{*, given}
 
-  override def create(data: Icon.Data): WalletIO[InvalidIconId, Icon] = for {
+  override def create(data: Icon.Data): WalletUIO[Icon] = for {
     ctx            <- ZIO.service[WalletContext]
     icon           <- Icon.make(ctx.wallet, data.contentType, data.content, data.tags)
     maybeExistTags <- run(selectForCurrent(ctx.wallet, icon.id).map(_.tags)).orDie

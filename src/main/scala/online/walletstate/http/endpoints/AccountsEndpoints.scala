@@ -1,6 +1,6 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.{Account, AppError, AssetAmount, Grouped, Page, Record}
+import online.walletstate.models.{Account, AssetAmount, Grouped, HttpError, Page, Record}
 import zio.Chunk
 import zio.http.codec.Doc
 import zio.http.endpoint.Endpoint
@@ -13,39 +13,46 @@ trait AccountsEndpoints extends WalletStateEndpoints {
     Endpoint(Method.POST / "api" / "accounts")
       .in[Account.Data]
       .out[Account](Status.Created)
+      .withBadRequestCodec
       .??(Doc.h1("Create new account"))
 
   val list =
     Endpoint(Method.GET / "api" / "accounts")
       .out[List[Account]]
+      .withBadRequestCodec
       .??(Doc.h1("Get accounts list"))
 
   val listGrouped =
     Endpoint(Method.GET / "api" / "accounts" / "grouped")
       .out[List[Grouped[Account]]]
+      .withBadRequestCodec
       .??(Doc.h1("Get grouped accounts list"))
 
   val get =
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path)
       .out[Account]
-      .outError[AppError.AccountNotExist](Status.NotFound)
+      .outError[HttpError.NotFound](HttpError.NotFound.status)
+      .withBadRequestCodec
       .??(Doc.h1("Get an account"))
 
   val update =
     Endpoint(Method.PUT / "api" / "accounts" / Account.Id.path)
       .in[Account.Data]
       .out[Unit](Status.NoContent)
+      .withBadRequestCodec
       .??(Doc.h1("Update an account"))
 
   val listRecords =
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path / "records")
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
       .out[Page[Record.Full]]
+      .withBadRequestCodec
       .??(Doc.h1("Load transactions list for account"))
 
   val getBalance =
     Endpoint(Method.GET / "api" / "accounts" / Account.Id.path / "balance")
       .out[List[AssetAmount]]
+      .withBadRequestCodec
       .??(Doc.h1("Get account balance"))
 
   override val endpointsMap = Map(

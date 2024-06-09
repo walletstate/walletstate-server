@@ -12,17 +12,20 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
       .in[Analytics.Filter]
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
       .out[Page[Record.SingleTransaction]](Status.Ok)
+      .withBadRequestCodec
 
   val aggregated =
       Endpoint(Method.POST / "api" / "analytics" / "aggregated")
         .in[Analytics.Filter]
         .out[List[AssetAmount]](Status.Ok)
+        .withBadRequestCodec
 
 
   val grouped =
     Endpoint(Method.POST / "api" / "analytics" / "grouped")
       .in[Analytics.GroupRequest]
       .out[List[Analytics.GroupedResult]](Status.Ok)
+      .withBadRequestCodec
 
 
   override val endpointsMap = Map(

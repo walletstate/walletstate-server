@@ -1,6 +1,6 @@
 package online.walletstate.http.auth
 
-import online.walletstate.models.{AppError, AuthContext}
+import online.walletstate.models.{AppError, AuthContext, HttpError}
 import online.walletstate.utils.AuthCookiesOps.{getAuthCookies, getBearerToken}
 import online.walletstate.models.AppError.Unauthorized
 import online.walletstate.models.AuthContext.{UserContext, WalletContext}
@@ -19,10 +19,8 @@ final case class AuthMiddleware(tokenService: TokenService) {
         .fold(ZIO.fail(Unauthorized.authTokenNotFound))(tokenStr => tokenService.decode(tokenStr))
         .map(token => Some(token))
         .mapError {
-          case e: Unauthorized =>
-            AppError.UnauthorizedCodec.encodeResponse(e, request.outputMediaType)
-          case e =>
-            AppError.InternalServerErrorCodec.encodeResponse(AppError.InternalServerError, request.outputMediaType)
+          case e: AppError.Unauthorized => HttpError.Unauthorized(e).encode(request.outputMediaType)
+          case e                        => HttpError.InternalServerError.default.encode(request.outputMediaType)
         }
     }
 

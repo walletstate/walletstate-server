@@ -2,7 +2,7 @@ package online.walletstate.http
 
 import online.walletstate.http.endpoints.WalletStateEndpoints
 import online.walletstate.models.AuthContext.{UserContext, WalletContext}
-import online.walletstate.models.{AppError, AuthContext, User, Wallet}
+import online.walletstate.models.{AppError, AuthContext, HttpError, User, Wallet}
 import online.walletstate.services.{AuthService, IdentityProviderService, TokenService, WalletsService}
 import online.walletstate.utils.AuthCookiesOps.{clearAuthCookies, withAuthCookies}
 import online.walletstate.utils.RequestOps.{as, outputMediaType}
@@ -30,9 +30,9 @@ final case class AuthRoutes(
     } yield Response.json(user.toJson).withAuthCookies(token)
 
     res.catchAll {
-      case e: AppError.ParseRequestError  => e.encode(Status.BadRequest, req.outputMediaType)
-      case e: AppError.InvalidCredentials => e.encode(Status.Forbidden, req.outputMediaType)
-      case _ => AppError.InternalServerError.encode(Status.InternalServerError, req.outputMediaType)
+      case e: AppError.ParseRequestError  => HttpError.BadRequest(e).encodeZIO(req.outputMediaType)
+      case e: AppError.InvalidCredentials => HttpError.Forbidden(e).encodeZIO(req.outputMediaType)
+      case _                              => HttpError.InternalServerError.default.encodeZIO(req.outputMediaType)
     }
   }
 
@@ -48,8 +48,8 @@ final case class AuthRoutes(
     } yield Response.json(wallet.toJson).withAuthCookies(newToken)
 
     rs.catchAll {
-      case e: AppError.UserIsNotInWallet => e.encode(Status.Forbidden, req.outputMediaType)
-      case _ => AppError.InternalServerError.encode(Status.InternalServerError, req.outputMediaType)
+      case e: AppError.UserIsNotInWallet => HttpError.Forbidden(e).encodeZIO(req.outputMediaType)
+      case _                             => HttpError.InternalServerError.default.encodeZIO(req.outputMediaType)
     }
 
   }

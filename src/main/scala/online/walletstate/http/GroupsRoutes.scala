@@ -1,6 +1,7 @@
 package online.walletstate.http
 
 import online.walletstate.http.endpoints.GroupsEndpoints
+import online.walletstate.models.HttpError
 import online.walletstate.services.GroupsService
 import zio.*
 import zio.http.*
@@ -16,7 +17,7 @@ case class GroupsRoutes(groupsService: GroupsService) extends WalletStateRoutes 
   }
 
   private val getRoute = get.implement {
-    Handler.fromFunctionZIO(id => groupsService.get(id))
+    Handler.fromFunctionZIO(id => groupsService.get(id).mapError(HttpError.NotFound.apply))
   }
 
   private val updateRoute = update.implement {

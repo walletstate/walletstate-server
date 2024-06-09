@@ -1,6 +1,7 @@
 package online.walletstate.http
 
 import online.walletstate.http.endpoints.AccountsEndpoints
+import online.walletstate.models.HttpError
 import online.walletstate.services.{AccountsService, RecordsService}
 import zio.*
 import zio.http.*
@@ -22,7 +23,7 @@ case class AccountsRoutes(accountsService: AccountsService, recordsService: Reco
   }
 
   private val getRoute = get.implement {
-    Handler.fromFunctionZIO(id => accountsService.get(id))
+    Handler.fromFunctionZIO(id => accountsService.get(id).mapError(HttpError.NotFound.apply))
   }
 
   private val updateRoute = update.implement {

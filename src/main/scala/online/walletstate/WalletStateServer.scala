@@ -4,11 +4,12 @@ import online.walletstate.db.Migrations
 import online.walletstate.http.*
 import online.walletstate.http.auth.AuthMiddleware
 import online.walletstate.http.endpoints.WalletStateEndpoints
-import online.walletstate.models.AppError
+import online.walletstate.models.HttpError
+import online.walletstate.utils.RequestOps.outputMediaType
 import zio.*
 import zio.http.*
 import zio.http.endpoint.Endpoint
-import zio.http.endpoint.openapi.{OpenAPIGen, SwaggerUI}
+import zio.http.endpoint.openapi.{JsonSchema, OpenAPIGen, SwaggerUI}
 
 final case class WalletStateServer(
     authMiddleware: AuthMiddleware,
@@ -32,11 +33,13 @@ final case class WalletStateServer(
   private val endpoints =
     routesClasses
       .flatMap(_.endpoints)
-      .map(_.outError[AppError.Unauthorized](Status.Unauthorized))
+      .map(_.outError[HttpError.Unauthorized](HttpError.Unauthorized.status))
+      .map(_.outError[HttpError.BadRequest](HttpError.BadRequest.status))
 
   private val openAPISpec = OpenAPIGen.fromEndpoints(
     title = "WalletState.online API",
     version = "0.0.1",
+    referenceType = JsonSchema.SchemaStyle.Reference,
     endpoints = endpoints
   )
 
@@ -48,7 +51,10 @@ final case class WalletStateServer(
 
   private val routes = noCtxRoutes ++ userRoutes ++ walletRoutes ++ swaggerRoutes
 
-  private val app = routes.handleError(e => Response.error(Status.InternalServerError)) @@ Middleware.requestLogging()
+  private val app = routes.handleErrorRequestCauseZIO { (req, error) =>
+    ZIO.log(s"InternalServerError: ${error.prettyPrint}") *>
+      HttpError.InternalServerError.default.encodeZIO(req.outputMediaType)
+  } @@ Middleware.requestLogging()
 
   val start = for {
     _ <- migrations.migrate
