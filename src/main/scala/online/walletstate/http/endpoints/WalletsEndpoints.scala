@@ -1,6 +1,6 @@
 package online.walletstate.http.endpoints
 
-import online.walletstate.models.{HttpError, Wallet, WalletInvite}
+import online.walletstate.models.{AuthToken, HttpError, Wallet, WalletInvite}
 import zio.http.codec.{Doc, HttpCodec}
 import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
@@ -15,8 +15,7 @@ trait WalletsEndpoints extends WalletStateEndpoints {
       .withBadRequestCodec
 
   val getCurrent =
-    Endpoint(Method.GET / "api" / "wallets" / "current")
-      .withBadRequestCodec
+    Endpoint(Method.GET / "api" / "wallets" / "current").withBadRequestCodec
       .out[Wallet]
       .outError[HttpError.NotFound](HttpError.NotFound.status, Doc.p("Wallet not found"))
 
@@ -36,11 +35,19 @@ trait WalletsEndpoints extends WalletStateEndpoints {
       )
       .withBadRequestCodec
 
+  val createApiToken =
+    Endpoint(Method.POST / "api" / "wallets" / "token")
+      .in[AuthToken.Create]
+      .out[AuthToken](Status.Created)
+      .outError[HttpError.Forbidden](HttpError.Forbidden.status)
+      .withBadRequestCodec
+
   override val endpointsMap = Map(
-    "create"       -> create,
-    "getCurrent"   -> getCurrent,
-    "createInvite" -> createInvite,
-    "join"         -> join
+    "create"         -> create,
+    "getCurrent"     -> getCurrent,
+    "createInvite"   -> createInvite,
+    "join"           -> join,
+    "createApiToken" -> createApiToken
   )
 }
 

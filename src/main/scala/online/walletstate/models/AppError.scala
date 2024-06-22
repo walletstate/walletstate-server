@@ -33,6 +33,10 @@ object AppError {
   case class UserIsNotInWallet(user: User.Id, wallet: Wallet.Id)
       extends AppError(s"User $user doesn't have access to wallet $wallet ")
 
+  // api token errors
+  case object CreateAPITokenNotAllowed
+      extends AppError("Creating API tokens is allowed only for users authorized with Cookies")
+
   /////////// user errors
   case class UserNotExist() extends AppError("")
 

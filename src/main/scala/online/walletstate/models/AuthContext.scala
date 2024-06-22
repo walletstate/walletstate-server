@@ -8,6 +8,9 @@ import zio.schema.{DeriveSchema, Schema}
 sealed trait AuthContext {
   def user: User.Id
   def `type`: AuthContext.Type
+
+  def isCookiesCtx: Boolean = `type` == AuthContext.Type.Cookies
+  def isBearerCtx: Boolean  = `type` == AuthContext.Type.Bearer
 }
 
 object AuthContext {
