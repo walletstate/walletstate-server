@@ -7,20 +7,26 @@ import zio.schema.{DeriveSchema, Schema}
 
 sealed trait AuthContext {
   def user: User.Id
+  def `type`: AuthContext.Type
 }
 
 object AuthContext {
-  final case class UserContext(user: User.Id) extends AuthContext
+
+  enum Type {
+    case Cookies, Bearer
+  }
+
+  final case class UserContext(user: User.Id, `type`: AuthContext.Type) extends AuthContext
 
   object UserContext {
-    given schema: Schema[UserContext] = DeriveSchema.gen[UserContext]
+    given schema: Schema[UserContext]   = DeriveSchema.gen[UserContext]
     given codec: JsonCodec[UserContext] = zio.schema.codec.JsonCodec.jsonCodec(schema)
   }
 
-  final case class WalletContext(user: User.Id, wallet: Wallet.Id) extends AuthContext
+  final case class WalletContext(user: User.Id, wallet: Wallet.Id, `type`: AuthContext.Type) extends AuthContext
 
   object WalletContext {
-    given schema: Schema[WalletContext] = DeriveSchema.gen[WalletContext]
+    given schema: Schema[WalletContext]   = DeriveSchema.gen[WalletContext]
     given codec: JsonCodec[WalletContext] = zio.schema.codec.JsonCodec.jsonCodec(schema)
   }
 
@@ -31,6 +37,6 @@ object AuthContext {
     }
   }
 
-  def of(user: User.Id, wallet: Option[Wallet.Id]): AuthContext =
-    wallet.fold(UserContext(user))(ns => WalletContext(user, ns))
+  def of(user: User.Id, wallet: Option[Wallet.Id], `type`: Type): AuthContext =
+    wallet.fold(UserContext(user, `type`))(wallet => WalletContext(user, wallet, `type`))
 }

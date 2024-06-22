@@ -1,6 +1,6 @@
 package online.walletstate.utils
 
-import online.walletstate.models.AuthToken
+import online.walletstate.models.{AuthContext, AuthToken}
 import zio.Duration
 import zio.http.*
 
@@ -18,6 +18,11 @@ object AuthCookiesOps {
         case Header.Authorization.Bearer(token) => Some(token.value.mkString)
         case _                                  => None
       }
+
+    def extractAuthToken: Option[(String, AuthContext.Type)] =
+      headers.getAuthCookies
+        .map((_, AuthContext.Type.Cookies))
+        .orElse(headers.getBearerToken.map((_, AuthContext.Type.Bearer)))
 
   extension (response: Response)
     def withAuthCookies(token: AuthToken): Response =

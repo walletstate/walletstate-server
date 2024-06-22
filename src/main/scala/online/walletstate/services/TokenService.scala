@@ -2,47 +2,63 @@ package online.walletstate.services
 
 import online.walletstate.config.AuthConfig
 import online.walletstate.config.AuthConfig.config
-import online.walletstate.models.AppError.Unauthorized
-import online.walletstate.models.{AppError, AuthToken}
+import online.walletstate.models.AppError.TokenDecodeError
+import online.walletstate.models.{AppError, AuthContext, AuthToken}
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
 import zio.*
 import zio.json.*
 
-//TODO add separate errors for token service
+import java.time.ZonedDateTime
+
 trait TokenService {
 
-  def encode[A: JsonEncoder](content: A): Task[AuthToken]
+  def encode[A: JsonEncoder](content: A): UIO[AuthToken]
 
-  def decode[A: JsonDecoder: Tag](token: String): IO[AppError, A]
+  def encode[A: JsonEncoder](content: A, expireAt: ZonedDateTime): UIO[AuthToken]
 
-}
+  def decode[A: JsonDecoder: Tag](token: String): IO[TokenDecodeError, A]
 
-object TokenService {
-  def encode[A: JsonEncoder](content: A): ZIO[TokenService, Throwable, AuthToken] =
-    ZIO.serviceWithZIO[TokenService](_.encode(content))
-
-  def decode[A: JsonDecoder: Tag](token: String): ZIO[TokenService, AppError, A] =
-    ZIO.serviceWithZIO[TokenService](_.decode(token))
+  def decodeAuthContext[A <: AuthContext: JsonDecoder: Tag](
+      token: String,
+      expectedType: AuthContext.Type
+  ): IO[TokenDecodeError, A]
 }
 
 case class StatelessTokenService(authConfig: AuthConfig) extends TokenService {
 
   private val algorithm = JwtAlgorithm.HS512
   private val secret    = authConfig.secret
-  
-  override def encode[A: JsonEncoder](content: A): Task[AuthToken] = for {
+
+  override def encode[A: JsonEncoder](content: A): UIO[AuthToken] = encode(content, authConfig.tokenTTL)
+
+  override def encode[A: JsonEncoder](content: A, expireAt: ZonedDateTime): UIO[AuthToken] =
+    for {
+      now <- Clock.instant
+      expireIn = Duration.fromInterval(now, expireAt.toInstant)
+      token <- encode(content, expireIn)
+    } yield token
+
+  private def encode[A: JsonEncoder](content: A, expireIn: Duration): UIO[AuthToken] = for {
     clock <- Clock.javaClock
-    claim <- ZIO.attempt(JwtClaim(content.toJson).issuedNow(clock).expiresIn(authConfig.tokenTTL.toSeconds)(clock))
-    token <- ZIO.attempt(Jwt(clock).encode(claim, secret, algorithm))
+    claim <- ZIO.succeed(JwtClaim(content.toJson).issuedNow(clock).expiresIn(expireIn.toSeconds)(clock))
+    token <- ZIO.succeed(Jwt(clock).encode(claim, secret, algorithm))
   } yield AuthToken(token, authConfig.tokenTTL)
 
-  override def decode[A: JsonDecoder: Tag](token: String): IO[AppError, A] = {
+  override def decode[A: JsonDecoder: Tag](token: String): IO[TokenDecodeError, A] =
     for {
       clock  <- Clock.javaClock
-      claims <- ZIO.fromTry(decodeJwt(token, clock)).mapError(e => Unauthorized.invalidAuthToken(e.getMessage))
-      data   <- ZIO.fromEither(claims.content.fromJson[A]).mapError(_ => Unauthorized.invalidAuthContext(Tag[A].tag.shortName))
+      claims <- ZIO.fromTry(decodeJwt(token, clock)).mapError(e => TokenDecodeError(e.getMessage))
+      data   <- ZIO.fromEither(claims.content.fromJson[A]).mapError(_ => TokenDecodeError.contentMalformed)
     } yield data
-  }
+
+  override def decodeAuthContext[A <: AuthContext: JsonDecoder: Tag](
+      token: String,
+      expectedType: AuthContext.Type
+  ): IO[TokenDecodeError, A] =
+    for {
+      ctx <- decode[A](token)
+      _   <- ZIO.cond(ctx.`type` == expectedType, (), TokenDecodeError.invalidTokenType(expectedType, ctx.`type`))
+    } yield ctx
 
   private def decodeJwt(token: String, clock: java.time.Clock) =
     Jwt(clock).decode(token, secret, Seq(algorithm))

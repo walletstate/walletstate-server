@@ -11,11 +11,13 @@ object AppError {
 
   case class ParseRequestError(msg: String) extends AppError(msg)
 
-  case class Unauthorized(msg: String) extends AppError(msg)
-  object Unauthorized {
-    val authTokenNotFound                   = Unauthorized("Auth token not found in request")
-    def invalidAuthToken(msg: String)       = Unauthorized(s"Invalid token: $msg")
-    def invalidAuthContext(context: String) = Unauthorized(s"Invalid auth context: $context")
+  case object NoToken                      extends AppError("Auth token not present in request")
+  case class TokenDecodeError(msg: String) extends AppError(msg)
+  object TokenDecodeError {
+    val contentMalformed: TokenDecodeError = TokenDecodeError("Cannot extract content from token")
+
+    def invalidTokenType(expected: AuthContext.Type, actual: AuthContext.Type): TokenDecodeError =
+      TokenDecodeError(s"Incorrect token type. Expected $expected token type but provided $actual token type")
   }
 
   /////////// wallet errors
