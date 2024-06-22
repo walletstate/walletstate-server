@@ -26,7 +26,7 @@ final case class AuthRoutes(
     val res = for {
       creds <- req.as[User.LoginInfo]
       user  <- authService.getOrCreateUser(creds)
-      token <- tokenService.encode(AuthContext.of(user.id, user.wallet))
+      token <- tokenService.encode(AuthContext.of(user.id, user.wallet, AuthContext.Type.Cookies))
     } yield Response.json(user.toJson).withAuthCookies(token)
 
     res.catchAll {
@@ -44,7 +44,7 @@ final case class AuthRoutes(
     val rs = for {
       ctx      <- ZIO.service[UserContext]
       wallet   <- authService.updateCurrentUserWallet(walletId)
-      newToken <- tokenService.encode(WalletContext(ctx.user, wallet.id))
+      newToken <- tokenService.encode(WalletContext(ctx.user, wallet.id, AuthContext.Type.Cookies))
     } yield Response.json(wallet.toJson).withAuthCookies(newToken)
 
     rs.catchAll {
