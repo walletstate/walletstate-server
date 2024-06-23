@@ -42,7 +42,7 @@ object Dependencies {
 
   private val db = Seq(zioQuil, postgresql, flyway)
 
-  private val zioConfig = Seq(
+  val zioConfig = Seq(
     "dev.zio" %% "zio-config"          % Versions.zioConfig,
     "dev.zio" %% "zio-config-magnolia" % Versions.zioConfig,
     "dev.zio" %% "zio-config-typesafe" % Versions.zioConfig
@@ -52,7 +52,8 @@ object Dependencies {
 
   val zioProcess = "dev.zio" %% "zio-process" % Versions.zioProcess
 
-  val all = Seq(zio, zioJson, zioHttp, jwt) ++ zioConfig ++ db ++ logging ++ Seq(zioProcess)
+  val common = Seq(zio, zioHttp)
+  val server = Seq(jwt) ++ zioConfig ++ db ++ logging
 
   val tests = Seq(
     "dev.zio"               %% "zio-test"                          % Versions.zio               % Test,
