@@ -1,6 +1,5 @@
 package online.walletstate.http
 
-import online.walletstate.common.models.HttpError
 import online.walletstate.http.endpoints.WalletsEndpoints
 import online.walletstate.models.AppError.{UserNotExist, WalletInviteExpired, WalletInviteNotExist, WalletNotExist}
 import online.walletstate.models.AuthContext.WalletContext
@@ -13,19 +12,19 @@ final case class WalletsRoutes(walletsService: WalletsService, tokenService: Tok
     extends WalletStateRoutes
     with WalletsEndpoints {
 
-  private val createRoute = create.implement {
+  private val createRoute = createEndpoint.implement {
     Handler.fromFunctionZIO(info => walletsService.create(info.name).mapError(_.asNotFound))
   }
 
-  private val getCurrentRoute = getCurrent.implement {
+  private val getCurrentRoute = getCurrentEndpoint.implement {
     Handler.fromFunctionZIO(_ => walletsService.get.mapError(_.asNotFound))
   }
 
-  private val createInviteRoute = createInvite.implement {
+  private val createInviteRoute = createInviteEndpoint.implement {
     Handler.fromFunctionZIO(_ => walletsService.createInvite.mapError(_.asNotFound))
   }
 
-  private val joinRoute = join.implement {
+  private val joinRoute = joinEndpoint.implement {
     Handler.fromFunctionZIO { info =>
       walletsService.joinWallet(info.inviteCode).mapError {
         case e: UserNotExist         => e.asNotFound

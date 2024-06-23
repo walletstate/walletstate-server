@@ -30,11 +30,7 @@ final case class WalletStateServer(
   private val routesClasses: Chunk[WalletStateRoutes with WalletStateEndpoints] =
     Chunk(health, auth, wallets, groups, accounts, categories, assets, exchangeRates, records, analytics, icons)
 
-  private val endpoints =
-    routesClasses
-      .flatMap(_.endpoints)
-      .map(_.outError[HttpError.Unauthorized](HttpError.Unauthorized.status))
-      .map(_.outError[HttpError.BadRequest](HttpError.BadRequest.status))
+  private val endpoints = routesClasses.flatMap(_.endpoints)
 
   private val openAPISpec = OpenAPIGen.fromEndpoints(
     title = "WalletState.online API",

@@ -12,11 +12,11 @@ import java.util.Base64
 
 case class IconsRoutes(iconsService: IconsService) extends WalletStateRoutes with IconsEndpoints {
 
-  private val createRoute = create.implement {
+  private val createRoute = createEndpoint.implement {
     Handler.fromFunctionZIO(info => iconsService.create(info).map(_.id))
   }
 
-  private val listRoute = list.implement {
+  private val listRoute = listEndpoint.implement {
     Handler.fromFunctionZIO(maybeTag => iconsService.listIds(maybeTag))
   }
 

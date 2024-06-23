@@ -42,7 +42,7 @@ object Dependencies {
 
   private val db = Seq(zioQuil, postgresql, flyway)
 
-  private val zioConfig = Seq(
+  val zioConfig = Seq(
     "dev.zio" %% "zio-config"          % Versions.zioConfig,
     "dev.zio" %% "zio-config-magnolia" % Versions.zioConfig,
     "dev.zio" %% "zio-config-typesafe" % Versions.zioConfig

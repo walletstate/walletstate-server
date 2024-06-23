@@ -1,6 +1,5 @@
 package online.walletstate.http
 
-import online.walletstate.common.models.HttpError
 import online.walletstate.http.endpoints.AccountsEndpoints
 import online.walletstate.services.{AccountsService, RecordsService}
 import zio.*
@@ -10,31 +9,31 @@ case class AccountsRoutes(accountsService: AccountsService, recordsService: Reco
     extends WalletStateRoutes
     with AccountsEndpoints {
 
-  private val createRoute = create.implement {
+  private val createRoute = createEndpoint.implement {
     Handler.fromFunctionZIO(accInfo => accountsService.create(accInfo))
   }
 
-  private val listRoute = list.implement {
+  private val listRoute = listEndpoint.implement {
     Handler.fromFunctionZIO(_ => accountsService.list)
   }
 
-  private val listGroupedRoute = listGrouped.implement {
+  private val listGroupedRoute = listGroupedEndpoint.implement {
     Handler.fromFunctionZIO(_ => accountsService.grouped)
   }
 
-  private val getRoute = get.implement {
+  private val getRoute = getEndpoint.implement {
     Handler.fromFunctionZIO(id => accountsService.get(id).mapError(_.asNotFound))
   }
 
-  private val updateRoute = update.implement {
+  private val updateRoute = updateEndpoint.implement {
     Handler.fromFunctionZIO((id, info) => accountsService.update(id, info))
   }
 
-  private val listRecordsRoute = listRecords.implement {
+  private val listRecordsRoute = listRecordsEndpoint.implement {
     Handler.fromFunctionZIO((id, token) => recordsService.list(id, token))
   }
 
-  private val getBalanceRoute = getBalance.implement {
+  private val getBalanceRoute = getBalanceEndpoint.implement {
     Handler.fromFunctionZIO(id => recordsService.balance(id))
   }
 

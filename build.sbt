@@ -8,13 +8,16 @@ lazy val walletstate = project
   .settings(
     name := "walletstate"
   )
-  .aggregate(server, client, angularClientGen)
+  .aggregate(common, server, client, angularClientGen)
 
 lazy val common = project
   .in(file("common"))
   .settings(
-    libraryDependencies ++= Dependencies.common
+    name := "common",
+    libraryDependencies ++= Dependencies.common,
+    release := Def.sequential(publish).value
   )
+  .settings(libraryPublishSettings)
 
 lazy val server = project
   .in(file("server"))
@@ -26,7 +29,7 @@ lazy val server = project
     Compile / mainClass := Some("online.walletstate.Application"),
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     Test / fork := true, // is needed for testcontainers
-    release := Def.sequential(Docker / publish).value
+    release     := Def.sequential(Docker / publish).value
   )
   .settings(dockerSettings)
   .settings(gitVersionSettings)
@@ -35,10 +38,13 @@ lazy val server = project
 lazy val client = project
   .in(file("client"))
   .dependsOn(common)
-  .settings(release := {
-    println("release client")
-  })
+  .settings(
+    name := "client",
+    libraryDependencies ++= Dependencies.zioConfig,
+    release := Def.sequential(publish).value
+  )
   .settings(gitVersionSettings)
+  .settings(libraryPublishSettings)
   .enablePlugins(GitVersioning)
 
 lazy val angularClientGen = project
@@ -47,7 +53,7 @@ lazy val angularClientGen = project
   .settings(
     name := "angular-client-generator",
     libraryDependencies += Dependencies.zioProcess,
-    release :=  Def.sequential(generateAngularClient).value
+    release := Def.sequential(generateAngularClient).value
   )
   .settings(angularClientGenSettings)
   .settings(gitVersionSettings)
@@ -68,6 +74,17 @@ lazy val gitVersionSettings = Seq(
     case string: String                      => Some(string)
     case _                                   => None
   }
+)
+
+///////////////////////////////////////////////////////////////////////////////////////
+// Maven publish
+///////////////////////////////////////////////////////////////////////////////////////
+lazy val libraryPublishSettings = Seq(
+  publishTo := Some(
+    "GitHub WalletState Maven Packages" at "https://maven.pkg.github.com/walletstate/walletstate-server"
+  ),
+  publishMavenStyle := true,
+  credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
 )
 
 ///////////////////////////////////////////////////////////////////////////////////////

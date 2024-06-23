@@ -16,44 +16,26 @@ sealed trait HttpError[T <: HttpError[T]: Schema](status: Status) {
 
   def encodeZIO(mediaType: NonEmptyChunk[MediaTypeWithQFactor]): UIO[Response] =
     ZIO.succeed(encode(mediaType))
-    
-  val codec: HttpCodec[HttpCodecType.Status with Content, T] = HttpCodec.error[T](status)
 }
 
 object HttpError {
-
-  final case class BadRequest(error: String, message: String) extends HttpError[BadRequest](BadRequest.status)
+  
+  final case class BadRequest(error: String, message: String) extends HttpError[BadRequest](Status.BadRequest)
       derives Schema
-  object BadRequest {
-    final val status: Status = Status.BadRequest
-  }
 
-  final case class Unauthorized(error: String, message: String) extends HttpError[Unauthorized](Unauthorized.status)
+  final case class Unauthorized(error: String, message: String) extends HttpError[Unauthorized](Status.Unauthorized)
       derives Schema
-  object Unauthorized {
-    final val status: Status = Status.Unauthorized
-  }
 
-  final case class Forbidden(error: String, message: String) extends HttpError[Forbidden](Forbidden.status)
+  final case class Forbidden(error: String, message: String) extends HttpError[Forbidden](Status.Forbidden)
       derives Schema
-  object Forbidden {
-    final val status: Status = Status.Forbidden
-  }
-
-  final case class NotFound(error: String, message: String) extends HttpError[NotFound](NotFound.status) derives Schema
-  object NotFound {
-    final val status: Status = Status.NotFound
-  }
-
-  final case class Conflict(error: String, message: String) extends HttpError[Conflict](Conflict.status) derives Schema
-  object Conflict {
-    final val status: Status = Status.Conflict
-  }
+  
+  final case class NotFound(error: String, message: String) extends HttpError[NotFound](Status.NotFound) derives Schema
+  
+  final case class Conflict(error: String, message: String) extends HttpError[Conflict](Status.Conflict) derives Schema
 
   final case class InternalServerError(error: String, message: String)
-      extends HttpError[InternalServerError](InternalServerError.status) derives Schema
-  object InternalServerError {
-    final val status: Status                        = Status.InternalServerError
+      extends HttpError[InternalServerError](Status.InternalServerError) derives Schema
+  object InternalServerError {      
     def apply(message: String): InternalServerError = InternalServerError("InternalServerError", message)
     val default: InternalServerError                = InternalServerError("Oops.... Something went wrong")
   }
