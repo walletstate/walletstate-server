@@ -52,7 +52,8 @@ object Dependencies {
 
   val zioProcess = "dev.zio" %% "zio-process" % Versions.zioProcess
 
-  val all = Seq(zio, zioJson, zioHttp, jwt) ++ zioConfig ++ db ++ logging ++ Seq(zioProcess)
+  val common = Seq(zio, zioHttp)
+  val server = Seq(jwt) ++ zioConfig ++ db ++ logging
 
   val tests = Seq(
     "dev.zio"               %% "zio-test"                          % Versions.zio               % Test,
