@@ -25,7 +25,8 @@ final case class CategoriesServiceLive(quill: WalletStateQuillContext, groupsSer
   import quill.{*, given}
 
   override def create(info: Category.Data): WalletUIO[Category] = for {
-    category <- Category.make(info) // todo: check group exists
+    ctx      <- ZIO.service[WalletContext]
+    category <- Category.make(ctx.wallet, info) // todo: check group exists
     _        <- run(insert(category)).orDie
   } yield category
 

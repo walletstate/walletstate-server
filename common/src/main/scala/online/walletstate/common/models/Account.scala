@@ -8,6 +8,7 @@ import java.util.UUID
 
 final case class Account(
     id: Account.Id,
+    wallet: Wallet.Id,
     group: Group.Id,
     name: String,
     defaultAsset: Option[Asset.Id],
@@ -30,8 +31,8 @@ object Account {
     given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
-  def make(data: Data): UIO[Account] =
-    Id.random.map(Account(_, data.group, data.name, data.defaultAsset, data.idx, data.icon, data.tags))
+  def make(wallet: Wallet.Id, data: Data): UIO[Account] =
+    Id.random.map(Account(_, wallet, data.group, data.name, data.defaultAsset, data.idx, data.icon, data.tags))
 
   final case class Data(
       group: Group.Id,
@@ -41,5 +42,5 @@ object Account {
       icon: Option[Icon.Id],
       tags: List[String]
   ) derives Schema
-  
+
 }

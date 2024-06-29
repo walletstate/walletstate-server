@@ -52,7 +52,7 @@ trait AnalyticsQuillQueries extends QuillQueries {
       .join(Tables.Categories)
       .on(_.category == _.id)
       .join(transactionWithAccountAndAsset)
-      .on { case ((record, _), (transaction, _, _, _)) => record.id == transaction.id }
+      .on { case ((record, _), (transaction, _, _, _)) => record.id == transaction.record }
       .map { case ((record, category), (transaction, asset, account, accountGroup)) =>
         RecordRow(record, transaction, account, accountGroup, asset, category)
       }

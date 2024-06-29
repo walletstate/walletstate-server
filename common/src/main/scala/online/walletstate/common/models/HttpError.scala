@@ -19,7 +19,7 @@ sealed trait HttpError[T <: HttpError[T]: Schema](status: Status) {
 }
 
 object HttpError {
-  
+
   final case class BadRequest(error: String, message: String) extends HttpError[BadRequest](Status.BadRequest)
       derives Schema
 
@@ -28,14 +28,14 @@ object HttpError {
 
   final case class Forbidden(error: String, message: String) extends HttpError[Forbidden](Status.Forbidden)
       derives Schema
-  
+
   final case class NotFound(error: String, message: String) extends HttpError[NotFound](Status.NotFound) derives Schema
-  
+
   final case class Conflict(error: String, message: String) extends HttpError[Conflict](Status.Conflict) derives Schema
 
   final case class InternalServerError(error: String, message: String)
       extends HttpError[InternalServerError](Status.InternalServerError) derives Schema
-  object InternalServerError {      
+  object InternalServerError {
     def apply(message: String): InternalServerError = InternalServerError("InternalServerError", message)
     val default: InternalServerError                = InternalServerError("Oops.... Something went wrong")
   }

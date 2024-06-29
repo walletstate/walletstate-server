@@ -3,6 +3,7 @@ package online.walletstate.services
 import online.walletstate.common.models.{Account, AssetAmount, Page, Record, Transaction}
 import online.walletstate.db.WalletStateQuillContext
 import online.walletstate.models.AppError.RecordNotExist
+import online.walletstate.models.AuthContext.WalletContext
 import online.walletstate.services.queries.RecordsQuillQueries
 import online.walletstate.utils.ZIOExtensions.headOrError
 import online.walletstate.{WalletIO, WalletUIO}
@@ -25,7 +26,8 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
 
   override def create(data: Record.Data): WalletUIO[Record.Full] = for {
     // TODO check record is for current wallet
-    recordWithTransactions <- Record.make(data)
+    ctx                    <- ZIO.service[WalletContext]
+    recordWithTransactions <- Record.make(ctx.wallet, data)
     (record, transactions) = recordWithTransactions
     _ <- transaction(run(insertRecord(record)) *> run(insertTransactions(transactions))).orDie
   } yield record.toFull(transactions)
@@ -37,8 +39,8 @@ case class RecordsServiceLive(quill: WalletStateQuillContext) extends RecordsSer
   } yield record.toFull(transactions)
 
   override def update(id: Record.Id, data: Record.Data): WalletUIO[Record.Full] = for {
-    // TODO check record is for current wallet
-    updatedRecord <- Record.make(id, data)
+    ctx           <- ZIO.service[WalletContext]
+    updatedRecord <- Record.make(ctx.wallet, id, data)
     (record, transactions) = updatedRecord
     _ <- transaction(
       run(transactionsById(id).delete) *> run(getRecord(id).delete) *>

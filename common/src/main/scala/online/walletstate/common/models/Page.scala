@@ -10,9 +10,8 @@ import java.time.ZonedDateTime
 import java.util.Base64
 import scala.util.Try
 
-/**
- * for now is used only for different representations of transaction/record 
- */
+/** for now is used only for different representations of transaction/record
+  */
 
 final case class Page[T](@genericField() items: List[T], nextPage: Option[Page.Token])
 
@@ -45,6 +44,6 @@ object Page {
           Right(base64Encode(plainCodec.encoder.encodeJson(token).toString))
         }
   }
-  
-  given schema[T : Schema]: Schema[Page[T]] = DeriveSchema.gen[Page[T]]
+
+  given schema[T: Schema]: Schema[Page[T]] = DeriveSchema.gen[Page[T]]
 }
