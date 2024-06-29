@@ -8,6 +8,7 @@ import java.util.UUID
 
 final case class Category(
     id: Category.Id,
+    wallet: Wallet.Id,
     group: Group.Id,
     name: String,
     icon: Option[Icon.Id],
@@ -28,8 +29,8 @@ object Category {
     given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }
 
-  def make(info: Data): UIO[Category] =
-    Id.random.map(Category(_, info.group, info.name, info.icon, info.tags, info.idx))
+  def make(wallet: Wallet.Id, info: Data): UIO[Category] =
+    Id.random.map(Category(_, wallet, info.group, info.name, info.icon, info.tags, info.idx))
 
   final case class Data(
       group: Group.Id,

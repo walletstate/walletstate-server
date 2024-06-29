@@ -33,9 +33,9 @@ trait RecordsQuillQueries extends QuillQueries {
   protected inline def selectFullRecords(account: Account.Id): Query[((Record, Transaction), Option[Transaction])] =
     Tables.Records
       .join(Tables.Transactions)
-      .on(_.id == _.id)
+      .on(_.id == _.record)
       .leftJoin(Tables.Transactions)
-      .on { case ((record, t1), t2) => record.id == t2.id && (t1.account != t2.account || t1.asset != t2.asset) }
+      .on { case ((record, t1), t2) => record.id == t2.record && (t1.account != t2.account || t1.asset != t2.asset) }
       .filter { case ((record, t1), t2) => t1.account == lift(account) }
       .distinctOn { case ((record, t1), t2) => (record.datetime, record.id) } // must be the same as sortBy
 
@@ -43,7 +43,7 @@ trait RecordsQuillQueries extends QuillQueries {
     quote(liftQuery(transactions).foreach(t => Tables.Transactions.insertValue(t)))
 
   protected inline def transactionsById(id: Record.Id): EntityQuery[Transaction] =
-    Tables.Transactions.filter(_.id == lift(id))
+    Tables.Transactions.filter(_.record == lift(id))
 
   protected inline def transactionsByAccount(account: Account.Id): Query[Transaction] =
     Tables.Transactions.filter(_.account == lift(account))

@@ -28,9 +28,9 @@ object Analytics {
       spentOn: Set[Asset.Id] = Set.empty,
       generatedBy: Set[Asset.Id] = Set.empty
   ) derives Schema
-  
+
   final case class AggregateRequest(filter: Filter, byFinalAsset: Boolean = false) derives Schema
-  
+
   // TODO To not allow server and DB overloading:
   // - define and implement validation rules (like allow groupBy category only if categoryGroup or category is defined in filter)
   // - limit the max number of groups, categories and accounts that can be created for wallet
@@ -54,5 +54,5 @@ object Analytics {
       case g: Group.Id    => GroupedResult(g.id, assets)
     }
   }
-  
+
 }

@@ -10,6 +10,7 @@ import scala.util.Try
 
 final case class Asset(
     id: Asset.Id,
+    wallet: Wallet.Id,
     group: Group.Id,
     `type`: Asset.Type,
     ticker: String,
@@ -23,7 +24,8 @@ final case class Asset(
     unlockDuration: Option[Duration],
     denominatedIn: Option[Asset.Id],
     denomination: Option[BigDecimal]
-) extends Groupable derives Schema
+) extends Groupable
+    derives Schema
 
 object Asset {
   final case class Id(id: UUID) extends AnyVal
@@ -50,10 +52,11 @@ object Asset {
     def asString(`type`: Type): String = `type`.toString
   }
 
-  def make(data: Data): UIO[Asset] =
+  def make(wallet: Wallet.Id, data: Data): UIO[Asset] =
     Id.random.map(
       Asset(
         _,
+        wallet,
         data.group,
         data.`type`,
         data.ticker,

@@ -11,6 +11,7 @@ import scala.util.Try
 
 final case class Record(
     id: Record.Id,
+    wallet: Wallet.Id,
     `type`: Record.Type,
     category: Category.Id,
     datetime: ZonedDateTime,
@@ -71,11 +72,22 @@ object Record {
     def asString(`type`: Type): String = `type`.toString
   }
 
-  def make(data: Data): UIO[(Record, List[Transaction])] = Id.random.flatMap(make(_, data))
+  def make(wallet: Wallet.Id, data: Data): UIO[(Record, List[Transaction])] = Id.random.flatMap(make(wallet, _, data))
 
-  def make(id: Record.Id, d: Data): UIO[(Record, List[Transaction])] = ZIO.succeed {
-    val r = Record(id, d.`type`, d.category, d.datetime, d.description, d.tags, d.externalId, d.spentOn, d.generatedBy)
-    (r, Transaction.make(id, d.from, d.to))
+  def make(wallet: Wallet.Id, id: Record.Id, d: Data): UIO[(Record, List[Transaction])] = ZIO.succeed {
+    val r = Record(
+      id,
+      wallet,
+      d.`type`,
+      d.category,
+      d.datetime,
+      d.description,
+      d.tags,
+      d.externalId,
+      d.spentOn,
+      d.generatedBy
+    )
+    (r, Transaction.make(wallet, id, d.from, d.to))
   }
 
   final case class Data(

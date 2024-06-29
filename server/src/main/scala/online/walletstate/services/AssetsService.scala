@@ -26,7 +26,7 @@ final case class AssetsServiceLive(quill: WalletStateQuillContext, groupsService
 
   override def create(info: Asset.Data): WalletUIO[Asset] = for {
     ctx   <- ZIO.service[WalletContext]
-    asset <- Asset.make(info)
+    asset <- Asset.make(ctx.wallet, info)
     _     <- run(insert(asset)).orDie
   } yield asset
 
