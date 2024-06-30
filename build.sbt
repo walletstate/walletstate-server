@@ -18,6 +18,8 @@ lazy val common = project
     release := Def.sequential(publish).value
   )
   .settings(libraryPublishSettings)
+  .settings(gitVersionSettings)
+  .enablePlugins(GitVersioning)
 
 lazy val server = project
   .in(file("server"))
