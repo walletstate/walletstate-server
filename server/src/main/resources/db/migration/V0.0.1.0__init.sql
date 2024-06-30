@@ -96,6 +96,7 @@ CREATE TABLE accounts
     idx           INTEGER       NOT NULL             DEFAULT 0,
     icon          CHAR(64),
     tags          VARCHAR(50)[] NOT NULL             DEFAULT '{}',
+    external_id   VARCHAR(255)                       DEFAULT NULL,
     CONSTRAINT accounts_wallet_fk FOREIGN KEY (wallet) REFERENCES wallets (id),
     CONSTRAINT accounts_groups_fk FOREIGN KEY ("group") REFERENCES groups (id),
     CONSTRAINT accounts_assets_fk FOREIGN KEY (default_asset) REFERENCES assets (id)
