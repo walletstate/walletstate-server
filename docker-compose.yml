@@ -12,7 +12,7 @@ services:
       - "5432:5432"
 
   server:
-    image: ghcr.io/walletstate/walletstate-server:0.0.1-25-g4163ee7
+    image: ghcr.io/walletstate/walletstate-server:0.0.1-27-gda3ab74
     environment:
       POSTGRES_HOST: "db"
       POSTGRES_USER: "docker"
