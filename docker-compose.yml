@@ -12,7 +12,7 @@ services:
       - "5432:5432"
 
   server:
-    image: ghcr.io/walletstate/walletstate-server:0.0.1-23-g1204e50
+    image: ghcr.io/walletstate/walletstate-server:0.0.1-25-g4163ee7
     environment:
       POSTGRES_HOST: "db"
       POSTGRES_USER: "docker"
@@ -20,7 +20,7 @@ services:
       POSTGRES_DB: "walletstate"
 
   ui:
-    image: ghcr.io/walletstate/walletstate-ui:0.0.1-3
+    image: ghcr.io/walletstate/walletstate-ui:0.0.1-4
     environment:
       WALLETSTATE_SERVER: "http://server:8081"
     ports:
