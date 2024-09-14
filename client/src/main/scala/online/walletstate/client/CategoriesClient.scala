@@ -6,9 +6,10 @@ import online.walletstate.common.models.{Category, Grouped, HttpError}
 import online.walletstate.http.endpoints.CategoriesEndpoints
 import zio.{IO, ZIO, ZLayer}
 import zio.http.Header
+import zio.http.Header.Authorization
 import zio.http.endpoint.EndpointExecutor
 
-final case class CategoriesClient(executor: EndpointExecutor[Header.Authorization]) extends CategoriesEndpoints {
+final case class CategoriesClient(executor: EndpointExecutor[Any, Authorization.Bearer]) extends CategoriesEndpoints {
 
   def create(data: Category.Data): IO[BadRequest | Unauthorized | InternalServerError, Category] =
     ZIO.scoped(executor(createEndpoint(data)))

@@ -3,9 +3,10 @@ package online.walletstate.client
 import online.walletstate.client.configs.WalletStateClientConfig
 import zio.ZLayer
 import zio.http.Header
+import zio.http.Header.Authorization
 import zio.http.endpoint.EndpointExecutor
 
-case class WalletStateClient(executor: EndpointExecutor[Header.Authorization]) {
+case class WalletStateClient(executor: EndpointExecutor[Any, Authorization.Bearer]) {
   val accounts: AccountsClient           = AccountsClient(executor)
   val analytics: AnalyticsClient         = AnalyticsClient(executor)
   val assets: AssetsClient               = AssetsClient(executor)

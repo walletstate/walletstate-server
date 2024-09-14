@@ -6,9 +6,10 @@ import online.walletstate.common.models.{HttpError, Icon}
 import online.walletstate.http.endpoints.IconsEndpoints
 import zio.{IO, ZIO, ZLayer}
 import zio.http.Header
+import zio.http.Header.Authorization
 import zio.http.endpoint.EndpointExecutor
 
-final case class IconsClient(executor: EndpointExecutor[Header.Authorization]) extends IconsEndpoints {
+final case class IconsClient(executor: EndpointExecutor[Any, Authorization.Bearer]) extends IconsEndpoints {
 
   def list(tag: Option[String] = None): IO[BadRequest | Unauthorized | InternalServerError, List[Icon.Id]] =
     ZIO.scoped(executor(listEndpoint(tag)))

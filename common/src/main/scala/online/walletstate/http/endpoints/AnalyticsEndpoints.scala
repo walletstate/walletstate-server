@@ -4,14 +4,14 @@ import online.walletstate.common.models.HttpError.{BadRequest, InternalServerErr
 import online.walletstate.common.models.{Analytics, AssetAmount, Page, Record}
 import zio.Chunk
 import zio.http.codec.HttpCodec
-import zio.http.endpoint.Endpoint
+import zio.http.endpoint.{AuthType, Endpoint}
 import zio.http.{Method, Status}
 
 trait AnalyticsEndpoints extends WalletStateEndpoints {
 
   val recordsEndpoint =
     Endpoint(Method.POST / "api" / "analytics" / "records")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[Analytics.Filter]
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
       .out[Page[Record.SingleTransaction]](Status.Ok)
@@ -24,7 +24,7 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
 
   val aggregatedEndpoint =
     Endpoint(Method.POST / "api" / "analytics" / "aggregated")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[Analytics.AggregateRequest]
       .out[List[AssetAmount]](Status.Ok)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -36,7 +36,7 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
 
   val groupedEndpoint =
     Endpoint(Method.POST / "api" / "analytics" / "grouped")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[Analytics.GroupRequest]
       .out[List[Analytics.GroupedResult]](Status.Ok)
       .outErrors[BadRequest | Unauthorized | InternalServerError](

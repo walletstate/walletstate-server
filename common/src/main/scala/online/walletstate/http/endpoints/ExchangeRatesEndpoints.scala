@@ -3,14 +3,14 @@ package online.walletstate.http.endpoints
 import online.walletstate.common.models.HttpError.{BadRequest, InternalServerError, NotFound, Unauthorized}
 import online.walletstate.common.models.{Asset, ExchangeRate}
 import zio.http.codec.HttpCodec
-import zio.http.endpoint.Endpoint
+import zio.http.endpoint.{AuthType, Endpoint}
 import zio.http.{Method, Status}
 
 trait ExchangeRatesEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "exchange-rates")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[ExchangeRate.Data]
       .out[ExchangeRate](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -22,7 +22,7 @@ trait ExchangeRatesEndpoints extends WalletStateEndpoints {
 
   val listEndpoint =
     Endpoint(Method.GET / "api" / "exchange-rates")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .query[Asset.Id](Asset.Id.query("from"))
       .query[Asset.Id](Asset.Id.query("to"))
       .out[List[ExchangeRate]]
@@ -35,7 +35,7 @@ trait ExchangeRatesEndpoints extends WalletStateEndpoints {
 
   val getEndpoint =
     Endpoint(Method.GET / "api" / "exchange-rates" / ExchangeRate.Id.path)
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .out[ExchangeRate]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),

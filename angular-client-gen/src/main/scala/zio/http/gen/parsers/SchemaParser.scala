@@ -58,13 +58,16 @@ object SchemaParser {
     case StandardType.LocalDateTimeType  => TSType.TSString // TODO investigate corresponding ts type
     case StandardType.OffsetTimeType     => TSType.TSString // TODO investigate corresponding ts type
     case StandardType.OffsetDateTimeType => TSType.TSString // TODO investigate corresponding ts type
-    case StandardType.ZonedDateTimeType  => TSType.TSString // TODO investigate corresponding ts type
+    case StandardType.ZonedDateTimeType  => TSType.TSString
+    case StandardType.CurrencyType       => TSType.TSString // TODO investigate corresponding ts type
   }
 
   private def parseCollection(schema: Schema.Collection[_, _]): TSType = schema match {
-    case Schema.Sequence(elementSchema, _, _, _, _) => TSType.TSArray(parse(elementSchema))
-    case Schema.Map(keySchema, valueSchema, _)      => TSType.TSMap(parse(keySchema), parse(valueSchema))
-    case Schema.Set(elementSchema, _)               => TSType.TSArray(parse(elementSchema))
+    case Schema.Sequence(elementSchema, _, _, _, _)         => TSType.TSArray(parse(elementSchema))
+    case Schema.NonEmptySequence(elementSchema, _, _, _, _) => TSType.TSArray(parse(elementSchema))
+    case Schema.Map(keySchema, valueSchema, _)              => TSType.TSMap(parse(keySchema), parse(valueSchema))
+    case Schema.NonEmptyMap(keySchema, valueSchema, _)      => TSType.TSMap(parse(keySchema), parse(valueSchema))
+    case Schema.Set(elementSchema, _)                       => TSType.TSArray(parse(elementSchema))
   }
 
   private def parseEnum(schema: Schema.Enum[_]): TSType = {

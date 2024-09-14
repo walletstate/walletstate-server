@@ -4,14 +4,14 @@ import online.walletstate.common.models.HttpError.{BadRequest, InternalServerErr
 import online.walletstate.common.models.{Category, Grouped}
 import zio.Chunk
 import zio.http.codec.HttpCodec
-import zio.http.endpoint.Endpoint
+import zio.http.endpoint.{AuthType, Endpoint}
 import zio.http.{Method, Status}
 
 trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "categories")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[Category.Data]
       .out[Category](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -23,7 +23,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val listEndpoint =
     Endpoint(Method.GET / "api" / "categories")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .out[List[Category]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -33,7 +33,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val listGroupedEndpoint =
     Endpoint(Method.GET / "api" / "categories" / "grouped")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .out[List[Grouped[Category]]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -43,7 +43,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val getEndpoint =
     Endpoint(Method.GET / "api" / "categories" / Category.Id.path)
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .out[Category]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -55,7 +55,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val updateEndpoint =
     Endpoint(Method.PUT / "api" / "categories" / Category.Id.path)
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[Category.Data]
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](

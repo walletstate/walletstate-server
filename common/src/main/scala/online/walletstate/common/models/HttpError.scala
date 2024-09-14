@@ -2,7 +2,7 @@ package online.walletstate.common.models
 
 import zio.http.Header.Accept.MediaTypeWithQFactor
 import zio.http.codec.HttpCodecType.Content
-import zio.http.codec.{HttpCodec, HttpCodecType}
+import zio.http.codec.{CodecConfig, HttpCodec, HttpCodecType}
 import zio.http.{Response, Status}
 import zio.schema.{Schema, derived}
 import zio.{NonEmptyChunk, UIO, ZIO}
@@ -12,7 +12,7 @@ sealed trait HttpError[T <: HttpError[T]: Schema](status: Status) {
   val message: String
 
   def encode(mediaType: NonEmptyChunk[MediaTypeWithQFactor]): Response =
-    HttpCodec.error[T](status).encodeResponse(this.asInstanceOf[T], mediaType)
+    HttpCodec.error[T](status).encodeResponse(this.asInstanceOf[T], mediaType, CodecConfig.defaultConfig)
 
   def encodeZIO(mediaType: NonEmptyChunk[MediaTypeWithQFactor]): UIO[Response] =
     ZIO.succeed(encode(mediaType))

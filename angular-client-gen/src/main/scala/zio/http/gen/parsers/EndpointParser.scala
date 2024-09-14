@@ -2,7 +2,7 @@ package zio.http.gen.parsers
 
 import zio.Chunk
 import zio.http.codec.HttpCodec.Metadata
-import zio.http.codec.HttpCodec.Query.QueryParamHint
+import zio.http.codec.HttpCodec.Query.QueryType
 import zio.http.codec.{HttpCodec, SegmentCodec, TextCodec}
 import zio.http.endpoint.Endpoint
 import zio.http.gen.ts
@@ -79,12 +79,19 @@ object EndpointParser {
   }
 
   private def parseQueryParams(atomCodecs: Chunk[(HttpCodec.Atom[_, _], Chunk[Metadata[_]])]): Chunk[TSField] = {
-    atomCodecs.collect { case (HttpCodec.Query(name, textCodec, hint, index), metadata) =>
+    atomCodecs.collect { case (HttpCodec.Query(queryType, index), metadata) =>
       val isOptional = metadata.collect { case m: Metadata.Optional[_] => m }.nonEmpty
+      // TODO quick fix of compilation errors after lib update, check it works as expected
+      val name = queryType match {
+        case q: QueryType.Collection[_] => q.elements.name
+        case q: QueryType.Primitive[_]  => q.name
+        case q: QueryType.Record[_]     => "notimplemented"
+      }
 
-      val queryParamType = hint match {
-        case QueryParamHint.Many | QueryParamHint.Any => TSType.TSArray(textCodecToTSType(textCodec))
-        case _                                        => textCodecToTSType(textCodec)
+      val queryParamType = queryType match {
+        case q: QueryType.Collection[_] => SchemaParser.parse(q.colSchema)
+        case q: QueryType.Primitive[_]  => SchemaParser.parse(q.codec.schema)
+        case q: QueryType.Record[_]     => SchemaParser.parse(q.recordSchema)
       }
       TSField.queryParam(name, if (isOptional) queryParamType.optional else queryParamType)
     }

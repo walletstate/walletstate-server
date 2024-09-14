@@ -12,13 +12,8 @@ import java.util.Base64
 
 case class IconsRoutes(iconsService: IconsService) extends WalletStateRoutes with IconsEndpoints {
 
-  private val createRoute = createEndpoint.implement {
-    Handler.fromFunctionZIO(info => iconsService.create(info).map(_.id))
-  }
-
-  private val listRoute = listEndpoint.implement {
-    Handler.fromFunctionZIO(maybeTag => iconsService.listIds(maybeTag))
-  }
+  private val createRoute = createEndpoint.implement(info => iconsService.create(info).map(_.id))
+  private val listRoute   = listEndpoint.implement(maybeTag => iconsService.listIds(maybeTag))
 
   private val getIconHandler = Handler.fromFunctionZIO[(Icon.Id, Request)] { (id, req) =>
     iconsService.get(id).flatMap(iconToResponse).catchAll {

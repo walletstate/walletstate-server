@@ -3,14 +3,14 @@ package online.walletstate.http.endpoints
 import online.walletstate.common.models.HttpError.*
 import online.walletstate.common.models.{AuthToken, Wallet, WalletInvite}
 import zio.http.codec.{Doc, HttpCodec}
-import zio.http.endpoint.Endpoint
+import zio.http.endpoint.{AuthType, Endpoint}
 import zio.http.{Method, Status}
 
 trait WalletsEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "wallets")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[Wallet.Data]
       .out[Wallet](Status.Created)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
@@ -23,7 +23,7 @@ trait WalletsEndpoints extends WalletStateEndpoints {
 
   val getCurrentEndpoint =
     Endpoint(Method.GET / "api" / "wallets" / "current").withBadRequestCodec
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .out[Wallet]
       .outErrors[Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -33,7 +33,7 @@ trait WalletsEndpoints extends WalletStateEndpoints {
 
   val createInviteEndpoint =
     Endpoint(Method.POST / "api" / "wallets" / "invite")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .out[WalletInvite](Status.Created)
       .outErrors[Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -44,7 +44,7 @@ trait WalletsEndpoints extends WalletStateEndpoints {
 
   val joinEndpoint =
     Endpoint(Method.POST / "api" / "wallets" / "join")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[Wallet.Join]
       .out[Wallet]
       .outErrors[BadRequest | Unauthorized | Forbidden | NotFound | InternalServerError](
@@ -58,7 +58,7 @@ trait WalletsEndpoints extends WalletStateEndpoints {
 
   val createApiToken =
     Endpoint(Method.POST / "api" / "wallets" / "token")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[AuthToken.Create]
       .out[AuthToken](Status.Created)
       .outErrors[BadRequest | Unauthorized | Forbidden | InternalServerError](

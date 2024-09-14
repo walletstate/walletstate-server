@@ -6,9 +6,10 @@ import online.walletstate.common.models.{Analytics, AssetAmount, HttpError, Page
 import online.walletstate.http.endpoints.AnalyticsEndpoints
 import zio.{IO, ZIO, ZLayer}
 import zio.http.Header
+import zio.http.Header.Authorization
 import zio.http.endpoint.EndpointExecutor
 
-final case class AnalyticsClient(executor: EndpointExecutor[Header.Authorization]) extends AnalyticsEndpoints {
+final case class AnalyticsClient(executor: EndpointExecutor[Any, Authorization.Bearer]) extends AnalyticsEndpoints {
 
   def records(
       filter: Analytics.Filter,

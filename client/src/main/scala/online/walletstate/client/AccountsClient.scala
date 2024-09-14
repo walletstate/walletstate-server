@@ -5,10 +5,11 @@ import online.walletstate.common.models.HttpError.{BadRequest, InternalServerErr
 import online.walletstate.common.models.{Account, AssetAmount, Grouped, HttpError, Page, Record}
 import online.walletstate.http.endpoints.AccountsEndpoints
 import zio.http.Header
+import zio.http.Header.Authorization
 import zio.http.endpoint.EndpointExecutor
 import zio.{IO, ZIO, ZLayer}
 
-final case class AccountsClient(executor: EndpointExecutor[Header.Authorization]) extends AccountsEndpoints {
+final case class AccountsClient(executor: EndpointExecutor[Any, Authorization.Bearer]) extends AccountsEndpoints {
 
   def create(data: Account.Data): IO[BadRequest | Unauthorized | InternalServerError, Account] =
     ZIO.scoped(executor(createEndpoint(data)))

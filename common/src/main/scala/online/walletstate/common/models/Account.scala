@@ -27,7 +27,7 @@ object Account {
     def from(id: String): Task[Id] = ZIO.attempt(UUID.fromString(id)).map(Id(_))
 
     val path: PathCodec[Id]   = zio.http.uuid("account-id").transform(Id(_))(_.id)
-    val query: QueryCodec[Id] = QueryCodec.queryTo[UUID]("account").transform(Id(_))(_.id)
+    val query: QueryCodec[Id] = QueryCodec.query[UUID]("account").transform(Id(_))(_.id)
 
     given schema: Schema[Id] = Schema[UUID].transform(Id(_), _.id)
   }

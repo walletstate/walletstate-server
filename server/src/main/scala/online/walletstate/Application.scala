@@ -9,9 +9,7 @@ import online.walletstate.services.*
 import zio.*
 import zio.config.typesafe.*
 import zio.http.*
-import zio.json.*
 import zio.logging.backend.SLF4J
-import zio.logging.removeDefaultLoggers
 
 object Application extends ZIOAppDefault {
 

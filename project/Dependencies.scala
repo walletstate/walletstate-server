@@ -3,20 +3,19 @@ import sbt.*
 object Dependencies {
 
   object Versions {
-    val zio       = "2.1.1"
-    val zioJson   = "0.6.2"
-    val zioHttp   = "3.0.0-RC8"
+    val zio       = "2.1.9"
+    val zioHttp   = "3.0.0"
     val zioConfig = "4.0.2"
-    val jwt       = "9.2.0"
+    val jwt       = "10.0.1"
 
-    val zioLogging = "2.1.16"
-    val slf4j      = "2.0.9"
-    val logback    = "1.4.11"
+    val zioLogging = "2.3.1"
+    val slf4j      = "2.0.13"
+    val logback    = "1.5.6"
 
     val zioSql     = "0.1.2"
-    val zioQuil    = "4.8.0"
-    val postgresql = "42.5.4"
-    val flyway     = "9.16.0"
+    val zioQuil    = "4.8.4"
+    val postgresql = "42.7.3"
+    val flyway     = "10.15.2"
 
     val zioTestContainers = "0.10.0"
 
@@ -24,7 +23,6 @@ object Dependencies {
   }
 
   private val zio     = "dev.zio" %% "zio"      % Versions.zio
-  private val zioJson = "dev.zio" %% "zio-json" % Versions.zioJson
   private val zioHttp = "dev.zio" %% "zio-http" % Versions.zioHttp
 
   private val logging = Seq(
@@ -35,7 +33,6 @@ object Dependencies {
     "ch.qos.logback" % "logback-classic"    % Versions.logback
   )
 
-//  private val zioSql  = "dev.zio" %% "zio-sql-postgres" % Versions.zioSql //doesn't support Scala 3
   private val zioQuil    = "io.getquill"   %% "quill-jdbc-zio" % Versions.zioQuil
   private val postgresql = "org.postgresql" % "postgresql"     % Versions.postgresql
   private val flyway     = "org.flywaydb"   % "flyway-core"    % Versions.flyway

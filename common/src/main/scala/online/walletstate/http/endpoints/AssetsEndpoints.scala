@@ -4,14 +4,14 @@ import online.walletstate.common.models.HttpError.{BadRequest, InternalServerErr
 import online.walletstate.common.models.{Asset, Grouped}
 import zio.Chunk
 import zio.http.codec.HttpCodec
-import zio.http.endpoint.Endpoint
+import zio.http.endpoint.{AuthType, Endpoint}
 import zio.http.{Method, Status}
 
 trait AssetsEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "assets")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[Asset.Data]
       .out[Asset](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -23,7 +23,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val listGroupedEndpoint =
     Endpoint(Method.GET / "api" / "assets" / "grouped")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .out[List[Grouped[Asset]]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -33,7 +33,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val listEndpoint =
     Endpoint(Method.GET / "api" / "assets")
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .out[List[Asset]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -43,7 +43,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val getEndpoint =
     Endpoint(Method.GET / "api" / "assets" / Asset.Id.path)
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .out[Asset]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -55,7 +55,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val updateEndpoint =
     Endpoint(Method.PUT / "api" / "assets" / Asset.Id.path)
-      .@@(EndpointAuthorization)
+      .auth(AuthType.Bearer)
       .in[Asset.Data]
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](

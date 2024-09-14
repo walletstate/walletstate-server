@@ -2,19 +2,16 @@ package online.walletstate.http.endpoints
 
 import online.walletstate.common.models.HttpError
 import zio.Chunk
-import zio.http.{Header, MediaType, Status}
-import zio.http.codec.{BinaryCodecWithSchema, HttpCodec, HttpCodecError, HttpContentCodec}
 import zio.http.codec.HttpCodecError.CustomError
-import zio.http.endpoint.EndpointMiddleware.Typed
-import zio.http.endpoint.{Endpoint, EndpointMiddleware}
+import zio.http.codec.{BinaryCodecWithSchema, HttpCodec, HttpCodecError, HttpContentCodec}
+import zio.http.endpoint.{AuthType, Endpoint}
+import zio.http.{Header, MediaType, Status}
 import zio.schema.Schema
 
 trait WalletStateEndpoints {
 
   def endpointsMap: Map[String, Endpoint[_, _, _, _, _]] = Map.empty
   def endpoints: Chunk[Endpoint[_, _, _, _, _]]          = Chunk.from(endpointsMap.values)
-
-  protected val EndpointAuthorization: Typed[Header.Authorization, Nothing, Unit] = EndpointMiddleware.auth
 
   // Workaround to not loss empty lists fields: https://github.com/zio/zio-http/issues/2911
   implicit def customCodec[T: Schema]: HttpContentCodec[T] = HttpContentCodec.from(
@@ -25,10 +22,10 @@ trait WalletStateEndpoints {
     )
   ) // ++ HttpContentCodec.byteChunkCodec ++ HttpContentCodec.byteCodec
 
-  extension [PathInput, Input, Err, Output, Middleware <: EndpointMiddleware](
-      endpoint: Endpoint[PathInput, Input, Err, Output, Middleware]
+  extension [PathInput, Input, Err, Output, Auth <: AuthType](
+      endpoint: Endpoint[PathInput, Input, Err, Output, Auth]
   ) {
-    protected def withBadRequestCodec: Endpoint[PathInput, Input, Err, Output, Middleware] =
+    protected def withBadRequestCodec: Endpoint[PathInput, Input, Err, Output, Auth] =
       endpoint
         .outCodecError(
           HttpCodec
