@@ -6,7 +6,7 @@ import online.walletstate.models.AppError
 import online.walletstate.services.IconsService
 import online.walletstate.utils.RequestOps.outputMediaType
 import zio.http.*
-import zio.{Chunk, Task, ZIO, ZLayer}
+import zio.*
 
 import java.util.Base64
 
@@ -22,11 +22,12 @@ case class IconsRoutes(iconsService: IconsService) extends WalletStateRoutes wit
     }
   }
 
-  // TODO add cache header
   private def iconToResponse(icon: Icon): Task[Response] = ZIO.attempt {
     val mediaType              = MediaType.forContentType(icon.contentType)
     val bodyArray: Array[Byte] = Base64.getDecoder.decode(icon.content)
-    val response               = Response(Status.Ok, body = Body.fromChunk(Chunk.fromArray(bodyArray)))
+
+    val response = Response(Status.Ok, body = Body.fromChunk(Chunk.fromArray(bodyArray)))
+      .addHeader(Header.CacheControl.MaxAge(1.day.toSeconds.toInt))
 
     mediaType match {
       case Some(mType) => response.addHeader(Header.ContentType(mType))
