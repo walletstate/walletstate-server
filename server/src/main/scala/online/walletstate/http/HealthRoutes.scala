@@ -4,7 +4,7 @@ import online.walletstate.http.endpoints.WalletStateEndpoints
 import zio.ZLayer
 import zio.http.*
 
-final case class HealthRoutes() extends WalletStateRoutes with WalletStateEndpoints {
+final case class HealthRoutes() extends WalletStateRoutes {
   private val health = Routes(Method.GET / "health" -> handler(Response.text("alive")))
 
   private val version = Routes(Method.GET / "version" -> handler(Response.text("0.0.1")))

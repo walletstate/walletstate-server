@@ -4,14 +4,15 @@ import online.walletstate.common.models.HttpError.{BadRequest, InternalServerErr
 import online.walletstate.common.models.{Analytics, AssetAmount, Page, Record}
 import zio.Chunk
 import zio.http.codec.HttpCodec
-import zio.http.endpoint.{AuthType, Endpoint}
+import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
 
 trait AnalyticsEndpoints extends WalletStateEndpoints {
 
+  override protected final val tag: String = "Analytics"
+
   val recordsEndpoint =
-    Endpoint(Method.POST / "api" / "analytics" / "records")
-      .withAuth
+    Endpoint(Method.POST / "api" / "analytics" / "records").walletStateEndpoint
       .in[Analytics.Filter]
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
       .out[Page[Record.SingleTransaction]](Status.Ok)
@@ -20,11 +21,9 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val aggregatedEndpoint =
-    Endpoint(Method.POST / "api" / "analytics" / "aggregated")
-      .withAuth
+    Endpoint(Method.POST / "api" / "analytics" / "aggregated").walletStateEndpoint
       .in[Analytics.AggregateRequest]
       .out[List[AssetAmount]](Status.Ok)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -32,11 +31,9 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val groupedEndpoint =
-    Endpoint(Method.POST / "api" / "analytics" / "grouped")
-      .withAuth
+    Endpoint(Method.POST / "api" / "analytics" / "grouped").walletStateEndpoint
       .in[Analytics.GroupRequest]
       .out[List[Analytics.GroupedResult]](Status.Ok)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -44,7 +41,6 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   override val endpointsMap = Map(
     "records"    -> recordsEndpoint,

@@ -27,10 +27,13 @@ final case class WalletStateServer(
     migrations: Migrations
 ) {
 
-  private val routesClasses: Chunk[WalletStateRoutes with WalletStateEndpoints] =
+  private val routesClasses: Chunk[WalletStateRoutes] =
     Chunk(health, auth, wallets, groups, accounts, categories, assets, exchangeRates, records, analytics, icons)
 
-  private val endpoints = routesClasses.flatMap(_.endpoints)
+  private val endpoints =
+    routesClasses
+      .collect { case endpoints: WalletStateEndpoints => endpoints }
+      .flatMap(_.endpoints)
 
   private val openAPISpec = OpenAPIGen.fromEndpoints(
     title = "WalletState.online API",

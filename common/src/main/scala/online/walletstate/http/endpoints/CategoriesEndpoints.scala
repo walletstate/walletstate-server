@@ -4,14 +4,15 @@ import online.walletstate.common.models.HttpError.{BadRequest, InternalServerErr
 import online.walletstate.common.models.{Category, Grouped}
 import zio.Chunk
 import zio.http.codec.HttpCodec
-import zio.http.endpoint.{AuthType, Endpoint}
+import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
 
 trait CategoriesEndpoints extends WalletStateEndpoints {
 
+  override protected final val tag: String = "Categories"
+
   val createEndpoint =
-    Endpoint(Method.POST / "api" / "categories")
-      .withAuth
+    Endpoint(Method.POST / "api" / "categories").walletStateEndpoint
       .in[Category.Data]
       .out[Category](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -19,31 +20,25 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val listEndpoint =
-    Endpoint(Method.GET / "api" / "categories")
-      .withAuth
+    Endpoint(Method.GET / "api" / "categories").walletStateEndpoint
       .out[List[Category]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val listGroupedEndpoint =
-    Endpoint(Method.GET / "api" / "categories" / "grouped")
-      .withAuth
+    Endpoint(Method.GET / "api" / "categories" / "grouped").walletStateEndpoint
       .out[List[Grouped[Category]]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val getEndpoint =
-    Endpoint(Method.GET / "api" / "categories" / Category.Id.path)
-      .withAuth
+    Endpoint(Method.GET / "api" / "categories" / Category.Id.path).walletStateEndpoint
       .out[Category]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -51,11 +46,9 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
         HttpCodec.error[NotFound](Status.NotFound),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val updateEndpoint =
-    Endpoint(Method.PUT / "api" / "categories" / Category.Id.path)
-      .withAuth
+    Endpoint(Method.PUT / "api" / "categories" / Category.Id.path).walletStateEndpoint
       .in[Category.Data]
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
@@ -64,7 +57,6 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
         HttpCodec.error[NotFound](Status.NotFound),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   override val endpointsMap = Map(
     "create"      -> createEndpoint,

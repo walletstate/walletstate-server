@@ -3,14 +3,15 @@ package online.walletstate.http.endpoints
 import online.walletstate.common.models.HttpError.{BadRequest, InternalServerError, Unauthorized}
 import online.walletstate.common.models.Icon
 import zio.http.codec.{HttpCodec, QueryCodec}
-import zio.http.endpoint.{AuthType, Endpoint}
+import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
 
 trait IconsEndpoints extends WalletStateEndpoints {
 
+  override protected final val tag: String = "Icons"
+
   val listEndpoint =
-    Endpoint(Method.GET / "api" / "icons")
-      .withAuth
+    Endpoint(Method.GET / "api" / "icons").walletStateEndpoint
       .query(QueryCodec.query[String]("tag").optional)
       .out[List[Icon.Id]]
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -18,11 +19,9 @@ trait IconsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val createEndpoint =
-    Endpoint(Method.POST / "api" / "icons")
-      .withAuth
+    Endpoint(Method.POST / "api" / "icons").walletStateEndpoint
       .in[Icon.Data]
       .out[Icon.Id](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -30,7 +29,6 @@ trait IconsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   override val endpointsMap = Map("list" -> listEndpoint, "create" -> createEndpoint)
 }

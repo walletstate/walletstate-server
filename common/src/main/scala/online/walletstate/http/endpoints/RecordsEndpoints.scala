@@ -4,14 +4,15 @@ import online.walletstate.common.models.HttpError.{BadRequest, InternalServerErr
 import online.walletstate.common.models.{Account, HttpError, Page, Record}
 import zio.Chunk
 import zio.http.codec.HttpCodec
-import zio.http.endpoint.{AuthType, Endpoint}
+import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
 
 trait RecordsEndpoints extends WalletStateEndpoints {
 
+  override protected final val tag: String = "Records"
+
   val createEndpoint =
-    Endpoint(Method.POST / "api" / "records")
-      .withAuth
+    Endpoint(Method.POST / "api" / "records").walletStateEndpoint
       .in[Record.Data]
       .out[Record.Full](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -19,11 +20,9 @@ trait RecordsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val listEndpoint =
-    Endpoint(Method.GET / "api" / "records")
-      .withAuth
+    Endpoint(Method.GET / "api" / "records").walletStateEndpoint
       .query[Account.Id](Account.Id.query)
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
       .out[Page[Record.Full]]
@@ -32,11 +31,9 @@ trait RecordsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val getEndpoint =
-    Endpoint(Method.GET / "api" / "records" / Record.Id.path)
-      .withAuth
+    Endpoint(Method.GET / "api" / "records" / Record.Id.path).walletStateEndpoint
       .out[Record.Full]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -44,11 +41,9 @@ trait RecordsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[NotFound](Status.NotFound),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val updateEndpoint =
-    Endpoint(Method.PUT / "api" / "records" / Record.Id.path)
-      .withAuth
+    Endpoint(Method.PUT / "api" / "records" / Record.Id.path).walletStateEndpoint
       .in[Record.Data]
       .out[Record.Full]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
@@ -57,11 +52,9 @@ trait RecordsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[NotFound](Status.NotFound),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val deleteEndpoint =
-    Endpoint(Method.DELETE / "api" / "records" / Record.Id.path)
-      .withAuth
+    Endpoint(Method.DELETE / "api" / "records" / Record.Id.path).walletStateEndpoint
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -69,7 +62,6 @@ trait RecordsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[NotFound](Status.NotFound),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   override val endpointsMap = Map(
     "create" -> createEndpoint,
