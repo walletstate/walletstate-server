@@ -2,8 +2,9 @@ package online.walletstate.http.endpoints
 
 import online.walletstate.common.models.HttpError
 import zio.Chunk
+import zio.http.Header.Authorization
 import zio.http.codec.HttpCodecError.CustomError
-import zio.http.codec.{BinaryCodecWithSchema, HttpCodec, HttpCodecError, HttpContentCodec}
+import zio.http.codec.{BinaryCodecWithSchema, HeaderCodec, HttpCodec, HttpCodecError, HttpContentCodec}
 import zio.http.endpoint.{AuthType, Endpoint}
 import zio.http.{Header, MediaType, Status}
 import zio.schema.Schema
@@ -22,9 +23,15 @@ trait WalletStateEndpoints {
     )
   ) // ++ HttpContentCodec.byteChunkCodec ++ HttpContentCodec.byteCodec
 
+  type WalletStateAuthType = AuthType { type ClientRequirement = Either[Authorization.Bearer, Header.Cookie] }
+  val walletStateAuth: WalletStateAuthType = AuthType.Bearer | AuthType.Custom(HeaderCodec.cookie)
+
   extension [PathInput, Input, Err, Output, Auth <: AuthType](
       endpoint: Endpoint[PathInput, Input, Err, Output, Auth]
   ) {
+    protected def withAuth: Endpoint[PathInput, Input, Err, Output, WalletStateAuthType] =
+      endpoint.auth(walletStateAuth)
+
     protected def withBadRequestCodec: Endpoint[PathInput, Input, Err, Output, Auth] =
       endpoint
         .outCodecError(

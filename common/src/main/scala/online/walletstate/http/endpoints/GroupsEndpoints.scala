@@ -10,7 +10,7 @@ trait GroupsEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "groups")
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Group.CreateData]
       .out[Group](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -22,7 +22,7 @@ trait GroupsEndpoints extends WalletStateEndpoints {
 
   val listEndpoint =
     Endpoint(Method.GET / "api" / "groups")
-      .auth(AuthType.Bearer)
+      .withAuth
       .query(QueryCodec.query[String]("groupType").transformOrFailLeft[Group.Type](Group.Type.fromString)(Group.Type.asString))
       .out[List[Group]]
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -34,7 +34,7 @@ trait GroupsEndpoints extends WalletStateEndpoints {
 
   val getEndpoint =
     Endpoint(Method.GET / "api" / "groups" / Group.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[Group]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -46,7 +46,7 @@ trait GroupsEndpoints extends WalletStateEndpoints {
 
   val updateEndpoint =
     Endpoint(Method.PUT / "api" / "groups" / Group.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Group.UpdateData](Doc.h1("Test doc"))
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
@@ -59,7 +59,7 @@ trait GroupsEndpoints extends WalletStateEndpoints {
 
   val deleteEndpoint =
     Endpoint(Method.DELETE / "api" / "groups" / Group.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),

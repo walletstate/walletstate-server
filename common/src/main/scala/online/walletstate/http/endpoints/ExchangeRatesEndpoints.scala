@@ -10,7 +10,7 @@ trait ExchangeRatesEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "exchange-rates")
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[ExchangeRate.Data]
       .out[ExchangeRate](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -22,7 +22,7 @@ trait ExchangeRatesEndpoints extends WalletStateEndpoints {
 
   val listEndpoint =
     Endpoint(Method.GET / "api" / "exchange-rates")
-      .auth(AuthType.Bearer)
+      .withAuth
       .query[Asset.Id](Asset.Id.query("from"))
       .query[Asset.Id](Asset.Id.query("to"))
       .out[List[ExchangeRate]]
@@ -35,7 +35,7 @@ trait ExchangeRatesEndpoints extends WalletStateEndpoints {
 
   val getEndpoint =
     Endpoint(Method.GET / "api" / "exchange-rates" / ExchangeRate.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[ExchangeRate]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),

@@ -11,7 +11,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "assets")
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Asset.Data]
       .out[Asset](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -23,7 +23,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val listGroupedEndpoint =
     Endpoint(Method.GET / "api" / "assets" / "grouped")
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[List[Grouped[Asset]]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -33,7 +33,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val listEndpoint =
     Endpoint(Method.GET / "api" / "assets")
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[List[Asset]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -43,7 +43,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val getEndpoint =
     Endpoint(Method.GET / "api" / "assets" / Asset.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[Asset]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -55,7 +55,7 @@ trait AssetsEndpoints extends WalletStateEndpoints {
 
   val updateEndpoint =
     Endpoint(Method.PUT / "api" / "assets" / Asset.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Asset.Data]
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](

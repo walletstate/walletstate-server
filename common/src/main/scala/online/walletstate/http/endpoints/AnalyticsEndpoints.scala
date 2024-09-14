@@ -11,7 +11,7 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
 
   val recordsEndpoint =
     Endpoint(Method.POST / "api" / "analytics" / "records")
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Analytics.Filter]
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
       .out[Page[Record.SingleTransaction]](Status.Ok)
@@ -24,7 +24,7 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
 
   val aggregatedEndpoint =
     Endpoint(Method.POST / "api" / "analytics" / "aggregated")
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Analytics.AggregateRequest]
       .out[List[AssetAmount]](Status.Ok)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -36,7 +36,7 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
 
   val groupedEndpoint =
     Endpoint(Method.POST / "api" / "analytics" / "grouped")
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Analytics.GroupRequest]
       .out[List[Analytics.GroupedResult]](Status.Ok)
       .outErrors[BadRequest | Unauthorized | InternalServerError](

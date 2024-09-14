@@ -11,7 +11,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "categories")
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Category.Data]
       .out[Category](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -23,7 +23,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val listEndpoint =
     Endpoint(Method.GET / "api" / "categories")
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[List[Category]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -33,7 +33,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val listGroupedEndpoint =
     Endpoint(Method.GET / "api" / "categories" / "grouped")
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[List[Grouped[Category]]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
@@ -43,7 +43,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val getEndpoint =
     Endpoint(Method.GET / "api" / "categories" / Category.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[Category]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -55,7 +55,7 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
 
   val updateEndpoint =
     Endpoint(Method.PUT / "api" / "categories" / Category.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Category.Data]
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](

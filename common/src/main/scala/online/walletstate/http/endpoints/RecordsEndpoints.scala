@@ -11,7 +11,7 @@ trait RecordsEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "records")
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Record.Data]
       .out[Record.Full](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -23,7 +23,7 @@ trait RecordsEndpoints extends WalletStateEndpoints {
 
   val listEndpoint =
     Endpoint(Method.GET / "api" / "records")
-      .auth(AuthType.Bearer)
+      .withAuth
       .query[Account.Id](Account.Id.query)
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
       .out[Page[Record.Full]]
@@ -36,7 +36,7 @@ trait RecordsEndpoints extends WalletStateEndpoints {
 
   val getEndpoint =
     Endpoint(Method.GET / "api" / "records" / Record.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[Record.Full]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -48,7 +48,7 @@ trait RecordsEndpoints extends WalletStateEndpoints {
 
   val updateEndpoint =
     Endpoint(Method.PUT / "api" / "records" / Record.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Record.Data]
       .out[Record.Full]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
@@ -61,7 +61,7 @@ trait RecordsEndpoints extends WalletStateEndpoints {
 
   val deleteEndpoint =
     Endpoint(Method.DELETE / "api" / "records" / Record.Id.path)
-      .auth(AuthType.Bearer)
+      .withAuth
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),

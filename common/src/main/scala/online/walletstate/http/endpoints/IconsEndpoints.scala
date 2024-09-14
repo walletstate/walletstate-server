@@ -10,7 +10,7 @@ trait IconsEndpoints extends WalletStateEndpoints {
 
   val listEndpoint =
     Endpoint(Method.GET / "api" / "icons")
-      .auth(AuthType.Bearer)
+      .withAuth
       .query(QueryCodec.query[String]("tag").optional)
       .out[List[Icon.Id]]
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -22,7 +22,7 @@ trait IconsEndpoints extends WalletStateEndpoints {
 
   val createEndpoint =
     Endpoint(Method.POST / "api" / "icons")
-      .auth(AuthType.Bearer)
+      .withAuth
       .in[Icon.Data]
       .out[Icon.Id](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
