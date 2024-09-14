@@ -47,13 +47,6 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
     "aggregated" -> aggregatedEndpoint,
     "grouped"    -> groupedEndpoint
   )
-
-  override val endpoints = Chunk(
-    // records, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-    aggregatedEndpoint,
-    groupedEndpoint
-  )
-
 }
 
 object AnalyticsEndpoints extends AnalyticsEndpoints

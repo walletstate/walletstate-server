@@ -65,14 +65,6 @@ trait CategoriesEndpoints extends WalletStateEndpoints {
     "list"        -> listEndpoint,
     "listGrouped" -> listGroupedEndpoint
   )
-
-  override val endpoints = Chunk(
-    createEndpoint,
-    getEndpoint,
-    updateEndpoint,
-    listEndpoint
-    //    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-  )
 }
 
 object CategoriesEndpoints extends CategoriesEndpoints

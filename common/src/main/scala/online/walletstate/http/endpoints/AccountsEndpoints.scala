@@ -99,17 +99,6 @@ trait AccountsEndpoints extends WalletStateEndpoints {
     "listRecords" -> listRecordsEndpoint,
     "getBalance"  -> getBalanceEndpoint
   )
-
-  override val endpoints = Chunk(
-    createEndpoint,
-    getEndpoint,
-    updateEndpoint,
-    listEndpoint,
-//    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-//    listRecords, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-    getBalanceEndpoint
-  )
-
 }
 
 object AccountsEndpoints extends AccountsEndpoints

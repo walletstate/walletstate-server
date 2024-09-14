@@ -38,7 +38,7 @@ final case class WalletStateServer(
   private val openAPISpec = OpenAPIGen.fromEndpoints(
     title = "WalletState.online API",
     version = "0.0.1",
-    referenceType = JsonSchema.SchemaStyle.Compact,
+    referenceType = JsonSchema.SchemaStyle.Reference,
     endpoints = endpoints
   )
 

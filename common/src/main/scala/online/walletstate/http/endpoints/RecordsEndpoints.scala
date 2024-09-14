@@ -70,15 +70,6 @@ trait RecordsEndpoints extends WalletStateEndpoints {
     "delete" -> deleteEndpoint,
     "list"   -> listEndpoint
   )
-
-  override val endpoints = Chunk(
-    createEndpoint,
-//    list, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-    getEndpoint,
-    updateEndpoint,
-    deleteEndpoint
-  )
-
 }
 
 object RecordsEndpoints extends RecordsEndpoints
