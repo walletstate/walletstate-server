@@ -35,9 +35,12 @@ object Dependencies {
 
   private val zioQuil    = "io.getquill"   %% "quill-jdbc-zio" % Versions.zioQuil
   private val postgresql = "org.postgresql" % "postgresql"     % Versions.postgresql
-  private val flyway     = "org.flywaydb"   % "flyway-core"    % Versions.flyway
+  private val flyway = Seq(
+    "org.flywaydb" % "flyway-core"                % Versions.flyway,
+    "org.flywaydb" % "flyway-database-postgresql" % Versions.flyway
+  )
 
-  private val db = Seq(zioQuil, postgresql, flyway)
+  private val db = Seq(zioQuil, postgresql) ++ flyway
 
   val zioConfig = Seq(
     "dev.zio" %% "zio-config"          % Versions.zioConfig,
