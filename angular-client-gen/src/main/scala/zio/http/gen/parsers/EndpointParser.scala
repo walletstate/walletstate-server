@@ -44,14 +44,15 @@ object EndpointParser {
 
   private def parseRoute(route: RoutePattern[_]): (Method, String, Chunk[TSField]) = {
     val pathParams: Chunk[Option[String | TSField]] = route.pathCodec.segments.map {
-      case SegmentCodec.Empty          => None
-      case SegmentCodec.Literal(value) => Some(value)
-      case SegmentCodec.BoolSeg(name)  => Some(TSField.pathParam(name, TSType.TSBoolean))
-      case SegmentCodec.IntSeg(name)   => Some(TSField.pathParam(name, TSType.TSNumber))
-      case SegmentCodec.LongSeg(name)  => Some(TSField.pathParam(name, TSType.TSNumber))
-      case SegmentCodec.Text(name)     => Some(TSField.pathParam(name, TSType.TSString))
-      case SegmentCodec.UUID(name)     => Some(TSField.pathParam(name, TSType.TSString))
-      case SegmentCodec.Trailing       => None
+      case SegmentCodec.Empty             => None
+      case SegmentCodec.Literal(value)    => Some(value)
+      case SegmentCodec.BoolSeg(name)     => Some(TSField.pathParam(name, TSType.TSBoolean))
+      case SegmentCodec.IntSeg(name)      => Some(TSField.pathParam(name, TSType.TSNumber))
+      case SegmentCodec.LongSeg(name)     => Some(TSField.pathParam(name, TSType.TSNumber))
+      case SegmentCodec.Text(name)        => Some(TSField.pathParam(name, TSType.TSString))
+      case SegmentCodec.UUID(name)        => Some(TSField.pathParam(name, TSType.TSString))
+      case SegmentCodec.Trailing          => None
+      case SegmentCodec.Combined(_, _, _) => None // TODO new. investigate
     }
 
     val path = pathParams
