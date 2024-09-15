@@ -4,12 +4,11 @@ import online.walletstate.client.configs.WalletStateClientConfig
 import online.walletstate.common.models.HttpError.{BadRequest, InternalServerError, NotFound, Unauthorized}
 import online.walletstate.common.models.{Group, HttpError}
 import online.walletstate.http.endpoints.GroupsEndpoints
-import zio.{IO, ZIO, ZLayer}
-import zio.http.Header
-import zio.http.Header.Authorization
+import online.walletstate.http.endpoints.WalletStateEndpoints.Auth.ClientAuthRequirement
 import zio.http.endpoint.EndpointExecutor
+import zio.{IO, ZIO, ZLayer}
 
-final case class GroupsClient(executor: EndpointExecutor[Any, Authorization.Bearer]) extends GroupsEndpoints {
+final case class GroupsClient(executor: EndpointExecutor[Any, ClientAuthRequirement]) extends GroupsEndpoints {
 
   def create(data: Group.CreateData): IO[BadRequest | Unauthorized | InternalServerError, Group] =
     ZIO.scoped(executor(createEndpoint(data)))

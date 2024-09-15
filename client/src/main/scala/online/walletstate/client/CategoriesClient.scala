@@ -4,12 +4,11 @@ import online.walletstate.client.configs.WalletStateClientConfig
 import online.walletstate.common.models.HttpError.{BadRequest, InternalServerError, NotFound, Unauthorized}
 import online.walletstate.common.models.{Category, Grouped, HttpError}
 import online.walletstate.http.endpoints.CategoriesEndpoints
-import zio.{IO, ZIO, ZLayer}
-import zio.http.Header
-import zio.http.Header.Authorization
+import online.walletstate.http.endpoints.WalletStateEndpoints.Auth.ClientAuthRequirement
 import zio.http.endpoint.EndpointExecutor
+import zio.{IO, ZIO, ZLayer}
 
-final case class CategoriesClient(executor: EndpointExecutor[Any, Authorization.Bearer]) extends CategoriesEndpoints {
+final case class CategoriesClient(executor: EndpointExecutor[Any, ClientAuthRequirement]) extends CategoriesEndpoints {
 
   def create(data: Category.Data): IO[BadRequest | Unauthorized | InternalServerError, Category] =
     ZIO.scoped(executor(createEndpoint(data)))

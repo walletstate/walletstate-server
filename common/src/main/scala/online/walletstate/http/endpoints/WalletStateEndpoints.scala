@@ -1,14 +1,15 @@
 package online.walletstate.http.endpoints
 
 import online.walletstate.common.models.HttpError
-import zio.Chunk
 import zio.http.codec.*
 import zio.http.codec.HttpCodecError.CustomError
 import zio.http.endpoint.{AuthType, Endpoint}
 import zio.http.{Header, MediaType, Status}
 import zio.schema.Schema
+import zio.{Chunk, Config}
 
 trait WalletStateEndpoints {
+  import WalletStateEndpoints.Auth.*
 
   protected def tag: String
 
@@ -24,16 +25,13 @@ trait WalletStateEndpoints {
     )
   ) // ++ HttpContentCodec.byteChunkCodec ++ HttpContentCodec.byteCodec
 
-  type WalletStateAuthType = AuthType { type ClientRequirement = Either[Header.Authorization.Bearer, Header.Cookie] }
-  val walletStateAuth: WalletStateAuthType = AuthType.Bearer | AuthType.Custom(HeaderCodec.cookie)
-
   extension [PathInput, Input, Err, Output, Auth <: AuthType](
       endpoint: Endpoint[PathInput, Input, Err, Output, Auth]
   ) {
-    protected def walletStateEndpoint: Endpoint[PathInput, Input, Err, Output, WalletStateAuthType] =
+    protected def walletStateEndpoint: Endpoint[PathInput, Input, Err, Output, AppAuthType] =
       endpoint
         .tag(tag)
-        .auth(walletStateAuth)
+        .auth(auth)
         .outCodecError(
           HttpCodec
             .error[HttpError.BadRequest](Status.BadRequest)
@@ -44,4 +42,17 @@ trait WalletStateEndpoints {
         )
   }
 
+}
+
+object WalletStateEndpoints {
+
+  object Auth {
+    type ClientAuthRequirement = Either[Header.Authorization.Bearer, Header.Cookie]
+    type AppAuthType           = AuthType { type ClientRequirement = ClientAuthRequirement }
+
+    val auth: AppAuthType = AuthType.Bearer | AuthType.Custom(HeaderCodec.cookie)
+
+    def bearer(token: String): ClientAuthRequirement        = Left(Header.Authorization.Bearer(token))
+    def bearer(token: Config.Secret): ClientAuthRequirement = Left(Header.Authorization.Bearer(token))
+  }
 }

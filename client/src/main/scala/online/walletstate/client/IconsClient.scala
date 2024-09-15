@@ -4,12 +4,11 @@ import online.walletstate.client.configs.WalletStateClientConfig
 import online.walletstate.common.models.HttpError.{BadRequest, InternalServerError, Unauthorized}
 import online.walletstate.common.models.{HttpError, Icon}
 import online.walletstate.http.endpoints.IconsEndpoints
-import zio.{IO, ZIO, ZLayer}
-import zio.http.Header
-import zio.http.Header.Authorization
+import online.walletstate.http.endpoints.WalletStateEndpoints.Auth.ClientAuthRequirement
 import zio.http.endpoint.EndpointExecutor
+import zio.{IO, ZIO, ZLayer}
 
-final case class IconsClient(executor: EndpointExecutor[Any, Authorization.Bearer]) extends IconsEndpoints {
+final case class IconsClient(executor: EndpointExecutor[Any, ClientAuthRequirement]) extends IconsEndpoints {
 
   def list(tag: Option[String] = None): IO[BadRequest | Unauthorized | InternalServerError, List[Icon.Id]] =
     ZIO.scoped(executor(listEndpoint(tag)))

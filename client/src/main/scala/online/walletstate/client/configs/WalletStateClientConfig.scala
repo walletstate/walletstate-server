@@ -1,15 +1,15 @@
 package online.walletstate.client.configs
 
-import zio.{Config, ZIO, ZLayer}
+import online.walletstate.http.endpoints.WalletStateEndpoints.Auth
 import zio.config.magnolia.deriveConfig
-import zio.http.Header.Authorization
-import zio.http.{Client, Header, URL}
-import zio.http.endpoint.{AuthType, EndpointExecutor, EndpointLocator}
+import zio.http.endpoint.{EndpointExecutor, EndpointLocator}
+import zio.http.{Client, URL}
+import zio.{Config, ZIO, ZLayer}
 
 case class WalletStateClientConfig(server: String, token: Config.Secret)
 
 object WalletStateClientConfig {
-  val configuredEndpointExecutorLayer: ZLayer[Client, Config.Error, EndpointExecutor[Any, Authorization.Bearer]] =
+  val configuredEndpointExecutorLayer: ZLayer[Client, Config.Error, EndpointExecutor[Any, Auth.ClientAuthRequirement]] =
     ZLayer {
       for {
         client    <- ZIO.service[Client]
@@ -18,7 +18,7 @@ object WalletStateClientConfig {
       } yield EndpointExecutor(
         client,
         EndpointLocator.fromURL(serverUrl),
-        Header.Authorization.Bearer(config.token)
+        Auth.bearer(config.token)
       )
     }
 }

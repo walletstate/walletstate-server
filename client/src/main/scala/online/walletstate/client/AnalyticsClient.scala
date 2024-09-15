@@ -4,12 +4,11 @@ import online.walletstate.client.configs.WalletStateClientConfig
 import online.walletstate.common.models.HttpError.{BadRequest, InternalServerError, Unauthorized}
 import online.walletstate.common.models.{Analytics, AssetAmount, HttpError, Page, Record}
 import online.walletstate.http.endpoints.AnalyticsEndpoints
-import zio.{IO, ZIO, ZLayer}
-import zio.http.Header
-import zio.http.Header.Authorization
+import online.walletstate.http.endpoints.WalletStateEndpoints.Auth.ClientAuthRequirement
 import zio.http.endpoint.EndpointExecutor
+import zio.{IO, ZIO, ZLayer}
 
-final case class AnalyticsClient(executor: EndpointExecutor[Any, Authorization.Bearer]) extends AnalyticsEndpoints {
+final case class AnalyticsClient(executor: EndpointExecutor[Any, ClientAuthRequirement]) extends AnalyticsEndpoints {
 
   def records(
       filter: Analytics.Filter,
