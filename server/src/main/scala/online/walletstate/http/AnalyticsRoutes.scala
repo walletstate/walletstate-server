@@ -7,17 +7,9 @@ import zio.http.{Handler, Routes}
 
 final case class AnalyticsRoutes(analyticsService: AnalyticsService) extends WalletStateRoutes with AnalyticsEndpoints {
 
-  val recordsRoute = recordsEndpoint.implement {
-    Handler.fromFunctionZIO((filter, page) => analyticsService.records(filter, page))
-  }
-
-  val aggregateRoute = aggregatedEndpoint.implement {
-    Handler.fromFunctionZIO(filter => analyticsService.aggregate(filter))
-  }
-
-  val groupRoute = groupedEndpoint.implement {
-    Handler.fromFunctionZIO(groupBy => analyticsService.group(groupBy))
-  }
+  private val recordsRoute   = recordsEndpoint.implement((filter, page) => analyticsService.records(filter, page))
+  private val aggregateRoute = aggregatedEndpoint.implement(filter => analyticsService.aggregate(filter))
+  private val groupRoute     = groupedEndpoint.implement(groupBy => analyticsService.group(groupBy))
 
   override val walletRoutes = Routes(recordsRoute, aggregateRoute, groupRoute)
 }

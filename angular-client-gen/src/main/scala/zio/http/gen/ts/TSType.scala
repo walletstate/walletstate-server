@@ -75,7 +75,7 @@ object TSType {
          |""".stripMargin
   }
 
-  final case class TSInterface private[TSType](name: String, fields: Chunk[TSField]) extends TSCustomType {
+  final case class TSInterface private[TSType] (name: String, fields: Chunk[TSField]) extends TSCustomType {
     val `type`: String = name
 
     val visibleTypes: Chunk[TSType]   = Chunk(this)
@@ -93,7 +93,7 @@ object TSType {
     }
   }
 
-  final case class TSInterface1[T <: TSType] private[TSType](name: String, genType: T, fields: Chunk[TSField])
+  final case class TSInterface1[T <: TSType] private[TSType] (name: String, genType: T, fields: Chunk[TSField])
       extends TSCustomType {
     val `type`: String = name
 
@@ -132,9 +132,9 @@ object TSType {
       val genericTypes = fields.filter(_.isGenericField).map(_.`type`).distinctBy(_.`type`)
 
       genericTypes.toList match {
-        case Nil if !name.contains('[')        => TSInterface(name, fields)
-        case genT :: Nil if name.endsWith("]") => TSInterface1(name.takeWhile(_ != '['), genT, fields)
-        case types                             => throw new Exception(s"Unsupported generic type: [$name, $types]")
+        case Nil         => TSInterface(name, fields)
+        case genT :: Nil => TSInterface1(name, genT, fields)
+        case types       => throw new Exception(s"Unsupported generic type: [$name, $types]")
       }
     }
   }

@@ -9,9 +9,10 @@ import zio.http.{Method, Status}
 
 trait AnalyticsEndpoints extends WalletStateEndpoints {
 
+  override protected final val tag: String = "Analytics"
+
   val recordsEndpoint =
-    Endpoint(Method.POST / "api" / "analytics" / "records")
-      .@@(EndpointAuthorization)
+    Endpoint(Method.POST / "api" / "analytics" / "records").walletStateEndpoint
       .in[Analytics.Filter]
       .query[Option[Page.Token]](Page.Token.queryCodec.optional)
       .out[Page[Record.SingleTransaction]](Status.Ok)
@@ -20,11 +21,9 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val aggregatedEndpoint =
-    Endpoint(Method.POST / "api" / "analytics" / "aggregated")
-      .@@(EndpointAuthorization)
+    Endpoint(Method.POST / "api" / "analytics" / "aggregated").walletStateEndpoint
       .in[Analytics.AggregateRequest]
       .out[List[AssetAmount]](Status.Ok)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -32,11 +31,9 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val groupedEndpoint =
-    Endpoint(Method.POST / "api" / "analytics" / "grouped")
-      .@@(EndpointAuthorization)
+    Endpoint(Method.POST / "api" / "analytics" / "grouped").walletStateEndpoint
       .in[Analytics.GroupRequest]
       .out[List[Analytics.GroupedResult]](Status.Ok)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -44,20 +41,12 @@ trait AnalyticsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   override val endpointsMap = Map(
     "records"    -> recordsEndpoint,
     "aggregated" -> aggregatedEndpoint,
     "grouped"    -> groupedEndpoint
   )
-
-  override val endpoints = Chunk(
-    // records, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-    aggregatedEndpoint,
-    groupedEndpoint
-  )
-
 }
 
 object AnalyticsEndpoints extends AnalyticsEndpoints

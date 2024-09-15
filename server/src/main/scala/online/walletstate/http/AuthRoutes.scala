@@ -16,9 +16,8 @@ final case class AuthRoutes(
     identityProviderService: IdentityProviderService,
     walletsService: WalletsService,
     tokenService: TokenService
-) extends WalletStateRoutes
-    with WalletStateEndpoints {
-
+) extends WalletStateRoutes {
+  
   val getLoginPageHandler = Handler.fromFunctionZIO { _ =>
     identityProviderService.loginUrl.map(url => Response.seeOther(url))
   }

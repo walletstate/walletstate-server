@@ -7,25 +7,12 @@ import zio.http.*
 
 case class RecordsRoutes(recordsService: RecordsService) extends WalletStateRoutes with RecordsEndpoints {
 
-  private val createRoute = createEndpoint.implement {
-    Handler.fromFunctionZIO(info => recordsService.create(info))
-  }
-
-  private val listRoute = listEndpoint.implement {
-    Handler.fromFunctionZIO((account, nextPageToken) => recordsService.list(account, nextPageToken))
-  }
-
-  private val getRoute = getEndpoint.implement {
-    Handler.fromFunctionZIO(id => recordsService.get(id).mapError(_.asNotFound))
-  }
-
-  private val updateRoute = updateEndpoint.implement {
-    Handler.fromFunctionZIO((id, data) => recordsService.update(id, data))
-  }
-
-  private val deleteRoute = deleteEndpoint.implement {
-    Handler.fromFunctionZIO(id => recordsService.delete(id))
-  }
+  private val createRoute = createEndpoint.implement(info => recordsService.create(info))
+  private val listRoute =
+    listEndpoint.implement((account, nextPageToken) => recordsService.list(account, nextPageToken))
+  private val getRoute    = getEndpoint.implement(id => recordsService.get(id).mapError(_.asNotFound))
+  private val updateRoute = updateEndpoint.implement((id, data) => recordsService.update(id, data))
+  private val deleteRoute = deleteEndpoint.implement(id => recordsService.delete(id))
 
   override val walletRoutes = Routes(createRoute, listRoute, getRoute, updateRoute, deleteRoute)
 }

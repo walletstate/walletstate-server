@@ -1,6 +1,6 @@
 import scala.sys.process.Process
 
-ThisBuild / scalaVersion := "3.3.1"
+ThisBuild / scalaVersion := "3.3.3"
 ThisBuild / organization := "online.walletstate"
 
 lazy val walletstate = project

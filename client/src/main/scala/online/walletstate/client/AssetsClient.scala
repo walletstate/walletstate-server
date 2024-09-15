@@ -1,14 +1,14 @@
 package online.walletstate.client
 
 import online.walletstate.client.configs.WalletStateClientConfig
-import online.walletstate.common.models.{Asset, Grouped}
 import online.walletstate.common.models.HttpError.{BadRequest, InternalServerError, NotFound, Unauthorized}
+import online.walletstate.common.models.{Asset, Grouped}
 import online.walletstate.http.endpoints.AssetsEndpoints
-import zio.{IO, ZIO, ZLayer}
-import zio.http.Header
+import online.walletstate.http.endpoints.WalletStateEndpoints.Auth.ClientAuthRequirement
 import zio.http.endpoint.EndpointExecutor
+import zio.{IO, ZIO, ZLayer}
 
-final case class AssetsClient(executor: EndpointExecutor[Header.Authorization]) extends AssetsEndpoints {
+final case class AssetsClient(executor: EndpointExecutor[Any, ClientAuthRequirement]) extends AssetsEndpoints {
   def create(data: Asset.Data): IO[BadRequest | Unauthorized | InternalServerError, Asset] =
     ZIO.scoped(executor(createEndpoint(data)))
 

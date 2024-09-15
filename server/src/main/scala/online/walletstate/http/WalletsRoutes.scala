@@ -12,40 +12,29 @@ final case class WalletsRoutes(walletsService: WalletsService, tokenService: Tok
     extends WalletStateRoutes
     with WalletsEndpoints {
 
-  private val createRoute = createEndpoint.implement {
-    Handler.fromFunctionZIO(info => walletsService.create(info.name).mapError(_.asNotFound))
-  }
+  private val createRoute = createEndpoint.implement(info => walletsService.create(info.name).mapError(_.asNotFound))
+  private val getCurrentRoute = getCurrentEndpoint.implement(_ => walletsService.get.mapError(_.asNotFound))
+  private val createInviteRoute =
+    createInviteEndpoint.implement(_ => walletsService.createInvite.mapError(_.asNotFound))
 
-  private val getCurrentRoute = getCurrentEndpoint.implement {
-    Handler.fromFunctionZIO(_ => walletsService.get.mapError(_.asNotFound))
-  }
-
-  private val createInviteRoute = createInviteEndpoint.implement {
-    Handler.fromFunctionZIO(_ => walletsService.createInvite.mapError(_.asNotFound))
-  }
-
-  private val joinRoute = joinEndpoint.implement {
-    Handler.fromFunctionZIO { info =>
-      walletsService.joinWallet(info.inviteCode).mapError {
-        case e: UserNotExist         => e.asNotFound
-        case e: WalletNotExist       => e.asNotFound
-        case e: WalletInviteNotExist => e.asNotFound
-        case e: WalletInviteExpired  => e.asForbidden
-      }
+  private val joinRoute = joinEndpoint.implement { info =>
+    walletsService.joinWallet(info.inviteCode).mapError {
+      case e: UserNotExist         => e.asNotFound
+      case e: WalletNotExist       => e.asNotFound
+      case e: WalletInviteNotExist => e.asNotFound
+      case e: WalletInviteExpired  => e.asForbidden
     }
   }
 
   // TODO Move to separate service
-  private val createApiTokenRoute = createApiToken.implement {
-    Handler.fromFunctionZIO { data =>
-      for {
-        ctx        <- ZIO.service[WalletContext]
-        isInWallet <- walletsService.isUserInWallet(ctx.user, ctx.wallet)
-        _          <- ZIO.cond(isInWallet, (), AppError.UserIsNotInWallet(ctx.user, ctx.wallet).asForbidden)
-        _          <- ZIO.cond(ctx.isCookiesCtx, (), AppError.CreateAPITokenNotAllowed.asForbidden)
-        token      <- tokenService.encode(ctx.copy(`type` = AuthContext.Type.Bearer), data.expireAt)
-      } yield token
-    }
+  private val createApiTokenRoute = createApiToken.implement { data =>
+    for {
+      ctx        <- ZIO.service[WalletContext]
+      isInWallet <- walletsService.isUserInWallet(ctx.user, ctx.wallet)
+      _          <- ZIO.cond(isInWallet, (), AppError.UserIsNotInWallet(ctx.user, ctx.wallet).asForbidden)
+      _          <- ZIO.cond(ctx.isCookiesCtx, (), AppError.CreateAPITokenNotAllowed.asForbidden)
+      token      <- tokenService.encode(ctx.copy(`type` = AuthContext.Type.Bearer), data.expireAt)
+    } yield token
   }
 
   override val userRoutes   = Routes(createRoute, joinRoute)

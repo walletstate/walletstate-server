@@ -39,7 +39,7 @@ object Page {
 
     val queryCodec: QueryCodec[Token] =
       QueryCodec
-        .query("page")
+        .query[String]("page")
         .transformOrFail { string => base64Decode(string).flatMap(plainCodec.decoder.decodeJson) } { token =>
           Right(base64Encode(plainCodec.encoder.encodeJson(token).toString))
         }

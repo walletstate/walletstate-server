@@ -9,17 +9,9 @@ final case class ExchangeRatesRoutes(exchangeRatesService: ExchangeRatesService)
     extends WalletStateRoutes
     with ExchangeRatesEndpoints {
 
-  private val createRoute = createEndpoint.implement {
-    Handler.fromFunctionZIO(info => exchangeRatesService.create(info))
-  }
-
-  private val listRoute = listEndpoint.implement {
-    Handler.fromFunctionZIO((from, to) => exchangeRatesService.list(from, to))
-  }
-
-  private val getRoute = getEndpoint.implement {
-    Handler.fromFunctionZIO(id => exchangeRatesService.get(id).mapError(_.asNotFound))
-  }
+  private val createRoute = createEndpoint.implement(info => exchangeRatesService.create(info))
+  private val listRoute   = listEndpoint.implement((from, to) => exchangeRatesService.list(from, to))
+  private val getRoute    = getEndpoint.implement(id => exchangeRatesService.get(id).mapError(_.asNotFound))
 
   override val walletRoutes = Routes(createRoute, listRoute, getRoute)
 }

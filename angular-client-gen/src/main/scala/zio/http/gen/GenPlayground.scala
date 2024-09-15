@@ -90,9 +90,9 @@ object TestData {
   val testEndpoint =
     Endpoint(Method.PUT / "test" / Wallet.Id.path)
       .in[WithNestedClass[Long]]
-      .query(QueryCodec.query("optional").optional.??(Doc.h1("Test optional query")))
-      .query(QueryCodec.query("required").??(Doc.h1("Test required query param")))
-      .query(QueryCodec.queryAllTo[Int]("array").??(Doc.h1("Test array query")))
+      .query(QueryCodec.query[String]("optional").optional.??(Doc.h1("Test optional query")))
+      .query(QueryCodec.query[String]("required").??(Doc.h1("Test required query param")))
+      .query(QueryCodec.query[List[Int]]("array").??(Doc.h1("Test array query")))
       .out[CaseClass[Long]]
 
 }

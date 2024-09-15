@@ -8,10 +8,11 @@ import zio.http.endpoint.Endpoint
 import zio.http.{Method, Status}
 
 trait AssetsEndpoints extends WalletStateEndpoints {
+  
+  override protected final val tag: String = "Assets"
 
   val createEndpoint =
-    Endpoint(Method.POST / "api" / "assets")
-      .@@(EndpointAuthorization)
+    Endpoint(Method.POST / "api" / "assets").walletStateEndpoint
       .in[Asset.Data]
       .out[Asset](Status.Created)
       .outErrors[BadRequest | Unauthorized | InternalServerError](
@@ -19,31 +20,25 @@ trait AssetsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val listGroupedEndpoint =
-    Endpoint(Method.GET / "api" / "assets" / "grouped")
-      .@@(EndpointAuthorization)
+    Endpoint(Method.GET / "api" / "assets" / "grouped").walletStateEndpoint
       .out[List[Grouped[Asset]]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val listEndpoint =
-    Endpoint(Method.GET / "api" / "assets")
-      .@@(EndpointAuthorization)
+    Endpoint(Method.GET / "api" / "assets").walletStateEndpoint
       .out[List[Asset]]
       .outErrors[Unauthorized | InternalServerError](
         HttpCodec.error[Unauthorized](Status.Unauthorized),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val getEndpoint =
-    Endpoint(Method.GET / "api" / "assets" / Asset.Id.path)
-      .@@(EndpointAuthorization)
+    Endpoint(Method.GET / "api" / "assets" / Asset.Id.path).walletStateEndpoint
       .out[Asset]
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
         HttpCodec.error[BadRequest](Status.BadRequest),
@@ -51,11 +46,9 @@ trait AssetsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[NotFound](Status.NotFound),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   val updateEndpoint =
-    Endpoint(Method.PUT / "api" / "assets" / Asset.Id.path)
-      .@@(EndpointAuthorization)
+    Endpoint(Method.PUT / "api" / "assets" / Asset.Id.path).walletStateEndpoint
       .in[Asset.Data]
       .out[Unit](Status.NoContent)
       .outErrors[BadRequest | Unauthorized | NotFound | InternalServerError](
@@ -64,7 +57,6 @@ trait AssetsEndpoints extends WalletStateEndpoints {
         HttpCodec.error[NotFound](Status.NotFound),
         HttpCodec.error[InternalServerError](Status.InternalServerError)
       )
-      .withBadRequestCodec
 
   override val endpointsMap = Map(
     "create"      -> createEndpoint,
@@ -72,14 +64,6 @@ trait AssetsEndpoints extends WalletStateEndpoints {
     "update"      -> updateEndpoint,
     "list"        -> listEndpoint,
     "listGrouped" -> listGroupedEndpoint
-  )
-
-  override val endpoints = Chunk(
-    createEndpoint,
-    getEndpoint,
-    updateEndpoint,
-//    listGrouped, // java.util.NoSuchElementException: None.get https://github.com/zio/zio-http/issues/2767
-    listEndpoint
   )
 }
 
