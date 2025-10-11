@@ -24,10 +24,11 @@ trait CategoriesQuillQueries extends QuillQueries {
     Tables.Categories
       .filter(_.id == lift(id))
       .update(
-        _.group -> lift(info.group),
-        _.name  -> lift(info.name),
-        _.icon  -> lift(info.icon),
-        _.tags  -> lift(info.tags),
-        _.idx   -> lift(info.idx)
+        _.group    -> lift(info.group),
+        _.name     -> lift(info.name),
+        _.icon     -> lift(info.icon),
+        _.tags     -> lift(info.tags),
+        _.idx      -> lift(info.idx),
+        _.isActive -> lift(info.isActive)
       )
 }

@@ -13,7 +13,8 @@ final case class Category(
     name: String,
     icon: Option[Icon.Id],
     tags: List[String],
-    idx: Int
+    idx: Int,
+    isActive: Boolean
 ) extends Groupable
     derives Schema
 
@@ -30,13 +31,14 @@ object Category {
   }
 
   def make(wallet: Wallet.Id, info: Data): UIO[Category] =
-    Id.random.map(Category(_, wallet, info.group, info.name, info.icon, info.tags, info.idx))
+    Id.random.map(Category(_, wallet, info.group, info.name, info.icon, info.tags, info.idx, info.isActive))
 
   final case class Data(
       group: Group.Id,
       name: String,
       icon: Option[Icon.Id],
       tags: List[String],
-      idx: Int
+      idx: Int,
+      isActive: Boolean = true
   ) derives Schema
 }

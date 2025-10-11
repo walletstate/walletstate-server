@@ -35,6 +35,7 @@ trait AssetsQuillQueries extends QuillQueries {
         _.lockDuration   -> lift(info.lockDuration),
         _.unlockDuration -> lift(info.unlockDuration),
         _.denominatedIn  -> lift(info.denominatedIn),
-        _.denomination   -> lift(info.denomination)
+        _.denomination   -> lift(info.denomination),
+        _.isActive       -> lift(info.isActive)
       )
 }
