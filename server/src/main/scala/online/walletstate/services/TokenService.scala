@@ -13,7 +13,7 @@ import java.time.ZonedDateTime
 
 trait TokenService {
 
-  def encode[A: JsonEncoder](content: A): UIO[AuthToken]
+  def encode[A: JsonEncoder](content: A, rememberMe: Boolean): UIO[AuthToken]
 
   def encode[A: JsonEncoder](content: A, expireAt: ZonedDateTime): UIO[AuthToken]
 
@@ -30,7 +30,8 @@ case class StatelessTokenService(authConfig: AuthConfig) extends TokenService {
   private val algorithm = JwtAlgorithm.HS512
   private val secret    = authConfig.secret
 
-  override def encode[A: JsonEncoder](content: A): UIO[AuthToken] = encode(content, authConfig.tokenTTL)
+  override def encode[A: JsonEncoder](content: A, rememberMe: Boolean): UIO[AuthToken] =
+    encode(content, if (rememberMe) authConfig.rememberMeTokenTTL else authConfig.defaultTokenTTL)
 
   override def encode[A: JsonEncoder](content: A, expireAt: ZonedDateTime): UIO[AuthToken] =
     for {
@@ -43,7 +44,7 @@ case class StatelessTokenService(authConfig: AuthConfig) extends TokenService {
     clock <- Clock.javaClock
     claim <- ZIO.succeed(JwtClaim(content.toJson).issuedNow(clock).expiresIn(expireIn.toSeconds)(clock))
     token <- ZIO.succeed(Jwt(clock).encode(claim, secret, algorithm))
-  } yield AuthToken(token, authConfig.tokenTTL)
+  } yield AuthToken(token, expireIn)
 
   override def decode[A: JsonDecoder: Tag](token: String): IO[TokenDecodeError, A] =
     for {

@@ -22,7 +22,7 @@ object User {
   given schema: Schema[User]   = DeriveSchema.gen[User]
   given codec: JsonCodec[User] = zio.schema.codec.JsonCodec.jsonCodec(schema)
 
-  final case class LoginInfo(username: String, password: String)
+  final case class LoginInfo(username: String, password: String, rememberMe: Boolean = false)
 
   object LoginInfo {
     given codec: JsonCodec[LoginInfo] = DeriveJsonCodec.gen[LoginInfo]
