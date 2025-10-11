@@ -4,7 +4,12 @@ import zio.*
 import zio.config.*
 import zio.config.magnolia.*
 
-case class AuthConfig(secret: String, tokenTTL: Duration, identityProvider: IdPConfig)
+case class AuthConfig(
+    secret: String,
+    defaultTokenTTL: Duration,
+    rememberMeTokenTTL: Duration,
+    identityProvider: IdPConfig
+)
 
 sealed trait IdPConfig
 

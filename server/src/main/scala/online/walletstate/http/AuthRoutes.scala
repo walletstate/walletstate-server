@@ -27,7 +27,7 @@ final case class AuthRoutes(
     val res = for {
       creds <- req.as[User.LoginInfo]
       user  <- authService.getOrCreateUser(creds)
-      token <- tokenService.encode(AuthContext.of(user.id, user.wallet, AuthContext.Type.Cookies))
+      token <- tokenService.encode(AuthContext.of(user.id, user.wallet, AuthContext.Type.Cookies), creds.rememberMe)
     } yield Response.json(user.toJson).withAuthCookies(token)
 
     res.catchAll {
@@ -41,11 +41,12 @@ final case class AuthRoutes(
 
   val callbackHandler = handler { (req: Request) => Response.notImplemented("For future SSO") }
 
+  // TODO get 'rememberMe' from request
   val changeCurrenWalletHandler = Handler.fromFunctionZIO[(Wallet.Id, Request)] { (walletId, req) =>
     val rs = for {
       ctx      <- ZIO.service[UserContext]
       wallet   <- authService.updateCurrentUserWallet(walletId)
-      newToken <- tokenService.encode(WalletContext(ctx.user, wallet.id, AuthContext.Type.Cookies))
+      newToken <- tokenService.encode(WalletContext(ctx.user, wallet.id, AuthContext.Type.Cookies), rememberMe = false)
     } yield Response.json(wallet.toJson).withAuthCookies(newToken)
 
     rs.catchAll {
