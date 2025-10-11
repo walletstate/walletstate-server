@@ -15,7 +15,8 @@ final case class Account(
     idx: Int,
     icon: Option[Icon.Id],
     tags: List[String],
-    externalId: Option[String]
+    externalId: Option[String],
+    isActive: Boolean
 ) extends Groupable
     derives Schema
 
@@ -34,7 +35,18 @@ object Account {
 
   def make(wallet: Wallet.Id, data: Data): UIO[Account] =
     Id.random.map(
-      Account(_, wallet, data.group, data.name, data.defaultAsset, data.idx, data.icon, data.tags, data.externalId)
+      Account(
+        _,
+        wallet,
+        data.group,
+        data.name,
+        data.defaultAsset,
+        data.idx,
+        data.icon,
+        data.tags,
+        data.externalId,
+        data.isActive
+      )
     )
 
   final case class Data(
@@ -44,7 +56,8 @@ object Account {
       idx: Int,
       icon: Option[Icon.Id],
       tags: List[String],
-      externalId: Option[String]
+      externalId: Option[String],
+      isActive: Boolean = true
   ) derives Schema
 
 }

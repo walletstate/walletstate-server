@@ -23,7 +23,8 @@ final case class Asset(
     lockDuration: Option[Duration],
     unlockDuration: Option[Duration],
     denominatedIn: Option[Asset.Id],
-    denomination: Option[BigDecimal]
+    denomination: Option[BigDecimal],
+    isActive: Boolean
 ) extends Groupable
     derives Schema
 
@@ -69,7 +70,8 @@ object Asset {
         data.lockDuration,
         data.unlockDuration,
         data.denominatedIn,
-        data.denomination
+        data.denomination,
+        data.isActive
       )
     )
 
@@ -86,6 +88,7 @@ object Asset {
       lockDuration: Option[Duration],
       unlockDuration: Option[Duration],
       denominatedIn: Option[Asset.Id],
-      denomination: Option[BigDecimal]
+      denomination: Option[BigDecimal],
+      isActive: Boolean = true
   ) derives Schema
 }

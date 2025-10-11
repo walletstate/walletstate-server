@@ -34,6 +34,7 @@ trait AccountsQuillQueries extends QuillQueries {
         _.icon         -> lift(info.icon),
         _.tags         -> lift(info.tags),
         _.idx          -> lift(info.idx),
-        _.externalId   -> lift(info.externalId)
+        _.externalId   -> lift(info.externalId),
+        _.isActive     -> lift(info.isActive)
       )
 }
